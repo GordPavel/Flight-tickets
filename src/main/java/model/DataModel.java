@@ -110,10 +110,9 @@ public class DataModel{
     }
 
     /**
-     @param main
      @param additional
      */
-    public void mergeData( File main , File additional ){
+    public void mergeData( File additionalData ){
         // TODO implement here
     }
 }
