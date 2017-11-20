@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
  Concurrency saved.
  */
 public class DataModel{
+
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      Default constructor
@@ -46,7 +49,14 @@ public class DataModel{
      @return specified flights
      */
     public Stream<Flight> listFlightsWithPredicate( Predicate<Flight> predicate ){
-        return flights.stream().filter( predicate );
+        Stream<Flight> result;
+        try{
+            lock.readLock().lock();
+            result = flights.stream().filter( predicate );
+        }finally{
+            lock.readLock().unlock();
+        }
+        return result;
     }
 
     /**
@@ -55,7 +65,14 @@ public class DataModel{
      @return true , if flight was added, false in other case
      */
     public Boolean addFlight( Flight flight ){
-        return flights.add( flight );
+        Boolean result;
+        try{
+            lock.writeLock().lock();
+            result = flights.add( flight );
+        }finally{
+            lock.writeLock().unlock();
+        }
+        return result;
     }
 
     /**
@@ -64,7 +81,14 @@ public class DataModel{
      @return true , if this flight was removed, false in other case
      */
     public Boolean removeFlight( String number ){
-        return flights.removeIf( flight -> flight.getNumber().equals( number ) );
+        Boolean result;
+        try{
+            lock.writeLock().lock();
+            result = flights.removeIf( flight -> flight.getNumber().equals( number ) );
+        }finally{
+            lock.writeLock().unlock();
+        }
+        return result;
     }
 
     /**
@@ -76,21 +100,28 @@ public class DataModel{
      false in other case
      */
     public Boolean editFlight( Flight flight ){
-        Optional<Flight> flightOptional =
-                listFlightsWithPredicate( baseFlight -> baseFlight.getNumber().equals( flight.getNumber() ) )
-                        .findFirst();
-        if( !flightOptional.isPresent() ) return false;
-        Optional<Flight> anyDuplicatedFlight = listFlightsWithPredicate(
-                baseFlight -> baseFlight.getRoute().equals( flight.getRoute() ) &&
-                              baseFlight.getPlaneID().equals( flight.getPlaneID() ) &&
-                              baseFlight.getArriveDate().equals( flight.getArriveDate() ) &&
-                              baseFlight.getDepartureDate().equals( flight.getDepartureDate() ) ).findAny();
-        if( anyDuplicatedFlight.isPresent() ) return false;
-        Flight editingFLight = flightOptional.get();
-        editingFLight.setRoute( flight.getRoute() );
-        editingFLight.setPlaneID( flight.getPlaneID() );
-        editingFLight.setArriveDate( flight.getArriveDate() );
-        editingFLight.setDepartureDate( flight.getDepartureDate() );
+        try{
+            lock.readLock().lock();
+            Optional<Flight> flightOptional =
+                    listFlightsWithPredicate( baseFlight -> baseFlight.getNumber().equals( flight.getNumber() ) )
+                            .findFirst();
+            if( !flightOptional.isPresent() ) return false;
+            Optional<Flight> anyDuplicatedFlight = listFlightsWithPredicate(
+                    baseFlight -> baseFlight.getRoute().equals( flight.getRoute() ) &&
+                                  baseFlight.getPlaneID().equals( flight.getPlaneID() ) &&
+                                  baseFlight.getArriveDate().equals( flight.getArriveDate() ) &&
+                                  baseFlight.getDepartureDate().equals( flight.getDepartureDate() ) ).findAny();
+            if( anyDuplicatedFlight.isPresent() ) return false;
+            lock.readLock().unlock();
+            lock.writeLock().lock();
+            Flight editingFLight = flightOptional.get();
+            editingFLight.setRoute( flight.getRoute() );
+            editingFLight.setPlaneID( flight.getPlaneID() );
+            editingFLight.setArriveDate( flight.getArriveDate() );
+            editingFLight.setDepartureDate( flight.getDepartureDate() );
+        }finally{
+            lock.writeLock().unlock();
+        }
         return true;
     }
 
