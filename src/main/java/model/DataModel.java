@@ -1,11 +1,12 @@
 package model;
 
 import java.io.File;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  Util class to manage routes and flights data. It looks after correct of this data, can export and import to binary
@@ -29,9 +30,9 @@ public class DataModel{
     }
 
     /**
-     *  Stores all flights, do
+     Stores all flights, do
      */
-    private CopyOnWriteArraySet<Flight> flights = new CopyOnWriteArraySet<>();
+    private Set<Flight> flights = new CopyOnWriteArraySet<>();
 
     /**
      *
@@ -40,31 +41,57 @@ public class DataModel{
 
 
     /**
-     @param predicate
+     @param predicate specifies flights what to choose
+
+     @return specified flights
      */
-    public List<Flight> listFlightsWithPredicate( Predicate<Flight> predicate ){
-        return flights.stream().filter( predicate ).collect( Collectors.toList() );
+    public Stream<Flight> listFlightsWithPredicate( Predicate<Flight> predicate ){
+        return flights.stream().filter( predicate );
     }
 
     /**
-     @param flight
+     @param flight create new flight, which has unique number, instead it won't be added
+
+     @return true , if flight was added, false in other case
      */
     public Boolean addFlight( Flight flight ){
         return flights.add( flight );
     }
 
     /**
-     @param number
+     @param number number of flight to be removed
+
+     @return true , if this flight was removed, false in other case
      */
     public Boolean removeFlight( String number ){
         return flights.removeIf( flight -> flight.getNumber().equals( number ) );
     }
 
     /**
-     @param flight
+     @param flight specify the number of flight, that you want to edit. Other attributes could not match with old
+     version. Editing doesn't allow the same route and planeId, arriveDate and departureDate because in this case
+     it'll duplicate another flight. So this flight won't be edited.
+
+     @return true , if database exists flight with specified number and new data doesn't duplicate another flights.
+     false in other case
      */
     public Boolean editFlight( Flight flight ){
-        // TODO implement here
+        Optional<Flight> flightOptional =
+                listFlightsWithPredicate( baseFlight -> baseFlight.getNumber().equals( flight.getNumber() ) )
+                        .findFirst();
+        if( !flightOptional.isPresent() ) return false;
+        Optional<Flight> anyDuplicatedFlight = listFlightsWithPredicate(
+                baseFlight -> baseFlight.getRoute().equals( flight.getRoute() ) &&
+                              baseFlight.getPlaneID().equals( flight.getPlaneID() ) &&
+                              baseFlight.getArriveDate().equals( flight.getArriveDate() ) &&
+                              baseFlight.getDepartureDate().equals( flight.getDepartureDate() ) ).findAny();
+        if( anyDuplicatedFlight.isPresent() ) return false;
+        Flight editingFLight = flightOptional.get();
+        editingFLight.setRoute( flight.getRoute() );
+        editingFLight.setPlaneID( flight.getPlaneID() );
+        editingFLight.setArriveDate( flight.getArriveDate() );
+        editingFLight.setDepartureDate( flight.getDepartureDate() );
+        return true;
     }
 
     /**
