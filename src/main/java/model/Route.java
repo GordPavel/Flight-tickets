@@ -6,11 +6,23 @@ import java.io.Serializable;
  Entity to store data about route between two airports.
 
  @author pavelgordeev email: pvgord@iclod.com */
-public class Route implements Serializable , Cloneable{
+public class Route implements Serializable, Cloneable{
+
+    private static final long serialVersionUID = 1L;
 
     public Route( String from , String to ){
         this.from = from;
         this.to = to;
+    }
+
+    private Integer id;
+
+    Integer getId(){
+        return id;
+    }
+
+    void setId( Integer id ){
+        this.id = id;
     }
 
     /**
