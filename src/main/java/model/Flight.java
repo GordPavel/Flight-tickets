@@ -14,6 +14,8 @@ import java.util.Locale;
  @author pavelgordeev email: pvgord@icloud.com */
 public class Flight implements Serializable, Cloneable{
 
+    private static final long serialVersionUID = 1L;
+
     public Flight( String number , Route route , String planeID , Date arriveDate , Date departureDate ){
         this.number = number;
         this.route = route;
