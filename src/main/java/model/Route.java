@@ -34,7 +34,7 @@ public class Route implements Serializable, Cloneable{
         return from;
     }
 
-    void setFrom( String from ){
+    public void setFrom( String from ){
         this.from = from;
     }
 
@@ -47,7 +47,7 @@ public class Route implements Serializable, Cloneable{
         return to;
     }
 
-    void setTo( String to ){
+    public void setTo( String to ){
         this.to = to;
     }
 

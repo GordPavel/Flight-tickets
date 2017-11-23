@@ -3,9 +3,6 @@ package model;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,9 +15,6 @@ import java.util.stream.Stream;
 
  @author pavelgordeev */
 public class DataModel{
-
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     /**
      Default constructor
      */
@@ -38,13 +32,12 @@ public class DataModel{
     /**
      Stores all flights, do
      */
-    private List<Flight> flights = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<Flight> flights = new CopyOnWriteArrayList<>();
 
     /**
      *
      */
-    private List<Route> routes = new CopyOnWriteArrayList<>();
-
+    private CopyOnWriteArrayList<Route> routes = new CopyOnWriteArrayList<>();
 
     /**
      @param predicate specifies flights what to choose
@@ -52,28 +45,26 @@ public class DataModel{
      @return specified flights
      */
     public Stream<Flight> listFlightsWithPredicate( Predicate<Flight> predicate ){
-        lock.readLock().lock();
-        Stream<Flight> result = flights.stream().filter( predicate );
-        lock.readLock().unlock();
-        return result;
+        return flights.stream().filter( predicate );
     }
 
     /**
      @param flight create new flight, which has unique number, instead it won't be added
 
      @return true , if flight was added, false in other case
+
+     @throws IllegalArgumentException if flight has incorrect dates / it has route, that doesn't exist in database / it duplicates in ( planeID && route && arrive date
+     && departure date ).
      */
     public Boolean addFlight( Flight flight ){
-        lock.readLock().lock();
-        if( flights.stream().anyMatch( flight1 -> flight1.getNumber().equals( flight.getNumber() ) ) ){
-            lock.readLock().unlock();
-            return false;
+        if( !checkFlightsDate( flight ) ) throw new IllegalArgumentException( "Flight has incorrect dates" );
+        if( !checkNumbersDuplicate( flight ) ){
+            throw new IllegalArgumentException( "Flight's numbers duplicates someone from database" );
         }
-        lock.readLock().unlock();
-        lock.writeLock().lock();
-        Boolean result = flights.add( flight );
-        lock.writeLock().unlock();
-        return result;
+        if( !checkFlightsRoute( flight ) ){
+            throw new IllegalArgumentException( "Flight's routes doesn't exists in database" );
+        }
+        return flights.addIfAbsent( flight );
     }
 
     /**
@@ -82,42 +73,56 @@ public class DataModel{
      @return true , if this flight was removed, false in other case
      */
     public Boolean removeFlight( String number ){
-        lock.writeLock().lock();
-        Boolean result = flights.removeIf( flight -> flight.getNumber().equals( number ) );
-        lock.writeLock().unlock();
-        return result;
+        return flights.removeIf( flight -> Objects.equals( flight.getNumber() , number ) );
     }
 
     /**
-     @param flight specify the number of flight, that you want to edit. Other attributes could not match with old
-     version. Editing doesn't allow the same route and planeId, arriveDate and departureDate because in this case
-     it'll duplicate another flight. So this flight won't be edited.
+     @param flight specify the flight, that you want to edit. if flight has incorrect data, it won't be added.
 
      @return true , if database exists flight with specified number and new data doesn't duplicate another flights.
      false in other case
+
+     @throws IllegalArgumentException if flight has incorrect dates / previous version of this flight doesn't exist
+     in database / it has route, that doesn't exist in database / it duplicates in ( planeID && route && arrive date
+     && departure date ).
      */
     public Boolean editFlight( Flight flight ){
-        lock.readLock().lock();
-        Optional<Flight> flightOptional =
-                flights.stream().filter( flight1 -> flight1.getNumber().equals( flight.getNumber() ) ).findFirst();
-        if( !flightOptional.isPresent() ) return false;
-        if( flights.stream().anyMatch( baseFlight -> baseFlight.getRoute().equals( flight.getRoute() ) &&
-                                                     baseFlight.getPlaneID().equals( flight.getPlaneID() ) &&
-                                                     baseFlight.getArriveDate().equals( flight.getArriveDate() ) &&
-                                                     baseFlight.getDepartureDate()
-                                                               .equals( flight.getDepartureDate() ) ) ){
-            lock.writeLock().unlock();
-            return false;
+        if( !checkFlightsDate( flight ) ) throw new IllegalArgumentException( "Flight has incorrect dates" );
+        if( !checkFlightsRoute( flight ) ){
+            throw new IllegalArgumentException( "Flight's routes doesn't exists in database" );
         }
-        lock.readLock().unlock();
-        Flight editingFLight = flightOptional.get();
-        lock.writeLock().lock();
-        editingFLight.setRoute( flight.getRoute() );
-        editingFLight.setPlaneID( flight.getPlaneID() );
-        editingFLight.setArriveDate( flight.getArriveDate() );
-        editingFLight.setDepartureDate( flight.getDepartureDate() );
-        lock.writeLock().unlock();
+        Optional<Flight> flightOptional =
+                flights.stream().filter( flight1 -> Objects.equals( flight.getNumber() , flight1.getNumber() ) )
+                       .findFirst();
+        if( !flightOptional.isPresent() ){
+            throw new IllegalArgumentException(
+                    String.format( "Flight with number %s doesn't consists" , flight.getNumber() ) );
+        }
+        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight.getRoute() , flight1.getRoute() ) &&
+                                                  Objects.equals( flight.getPlaneID() , flight1.getPlaneID() ) &&
+                                                  Objects.equals( flight.getArriveDate() , flight1.getArriveDate() ) &&
+                                                  Objects.equals( flight.getDepartureDate() ,
+                                                                  flight1.getDepartureDate() ) ) ){
+            throw new IllegalArgumentException( "New flight duplicates someone another" );
+        }
+        Flight editedFLight = flightOptional.get();
+        editedFLight.setRoute( flight.getRoute() );
+        editedFLight.setPlaneID( flight.getPlaneID() );
+        editedFLight.setArriveDate( flight.getArriveDate() );
+        editedFLight.setDepartureDate( flight.getDepartureDate() );
         return true;
+    }
+
+    private Boolean checkFlightsRoute( Flight flight ){
+        return routes.contains( flight.getRoute() );
+    }
+
+    private Boolean checkNumbersDuplicate( Flight flight ){
+        return flights.stream().noneMatch( flight1 -> Objects.equals( flight1.getNumber() , flight.getNumber() ) );
+    }
+
+    private Boolean checkFlightsDate( Flight flight ){
+        return flight.getArriveDate().before( flight.getDepartureDate() );
     }
 
     /**
@@ -126,10 +131,7 @@ public class DataModel{
      @return specified routes
      */
     public Stream<Route> listRoutesWithPredicate( Predicate<Route> predicate ){
-        lock.readLock().lock();
-        Stream<Route> routesSet = routes.stream().filter( predicate );
-        lock.readLock().unlock();
-        return routesSet;
+        return routes.stream().filter( predicate );
     }
 
     private Iterator<Integer> routesIdIterator =
@@ -142,77 +144,143 @@ public class DataModel{
      @return true , if route's unique and was added, false instead
      */
     public Boolean addRoute( Route route ){
-        lock.writeLock().lock();
         route.setId( routesIdIterator.next() );
-        Boolean result = routes.add( route );
-        lock.writeLock().unlock();
-        return result;
+        return routes.addIfAbsent( route );
     }
 
     /**
-     @param route
+     @param route to remove
+
+     @return true , if database contains him and deleted, false instead
      */
     public Boolean removeRoute( Route route ){
-        lock.writeLock().lock();
-        Boolean result = routes.removeIf( route1 -> route1.getId().equals( route.getId() ) );
-        lock.writeLock().unlock();
-        return result;
+        return routes.removeIf( route1 -> route1.getId().equals( route.getId() ) );
     }
 
     /**
-     @param route
+     @param route edited route.
+
+     @return true , if it has correct data and doesn't duplicate someone another, false instead.
+
+     @throws IllegalArgumentException if database doesn't contain previous version of route / it duplicates someone
+     another
      */
     public Boolean editRoute( Route route ){
-        lock.readLock().lock();
         Optional<Route> routeOptional =
-                routes.stream().filter( route1 -> route1.getId().equals( route.getId() ) ).findFirst();
-        if( !routeOptional.isPresent() ) return false;
-        if( routes.stream().anyMatch(
-                route1 -> route1.getFrom().equals( route.getFrom() ) && route1.getTo().equals( route.getTo() ) ) ){
-            lock.readLock().unlock();
-            return false;
+                routes.stream().filter( route1 -> Objects.equals( route.getId() , route1.getId() ) ).findFirst();
+        if( !routeOptional.isPresent() ){
+            throw new IllegalArgumentException( "This route doesn't contains in database" );
         }
-        lock.readLock().unlock();
-        Route editingRoute = routeOptional.get();
-        lock.writeLock().lock();
-        editingRoute.setFrom( route.getFrom() );
-        editingRoute.setTo( route.getTo() );
-        lock.writeLock().unlock();
+        if( routes.stream().anyMatch( route1 -> Objects.equals( route , route1 ) ) ){
+            throw new IllegalArgumentException( "This new route duplicates someone another" );
+        }
+        Route editedRoute = routeOptional.get();
+        editedRoute.setFrom( route.getFrom() );
+        editedRoute.setTo( route.getTo() );
         return true;
     }
 
     /**
      Deserialize data from file, swap data contains in RAM to data from file. This method doesn't merge RAM and file
-     data, like when you just open another file.
+     data, like when you just open another file. Method closes stream.
 
      @param file that contains serialized data.
+
+     @throws IllegalArgumentException if file contains not just flights and routes / flight has route that doesn't
+     exist in this file
+     @throws IOException              If other I/O error has occurred.
      */
     public void importFromFile( File file ) throws IOException{
-        try( ObjectInputStream objectInputStream = new ObjectInputStream( new FileInputStream( file ) ) ){
-            List<Serializable> data = new ArrayList<>();
-            int                size = objectInputStream.readInt();
-            int                i    = 0;
-            while( i++ < size ){
-                Serializable ser = ( Serializable ) objectInputStream.readObject();
-                if( !isFLightOrRoute( ser ) ){
-                    throw new ClassNotFoundException();
-                }
-                data.add( ser );
+        List<Serializable> data = deserializeData( file );
+        try{
+            if( !data.stream().allMatch( serializable -> serializable.getClass().equals( Flight.class ) ||
+                                                         serializable.getClass().equals( Route.class ) ) ){
+                throw new IllegalArgumentException( "File must contain just flights and routes" );
             }
             Map<Boolean, List<Serializable>> flightsAndRoutes =
                     data.stream().collect( Collectors.partitioningBy( item -> item instanceof Flight ) );
-            flights = flightsAndRoutes.get( true ).stream().map( ser -> ( Flight ) ser ).collect( Collectors.toList() );
-            routes = flightsAndRoutes.get( false ).stream().map( ser -> ( Route ) ser ).collect( Collectors.toList() );
-        }catch( ClassNotFoundException e ){
-            throw new IllegalArgumentException( "File contains illegal data" );
+            List<Route> tempRoutes = new ArrayList<>();
+            flightsAndRoutes.get( false ).stream().map( serializable -> ( Route ) serializable ).forEach( route -> {
+                if( !tempRoutes.contains( route ) ){
+                    tempRoutes.add( route );
+                }else{
+                    throw new IllegalArgumentException( "Duplicates routes" );
+                }
+            } );
+            List<Flight> tempFlights = new ArrayList<>();
+            flightsAndRoutes.get( true ).stream().map( serializable -> ( Flight ) serializable ).forEach( flight -> {
+                if( tempFlights.contains( flight ) ) throw new IllegalArgumentException( "Duplicate flights" );
+                if( !tempRoutes.contains( flight.getRoute() ) ){
+                    throw new IllegalArgumentException( "Flight's route doesn't exist in file" );
+                }
+                tempFlights.add( flight );
+            } );
+            routes = new CopyOnWriteArrayList<>( tempRoutes );
+            flights = new CopyOnWriteArrayList<>( tempFlights );
+        }catch( IllegalArgumentException e ){
+            throw new IllegalArgumentException( "File contains illegal data" , e );
         }
     }
 
+    /**
+     This method try to add each item of data in this file. If it can't, it puts this to collection to give a report
+     of fail of adding. Clear data will be added.
+     Method closes stream.
+
+     @param additionalData file with data to be merged with current data
+
+     @return collection of data, that can't been added.
+
+     @throws IOException If other I/O error has occurred.
+     */
+    public Collection<Serializable> mergeData( File additionalData ) throws IOException{
+        List<Serializable> data       = deserializeData( additionalData );
+        List<Serializable> failedData = new ArrayList<>();
+        try{
+            if( !data.stream().allMatch( serializable -> serializable.getClass().equals( Flight.class ) ||
+                                                         serializable.getClass().equals( Route.class ) ) ){
+                throw new IllegalArgumentException( "File must contain just flights and routes" );
+            }
+            Map<Boolean, List<Serializable>> flightsAndRoutes =
+                    data.stream().collect( Collectors.partitioningBy( item -> item instanceof Flight ) );
+            flightsAndRoutes.get( false ).stream().map( serializable -> ( Route ) serializable ).forEach( route -> {
+                try{
+                    if( !addRoute( route ) ) failedData.add( route );
+                }catch( IllegalArgumentException e ){
+                    failedData.add( route );
+                }
+            } );
+            flightsAndRoutes.get( true ).stream().map( serializable -> ( Flight ) serializable ).forEach( flight -> {
+                try{
+                    if( ! addFlight( flight ) )
+                        failedData.add( flight );
+                }catch( IllegalArgumentException e ){
+                    failedData.add( flight );
+                }
+            } );
+        }catch( IllegalArgumentException e ){
+            throw new IllegalArgumentException( "File contains illegal data" , e );
+        }
+        return failedData;
+    }
+
+    private List<Serializable> deserializeData( File file ) throws IOException{
+        List<Serializable> data = new ArrayList<>();
+        try( ObjectInputStream objectInputStream = new ObjectInputStream( new FileInputStream( file ) ) ){
+            int size = objectInputStream.readInt();
+            int i    = 0;
+            while( i++ < size ){
+                Serializable ser = ( Serializable ) objectInputStream.readObject();
+                data.add( ser );
+            }
+        }catch( ClassNotFoundException e ){
+            throw new IllegalArgumentException( "File contains illegal data" , e );
+        }
+        return data;
+    }
 
     /**
-     Serialize data from RAM to computer's storage ( NvRAM )
-
-     @param file where serialize the data
+     Look at method {@code void exportSpecifiedData( Collection<Serializable> , File )}. Export all data in database
      */
     public void exportToFile( File file ) throws IOException{
         List<Serializable> data = new ArrayList<>();
@@ -222,9 +290,13 @@ public class DataModel{
     }
 
     /**
-     from RAM to computer's storage ( NvRAM ).Serialize just Flight and Route classes.
+     Serialize collected data from RAM to computer's storage ( NvRAM ).Serialize just Flight and Route classes.
+     Method closes stream.
 
+     @param data collection of data to serialize
      @param file where serialize the data
+
+     @throws IllegalArgumentException if collection contains not just flights and routes
      */
     public void exportSpecifiedData( Collection<Serializable> data , File file ) throws IOException{
         if( data.parallelStream().anyMatch( serializable -> !isFLightOrRoute( serializable ) ) ){
@@ -240,12 +312,5 @@ public class DataModel{
 
     private Boolean isFLightOrRoute( Serializable d ){
         return d.getClass().equals( Flight.class ) || d.getClass().equals( Route.class );
-    }
-
-    /**
-     @param additionalData
-     */
-    public void mergeData( File additionalData ){
-        // TODO implement here
     }
 }
