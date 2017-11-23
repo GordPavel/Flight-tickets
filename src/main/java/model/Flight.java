@@ -46,7 +46,7 @@ public class Flight implements Serializable, Cloneable{
         return route;
     }
 
-    void setRoute( Route route ){
+    public void setRoute( Route route ){
         this.route = route;
     }
 
@@ -59,7 +59,7 @@ public class Flight implements Serializable, Cloneable{
         return planeID;
     }
 
-    void setPlaneID( String planeID ){
+    public void setPlaneID( String planeID ){
         this.planeID = planeID;
     }
 
@@ -72,7 +72,7 @@ public class Flight implements Serializable, Cloneable{
         return arriveDate;
     }
 
-    void setArriveDate( Date date ){
+    public void setArriveDate( Date date ){
         this.arriveDate = date;
     }
 
@@ -85,7 +85,7 @@ public class Flight implements Serializable, Cloneable{
         return departureDate;
     }
 
-    void setDepartureDate( Date date ){
+    public void setDepartureDate( Date date ){
         this.departureDate = date;
     }
 
