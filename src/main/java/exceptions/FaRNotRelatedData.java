@@ -1,24 +1,24 @@
 package exceptions;
 
 /**
- Incorrect string fields ( forbidden symbols )
+ When data-object has a link to another data-object, that doesn't exist in database.
  */
-public class FaRUnacceptableSymbolException extends FlightAndRouteException{
+public class FaRNotRelatedData extends FlightAndRouteException{
     /**
-     Constructs an <code>FaRUnacceptableSymbolException</code> with no
+     Constructs an <code>FaRNotRelatedData</code> with no
      detail message.
      */
-    public FaRUnacceptableSymbolException(){
+    public FaRNotRelatedData(){
         super();
     }
 
     /**
-     Constructs an <code>FaRUnacceptableSymbolException</code> with the
+     Constructs an <code>FaRNotRelatedData</code> with the
      specified detail message.
 
      @param s the detail message.
      */
-    public FaRUnacceptableSymbolException( String s ){
+    public FaRNotRelatedData( String s ){
         super( s );
     }
 
@@ -39,7 +39,7 @@ public class FaRUnacceptableSymbolException extends FlightAndRouteException{
 
      @since 1.5
      */
-    public FaRUnacceptableSymbolException( String message , Throwable cause ){
+    public FaRNotRelatedData( String message , Throwable cause ){
         super( message , cause );
     }
 
@@ -58,7 +58,7 @@ public class FaRUnacceptableSymbolException extends FlightAndRouteException{
 
      @since 1.5
      */
-    public FaRUnacceptableSymbolException( Throwable cause ){
+    public FaRNotRelatedData( Throwable cause ){
         super( cause );
     }
 

@@ -1,24 +1,24 @@
 package exceptions;
 
 /**
- Incorrect string fields ( forbidden symbols )
+ When edited data hasn't previous version in database
  */
-public class FaRUnacceptableSymbolException extends FlightAndRouteException{
+public class FaRIllegalEditedData extends FlightAndRouteException{
     /**
-     Constructs an <code>FaRUnacceptableSymbolException</code> with no
+     Constructs an <code>FaRIllegalEditedData</code> with no
      detail message.
      */
-    public FaRUnacceptableSymbolException(){
+    public FaRIllegalEditedData(){
         super();
     }
 
     /**
-     Constructs an <code>FaRUnacceptableSymbolException</code> with the
+     Constructs an <code>FaRIllegalEditedData</code> with the
      specified detail message.
 
      @param s the detail message.
      */
-    public FaRUnacceptableSymbolException( String s ){
+    public FaRIllegalEditedData( String s ){
         super( s );
     }
 
@@ -39,7 +39,7 @@ public class FaRUnacceptableSymbolException extends FlightAndRouteException{
 
      @since 1.5
      */
-    public FaRUnacceptableSymbolException( String message , Throwable cause ){
+    public FaRIllegalEditedData( String message , Throwable cause ){
         super( message , cause );
     }
 
@@ -58,7 +58,7 @@ public class FaRUnacceptableSymbolException extends FlightAndRouteException{
 
      @since 1.5
      */
-    public FaRUnacceptableSymbolException( Throwable cause ){
+    public FaRIllegalEditedData( Throwable cause ){
         super( cause );
     }
 
