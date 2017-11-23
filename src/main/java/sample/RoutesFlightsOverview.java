@@ -1,6 +1,5 @@
 package sample;
 
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +9,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 
 public class RoutesFlightsOverview {
 
@@ -36,7 +34,7 @@ public class RoutesFlightsOverview {
         Parent addRouteWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            addRouteWindow = FXMLLoader.load(getClass().getResource("AddRoutesOverview.fxml"));
+            addRouteWindow = FXMLLoader.load(getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
 
             Scene scene = new Scene(addRouteWindow);
             Stage popUp = new Stage();
@@ -61,7 +59,7 @@ public class RoutesFlightsOverview {
         Parent editRouteWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            editRouteWindow = FXMLLoader.load(getClass().getResource("EditRoutesOverview.fxml"));
+            editRouteWindow = FXMLLoader.load(getClass().getResource( "../../resources/fxml/EditRoutesOverview.fxml" ) );
 
             Scene scene = new Scene(editRouteWindow);
             Stage popUp = new Stage();
@@ -86,7 +84,7 @@ public class RoutesFlightsOverview {
         Parent addFlightWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            addFlightWindow = FXMLLoader.load(getClass().getResource("AddFlightsOverview.fxml"));
+            addFlightWindow = FXMLLoader.load(getClass().getResource( "../../resources/fxml/AddFlightsOverview.fxml" ) );
 
             Scene scene = new Scene(addFlightWindow);
             Stage popUp = new Stage();
@@ -111,7 +109,8 @@ public class RoutesFlightsOverview {
         Parent editFlightWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            editFlightWindow = FXMLLoader.load(getClass().getResource("EditFlightsOverview.fxml"));
+            editFlightWindow = FXMLLoader.load(getClass().getResource(
+                    "../../resources/fxml/EditFlightsOverview.fxml" ) );
 
             Scene scene = new Scene(editFlightWindow);
             Stage popUp = new Stage();
@@ -136,7 +135,8 @@ public class RoutesFlightsOverview {
         Parent editFlightWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            editFlightWindow = FXMLLoader.load(getClass().getResource("SearchRoutesOverview.fxml"));
+            editFlightWindow = FXMLLoader.load(getClass().getResource(
+                    "../../resources/fxml/SearchRoutesOverview.fxml" ) );
 
             Scene scene = new Scene(editFlightWindow);
             Stage popUp = new Stage();
@@ -161,7 +161,8 @@ public class RoutesFlightsOverview {
         Parent editFlightWindow = null;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
         try {
-            editFlightWindow = FXMLLoader.load(getClass().getResource("SearchFlightsOverview.fxml"));
+            editFlightWindow = FXMLLoader.load(getClass().getResource(
+                    "../../resources/fxml/SearchFlightsOverview.fxml" ) );
 
             Scene scene = new Scene(editFlightWindow);
             Stage popUp = new Stage();

@@ -6,19 +6,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Main extends Application{
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("RoutesFlightsOverview.fxml"));
-        primaryStage.setTitle("Routes and flights");
-        primaryStage.setScene(new Scene(root, 700, 500));
-        primaryStage.setResizable(false);
+    public void start( Stage primaryStage ) throws Exception{
+        Parent root = FXMLLoader.load( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+        primaryStage.setTitle( "Routes and flights" );
+        primaryStage.setScene( new Scene( root , 700 , 500 ) );
+        primaryStage.setResizable( false );
         primaryStage.show();
     }
 
 
-    public static void main(String[] args) {
-        launch(args);
+    public static void main( String[] args ){
+        launch( args );
     }
 }
