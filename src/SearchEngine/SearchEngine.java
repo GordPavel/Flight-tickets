@@ -3,8 +3,10 @@ package SearchEngine;
 import model.*;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /*
 
@@ -24,10 +26,10 @@ public class SearchEngine {
     /**
      @param to
      */
-    public Set<Route> findRoutesByArrivalAirport(String to) {
+    public List<Route> findRoutesByArrivalAirport(String to) {
 
-        Set<Route> set =  data.listRoutesWithPredicate(route -> true );
-        Set<Route> result = new HashSet<Route>();
+        List<Route> set =  data.listRoutesWithPredicate(route -> true ).collect(Collectors.toList());
+        List<Route> result = new ArrayList<>();
         Pattern pattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
 
         for (Route route:set) {
@@ -42,10 +44,10 @@ public class SearchEngine {
     /**
      @param from
      */
-    public Set<Route> findRoutesByDepartureAirport(String from) {
+    public List<Route> findRoutesByDepartureAirport(String from) {
 
-        Set<Route> set =  data.listRoutesWithPredicate(route -> true );
-        Set<Route> result = new HashSet<Route>();
+        List<Route> set =  data.listRoutesWithPredicate(route -> true ).collect(Collectors.toList());
+        List<Route> result = new ArrayList<>();
         Pattern pattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
 
         for (Route route:set) {
@@ -62,7 +64,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightByNumber(String number) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         Pattern pattern = Pattern.compile(number.toUpperCase().replace("*",".*").replace("?","."));
 
@@ -80,7 +82,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByRoute(Route route) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         Pattern patternTo = Pattern.compile(route.getTo().toUpperCase().replace("*",".*").replace("?","."));
         Pattern patternFrom = Pattern.compile(route.getFrom().toUpperCase().replace("*",".*").replace("?","."));
@@ -99,7 +101,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByArrivalAirport(String to) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         Pattern patternTo = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
         for (Flight flight:list) {
@@ -116,7 +118,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByDepartureAirport(String from) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         Pattern patternFrom = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
         for (Flight flight:list) {
@@ -133,7 +135,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByPlane(String id) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         Pattern pattern = Pattern.compile(id.toUpperCase().replace("*",".*").replace("?","."));
         for (Flight flight:list) {
@@ -151,7 +153,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByArrivalTime(Date from, Date to) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getArriveDate().after(from)&&flight.getArriveDate().before(to)){
@@ -166,7 +168,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByArrivalTime(Date exact) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getArriveDate().equals(exact)){
@@ -182,7 +184,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByDepartureTime(Date from, Date to) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getDepartureDate().after(from)&&flight.getDepartureDate().before(to)){
@@ -197,7 +199,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByDepartureTime(Date exact) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getDepartureDate().equals(exact)){
@@ -205,6 +207,7 @@ public class SearchEngine {
             }
         }
         return result;
+
     }
 
     /**
@@ -215,7 +218,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByArrivalAndDepartureTime(Date fromArrival, Date toArrival, Date fromDeparture, Date toDeparture) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getDepartureDate().after(fromDeparture)&&flight.getDepartureDate().before(toDeparture)&&flight.getArriveDate().after(fromArrival)&&flight.getArriveDate().before(toArrival)){
@@ -231,7 +234,7 @@ public class SearchEngine {
      */
     public List<Flight> findFlightsByArrivalAndDepartureTime(Date exactArrival, Date exactDeparture) {
 
-        List<Flight> list =  data.listFlightsWithPredicate(flight -> true );
+        List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
             if (flight.getArriveDate().equals(exactArrival)&&flight.getDepartureDate().equals(exactDeparture)){
@@ -239,6 +242,41 @@ public class SearchEngine {
             }
         }
         return result;
+    }
+
+
+    public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startArrival, Date stopArrival, Date startDeparture, Date stopDeparture)
+    {
+
+        Pattern numberPattern = Pattern.compile(number.replace("*",".*").replace("?","."));
+        Pattern fromPattern = Pattern.compile(from.replace("*",".*").replace("?","."));
+        Pattern toPattern = Pattern.compile(to.replace("*",".*").replace("?","."));
+        Pattern planeIDPattern = Pattern.compile(planeID.replace("*",".*").replace("?","."));
+
+        return data.listFlightsWithPredicate(flight ->
+                (number != "" ? numberPattern.matcher(flight.getNumber()).matches() : true )
+                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom()).matches() : true )
+                && ( to != "" ? toPattern.matcher(flight.getRoute().getTo()).matches() : true )
+                && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID()).matches() : true )
+                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom()).matches() : true )
+                && ( route!= null ? route.equals(flight.getRoute()) : true )
+                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArriveDate()) : true)
+                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArriveDate().after(startArrival)&&flight.getArriveDate().before(stopArrival) : true)
+                && ( (startDeparture!= null)&&(stopDeparture==null) ? startDeparture.equals(flight.getDepartureDate()) : true)
+                && ( (startDeparture!= null)&&(stopDeparture!=null) ? flight.getDepartureDate().after(startDeparture)&&flight.getDepartureDate().before(stopDeparture) : true)
+        ).collect(Collectors.toList());
+    }
+
+    public List<Route> searchRoute(String from, String to)
+    {
+
+        Pattern fromPattern = Pattern.compile(from.replace("*",".*").replace("?","."));
+        Pattern toPattern = Pattern.compile(to.replace("*",".*").replace("?","."));
+
+        return data.listRoutesWithPredicate(route ->
+                ( to != "" ? toPattern.matcher(route.getTo()).matches() : true )
+                        && ( from != "" ? fromPattern.matcher(route.getFrom()).matches() : true )
+        ).collect(Collectors.toList());
     }
 
 }
