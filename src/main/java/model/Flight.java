@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,7 +47,7 @@ public class Flight implements Serializable, Cloneable{
         return route;
     }
 
-    public void setRoute( Route route ){
+    void setRoute( Route route ){
         this.route = route;
     }
 
@@ -59,7 +60,7 @@ public class Flight implements Serializable, Cloneable{
         return planeID;
     }
 
-    public void setPlaneID( String planeID ){
+    void setPlaneID( String planeID ){
         this.planeID = planeID;
     }
 
@@ -72,7 +73,7 @@ public class Flight implements Serializable, Cloneable{
         return arriveDate;
     }
 
-    public void setArriveDate( Date date ){
+    void setArriveDate( Date date ){
         this.arriveDate = date;
     }
 
@@ -85,7 +86,7 @@ public class Flight implements Serializable, Cloneable{
         return departureDate;
     }
 
-    public void setDepartureDate( Date date ){
+    void setDepartureDate( Date date ){
         this.departureDate = date;
     }
 
@@ -93,7 +94,7 @@ public class Flight implements Serializable, Cloneable{
      @return countable field, difference between departureDate and arriveDate
      */
     public Date getTravelTime(){
-        return Date.from( departureDate.toInstant().minusMillis( arriveDate.getTime() ) );
+        return Date.from( Instant.ofEpochMilli( departureDate.getTime() - arriveDate.getTime() ) );
     }
 
     @Override
