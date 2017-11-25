@@ -9,7 +9,7 @@ public class EditFlightsOverview {
     @FXML
     ChoiceBox<String> box;
 
-    ObservableList<String> list = FXCollections.observableArrayList();
+    private ObservableList<String> list = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {

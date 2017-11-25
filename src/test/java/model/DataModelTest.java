@@ -17,10 +17,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,10 +54,10 @@ class DataModelTest{
 
     @Test
     void listAllAirports(){
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" ) ,
                               dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) ,
                               "Check all airports" );
-        assertIterableEquals( List.of( "port3" ) ,
+        assertIterableEquals( Arrays.asList( "port3" ) ,
                               dataModel.listAllAirportsWithPredicate( airport -> airport.endsWith( "3" ) )
                                        .collect( Collectors.toList() ) , "Check filtered airports" );
     }
@@ -69,7 +66,7 @@ class DataModelTest{
     void addRoute(){
         Route addition = new Route( "port1" , "port4" );
         assertTrue( dataModel.addRoute( addition ) , "Route added" );
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" , "port4" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
         assertEquals( addition , dataModel.listRoutesWithPredicate( route -> route.equals( addition ) ).findFirst()
@@ -94,7 +91,7 @@ class DataModelTest{
         Route route = dataModel.listRoutesWithPredicate( route1 -> true ).skip( 2 ).limit( 1 ).findFirst().get();
         assertTrue( dataModel.editRoute( route , "port4" , null ) ,
                     "Change route( port2 -> port3 ) to route( port4 -> port3 )" );
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" , "port4" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
         assertFalse(
@@ -110,7 +107,7 @@ class DataModelTest{
 
     @Test
     void listAllFlights(){
-        List<Flight> flights = List.of( new Flight( "number1" , new Route( "port1" , "port2" ) , "planeId2" , Date.from(
+        List<Flight> flights = Arrays.asList( new Flight( "number1" , new Route( "port1" , "port2" ) , "planeId2" , Date.from(
                 LocalDateTime.of( 2010 , 12 , 15 , 10 , 30 ).atZone( ZoneId.systemDefault() ).toInstant() ) , Date.from(
                 LocalDateTime.of( 2010 , 12 , 15 , 12 , 30 ).atZone( ZoneId.systemDefault() ).toInstant() ) ) );
         assertIterableEquals( flights ,
@@ -132,7 +129,7 @@ class DataModelTest{
                 .listFlightsWithPredicate( flight -> flight.getTravelTime().getTime() < 1000 * 60 * 60 * 4 + 1 )
                 .collect( Collectors.toList() ) , "Filter by travel time" );
 
-        flights = List.of( new Flight( String.format( "number%d" , 10 ) , routes.get( 9 % routes.size() ) ,
+        flights = Arrays.asList( new Flight( String.format( "number%d" , 10 ) , routes.get( 9 % routes.size() ) ,
                                        String.format( "planeId%d" , 10 + 1 ) , Date.from(
                 LocalDateTime.of( 2009 + 10 , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() ) ,
                                        Date.from( LocalDateTime.of( 2009 + 10 , 12 , 15 , 11 + 10 , 30 )
