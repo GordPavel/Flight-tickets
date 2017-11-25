@@ -20,7 +20,7 @@ public class DataModel{
     /**
      Default constructor
      */
-    private DataModel(){
+    DataModel(){
     }
 
     private static class InstanceHolder{
@@ -114,9 +114,13 @@ public class DataModel{
     }
 
     /**
-     Use
+     Use this to set any fields in flight
 
-     @param flight specify the flight, that you want to edit. if flight has incorrect data, it won't be added.
+     @param flight           specify the flight, that you want to edit. if flight has incorrect data, it won't be added.
+     @param newRoute         new route to change. if null, value win't be changed
+     @param newPlaneId       new plane ID to change. if null, value win't be changed
+     @param newArriveDate    new arrive date to change. if null, value win't be changed
+     @param newDepartureDate new departure date to change. if null, value win't be changed
 
      @return true , if database exists flight with specified number and new data doesn't duplicate another flights.
      false in other case
@@ -132,8 +136,8 @@ public class DataModel{
                 .before( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( routes.stream().noneMatch( route -> route.getId().equals(
-                newRoute.getId() != null ? newRoute.getId() : flight.getRoute().getId() ) ) ){
+        if( routes.stream().noneMatch(
+                route -> route.getId().equals( newRoute != null ? newRoute.getId() : flight.getRoute().getId() ) ) ){
             throw new FaRNotRelatedData( "Flight's routes doesn't exists in database" );
         }
         Optional<Flight> flightOptional =
@@ -304,7 +308,11 @@ public class DataModel{
             Map<Boolean, List<Serializable>> flightsAndRoutes =
                     data.stream().collect( Collectors.partitioningBy( item -> item instanceof Flight ) );
             flightsAndRoutes.get( false ).stream().map( serializable -> ( Route ) serializable ).forEach( route -> {
-                if( !addRoute( route ) ) failedData.add( route );
+                try{
+                    if( !addRoute( route ) ) failedData.add( route );
+                }catch( FaRSameNameException e ){
+                    failedData.add( route );
+                }
             } );
             flightsAndRoutes.get( true ).stream().map( serializable -> ( Flight ) serializable ).forEach( flight -> {
                 try{
