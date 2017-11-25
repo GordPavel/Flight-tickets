@@ -181,7 +181,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getArriveDate().after(from)&&flight.getArriveDate().before(to)){
+            if (flight.getArraivalDate().after(from)&&flight.getArraivalDate().before(to)){
                 result.add(flight);
             }
         }
@@ -198,7 +198,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getArriveDate().equals(exact)){
+            if (flight.getArraivalDate().equals(exact)){
                 result.add(flight);
             }
         }
@@ -254,7 +254,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getDepartureDate().after(fromDeparture)&&flight.getDepartureDate().before(toDeparture)&&flight.getArriveDate().after(fromArrival)&&flight.getArriveDate().before(toArrival)){
+            if (flight.getDepartureDate().after(fromDeparture)&&flight.getDepartureDate().before(toDeparture)&&flight.getArraivalDate().after(fromArrival)&&flight.getArraivalDate().before(toArrival)){
                 result.add(flight);
             }
         }
@@ -272,7 +272,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getArriveDate().equals(exactArrival)&&flight.getDepartureDate().equals(exactDeparture)){
+            if (flight.getDepartureDate().equals(exactArrival)&&flight.getArraivalDate().equals(exactDeparture)){
                 result.add(flight);
             }
         }
@@ -293,7 +293,7 @@ public class SearchEngine {
      @return list of flights, filtred by predicate, generated from params
      */
 
-    public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startArrival, Date stopArrival, Date startDeparture, Date stopDeparture)
+    public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startDeparture, Date stopDeparture, Date startArrival, Date stopArrival)
     {
 
         Pattern numberPattern = Pattern.compile(number.toUpperCase().replace("*",".*").replace("?","."));
@@ -308,8 +308,8 @@ public class SearchEngine {
                 && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID().toUpperCase()).matches() : true )
                 && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
                 && ( route!= null ? route.equals(flight.getRoute()) : true )
-                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArriveDate()) : true)
-                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArriveDate().after(startArrival)&&flight.getArriveDate().before(stopArrival) : true)
+                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArraivalDate()) : true)
+                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArraivalDate().after(startArrival)&&flight.getArraivalDate().before(stopArrival) : true)
                 && ( (startDeparture!= null)&&(stopDeparture==null) ? startDeparture.equals(flight.getDepartureDate()) : true)
                 && ( (startDeparture!= null)&&(stopDeparture!=null) ? flight.getDepartureDate().after(startDeparture)&&flight.getDepartureDate().before(stopDeparture) : true)
         ).collect(Collectors.toList());
@@ -336,3 +336,4 @@ public class SearchEngine {
     }
 
 }
+
