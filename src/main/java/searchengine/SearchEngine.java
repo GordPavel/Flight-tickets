@@ -27,7 +27,7 @@ public class SearchEngine {
     /**
       @param data - datamodel
      */
-    SearchEngine (DataModel data)
+    public SearchEngine (DataModel data)
     {
         this.data=data;
     }
@@ -44,7 +44,7 @@ public class SearchEngine {
         Pattern pattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
 
         for (Route route:set) {
-            Matcher matcher=pattern.matcher(route.getFrom().toUpperCase());
+            Matcher matcher=pattern.matcher(route.getTo().toUpperCase());
             if (matcher.matches()){
                 result.add(route);
             }
@@ -64,7 +64,7 @@ public class SearchEngine {
         Pattern pattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
 
         for (Route route:set) {
-            Matcher matcher=pattern.matcher(route.getTo().toUpperCase());
+            Matcher matcher=pattern.matcher(route.getFrom().toUpperCase());
             if (matcher.matches()){
                 result.add(route);
             }
@@ -162,7 +162,7 @@ public class SearchEngine {
         List<Flight> result = new ArrayList<Flight>();
         Pattern pattern = Pattern.compile(id.toUpperCase().replace("*",".*").replace("?","."));
         for (Flight flight:list) {
-            Matcher matcher=pattern.matcher(flight.getRoute().getFrom().toUpperCase());
+            Matcher matcher=pattern.matcher(flight.getPlaneID().toUpperCase());
             if (matcher.matches()){
                 result.add(flight);
             }
@@ -296,17 +296,17 @@ public class SearchEngine {
     public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startArrival, Date stopArrival, Date startDeparture, Date stopDeparture)
     {
 
-        Pattern numberPattern = Pattern.compile(number.replace("*",".*").replace("?","."));
-        Pattern fromPattern = Pattern.compile(from.replace("*",".*").replace("?","."));
-        Pattern toPattern = Pattern.compile(to.replace("*",".*").replace("?","."));
-        Pattern planeIDPattern = Pattern.compile(planeID.replace("*",".*").replace("?","."));
+        Pattern numberPattern = Pattern.compile(number.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern fromPattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern toPattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern planeIDPattern = Pattern.compile(planeID.toUpperCase().replace("*",".*").replace("?","."));
 
         return data.listFlightsWithPredicate(flight ->
-                (number != "" ? numberPattern.matcher(flight.getNumber()).matches() : true )
-                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom()).matches() : true )
-                && ( to != "" ? toPattern.matcher(flight.getRoute().getTo()).matches() : true )
-                && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID()).matches() : true )
-                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom()).matches() : true )
+                (number != "" ? numberPattern.matcher(flight.getNumber().toUpperCase()).matches() : true )
+                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
+                && ( to != "" ? toPattern.matcher(flight.getRoute().getTo().toUpperCase()).matches() : true )
+                && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID().toUpperCase()).matches() : true )
+                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
                 && ( route!= null ? route.equals(flight.getRoute()) : true )
                 && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArriveDate()) : true)
                 && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArriveDate().after(startArrival)&&flight.getArriveDate().before(stopArrival) : true)
@@ -326,12 +326,12 @@ public class SearchEngine {
     public List<Route> searchRoute(String from, String to)
     {
 
-        Pattern fromPattern = Pattern.compile(from.replace("*",".*").replace("?","."));
-        Pattern toPattern = Pattern.compile(to.replace("*",".*").replace("?","."));
+        Pattern fromPattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern toPattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
 
         return data.listRoutesWithPredicate(route ->
-                ( to != "" ? toPattern.matcher(route.getTo()).matches() : true )
-                        && ( from != "" ? fromPattern.matcher(route.getFrom()).matches() : true )
+                ( to != "" ? toPattern.matcher(route.getTo().toUpperCase()).matches() : true )
+                        && ( from != "" ? fromPattern.matcher(route.getFrom().toUpperCase()).matches() : true )
         ).collect(Collectors.toList());
     }
 
