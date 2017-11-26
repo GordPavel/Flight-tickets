@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -85,8 +86,12 @@ public class DataModel{
      duplicates number
      */
     public Boolean addFlight( Flight flight ) throws FlightAndRouteException{
-        if( !flight.getArriveDate().before( flight.getDepartureDate() ) ){
+        if( flight.getArriveDate().before( flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
+        }
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
+            throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
         if( flights.stream().anyMatch( flight1 -> flight1.getNumber().equals( flight.getNumber() ) ) ){
             throw new FaRSameNameException( "Flight's numbers duplicates someone from database" );
@@ -119,8 +124,8 @@ public class DataModel{
      @param flight           specify the flight, that you want to edit. if flight has incorrect data, it won't be added.
      @param newRoute         new route to change. if null, value win't be changed
      @param newPlaneId       new plane ID to change. if null, value win't be changed
-     @param newArriveDate    new arrive date to change. if null, value win't be changed
      @param newDepartureDate new departure date to change. if null, value win't be changed
+     @param newArriveDate    new arrive date to change. if null, value win't be changed
 
      @return true , if database exists flight with specified number and new data doesn't duplicate another flights.
      false in other case
@@ -130,11 +135,15 @@ public class DataModel{
      @throws FaRNotRelatedData        it has route, that doesn't exist in database
      @throws FaRSameNameException     it   duplicates in ( planeID && route && arrive date && departure date ).
      */
-    public Boolean editFlight( Flight flight , Route newRoute , String newPlaneId , Date newArriveDate ,
-                               Date newDepartureDate ) throws FlightAndRouteException{
-        if( !( newArriveDate != null ? newArriveDate : flight.getArriveDate() )
+    public Boolean editFlight( Flight flight , Route newRoute , String newPlaneId , Date newDepartureDate ,
+                               Date newArriveDate ) throws FlightAndRouteException{
+        if( ( newArriveDate != null ? newArriveDate : flight.getArriveDate() )
                 .before( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
+        }
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
+            throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
         if( routes.stream().noneMatch(
                 route -> route.getId().equals( newRoute != null ? newRoute.getId() : flight.getRoute().getId() ) ) ){
@@ -186,6 +195,10 @@ public class DataModel{
      @throws FaRSameNameException if new route's arrival and departure points duplicate someone another in database
      */
     public Boolean addRoute( Route route ){
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
+            throw new FaRUnacceptableSymbolException( "Illegal symbols" );
+        }
         route.setId( routesIdIterator.next() );
         if( routes.stream().anyMatch(
                 route1 -> route1.getFrom().equals( route.getFrom() ) && route1.getTo().equals( route.getTo() ) ) ){
@@ -223,6 +236,10 @@ public class DataModel{
      another
      */
     public Boolean editRoute( Route route , String newArrivalAirport , String newDestinationAirport ){
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
+            throw new FaRUnacceptableSymbolException( "Illegal symbols" );
+        }
         Optional<Route> routeOptional =
                 routes.stream().filter( route1 -> Objects.equals( route.getId() , route1.getId() ) ).findFirst();
         if( !routeOptional.isPresent() ){

@@ -6,10 +6,9 @@ import java.io.Serializable;
  Entity to store data about route between two airports.
 
  @author pavelgordeev email: pvgord@iclod.com */
-public class Route implements Serializable, Cloneable{
+public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
-
 
 
     public Route( String from , String to ){
@@ -51,6 +50,12 @@ public class Route implements Serializable, Cloneable{
 
     void setTo( String to ){
         this.to = to;
+    }
+
+    @Override
+    public int compareTo( Route o ){
+        int from = this.from.compareToIgnoreCase( o.to );
+        return from != 0 ? from : this.to.compareToIgnoreCase( o.to );
     }
 
     @Override

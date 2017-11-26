@@ -17,12 +17,12 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , Date arriveDate , Date departureDate ){
+    public Flight( String number , Route route , String planeID , Date departureDate , Date arriveDate ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
-        this.arriveDate = arriveDate;
         this.departureDate = departureDate;
+        this.arriveDate = arriveDate;
     }
 
     /**
@@ -65,7 +65,7 @@ public class Flight implements Serializable, Cloneable{
     }
 
     /**
-     Stores date and time, when plane have to take off
+     Stores date and time, when plane have to launch
      */
     private Date arriveDate;
 
@@ -78,7 +78,7 @@ public class Flight implements Serializable, Cloneable{
     }
 
     /**
-     Stores date and time, when plane have to launch
+     Stores date and time, when plane have to take off
      */
     private Date departureDate;
 
@@ -91,10 +91,10 @@ public class Flight implements Serializable, Cloneable{
     }
 
     /**
-     @return countable field, difference between departureDate and arriveDate
+     @return countable field, difference between departureDate and arriveDate in milliseconds
      */
     public Date getTravelTime(){
-        return Date.from( Instant.ofEpochMilli( departureDate.getTime() - arriveDate.getTime() ) );
+        return Date.from( Instant.ofEpochMilli( arriveDate.getTime() - departureDate.getTime() ) );
     }
 
     @Override
@@ -134,14 +134,14 @@ public class Flight implements Serializable, Cloneable{
     @Override
     public String toString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
-        LocalDateTime arrivalLocalDate =
-                LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
         LocalDateTime departureLocalDate =
                 LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
+        LocalDateTime arrivalLocalDate =
+                LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
         return String
                 .format( "Flight number %s, takes at %s from %s, launches at %s at %s, flies by %s plane" , number ,
-                         arrivalLocalDate.format( formatter ) , route.getFrom() ,
-                         departureLocalDate.format( formatter ) , route.getTo() , planeID );
+                         departureLocalDate.format( formatter ) , route.getFrom() ,
+                         arrivalLocalDate.format( formatter ) , route.getTo() , planeID );
     }
 
     /**
