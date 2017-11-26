@@ -5,11 +5,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 
-public class EditFlightsOverview {
+public class AddFlightsOverviewController {
+
     @FXML
     ChoiceBox<String> box;
 
-    private ObservableList<String> list = FXCollections.observableArrayList();
+    ObservableList<String> list = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {

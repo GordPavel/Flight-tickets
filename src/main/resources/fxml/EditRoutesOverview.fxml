@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.image.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
-
-<AnchorPane fx:controller="sample.EditRoutesOverview" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="-4.0" layoutY="-2.0" prefHeight="34.0" prefWidth="519.0" text="Edit a route" textAlignment="CENTER" textFill="#1b1616" AnchorPane.bottomAnchor="268.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-2.0">
-         <font>
-            <Font size="14.0" />
-         </font></Label>
-      <TextField layoutX="170.0" layoutY="80.0" prefHeight="25.0" prefWidth="150.0" />
-      <Button layoutX="43.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Accept" />
-      <Label layoutX="45.0" layoutY="35.0" text="Enter new data" />
-      <Button layoutX="382.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Cancel" />
-      <TextField layoutX="170.0" layoutY="145.0" prefHeight="17.0" prefWidth="149.0" />
-      <Label layoutX="45.0" layoutY="85.0" prefHeight="17.0" prefWidth="64.0" text="Departure:" />
-      <Label layoutX="45.0" layoutY="150.0" text="Destination:" />
-      <Button layoutX="380.0" layoutY="145.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Clear" />
-   </children>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0"
+            prefWidth="520.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sample.EditRoutesOverviewController">
+    <children>
+        <TextField layoutX="170.0" layoutY="80.0" prefHeight="25.0" prefWidth="150.0"/>
+        <Button layoutX="43.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+                text="Accept"/>
+        <Label layoutX="95.0" layoutY="20.0" prefHeight="27.0" prefWidth="355.0"
+               text="Please enter new data for a chosen route.">
+            <font>
+                <Font name="System Bold Italic" size="18.0"/>
+            </font>
+        </Label>
+        <Button layoutX="382.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+                text="Cancel"/>
+        <TextField layoutX="170.0" layoutY="145.0" prefHeight="17.0" prefWidth="149.0"/>
+        <Label layoutX="45.0" layoutY="85.0" prefHeight="17.0" prefWidth="64.0" text="Departure:">
+            <font>
+                <Font name="System Italic" size="12.0"/>
+            </font>
+        </Label>
+        <Label layoutX="45.0" layoutY="150.0" text="Destination:">
+            <font>
+                <Font name="System Italic" size="12.0"/>
+            </font>
+        </Label>
+        <Button layoutX="380.0" layoutY="145.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+                text="Clear"/>
+    </children>
 </AnchorPane>
