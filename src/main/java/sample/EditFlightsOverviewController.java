@@ -5,7 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 
-public class EditFlightsOverview {
+public class EditFlightsOverviewController{
     @FXML
     ChoiceBox<String> box;
 

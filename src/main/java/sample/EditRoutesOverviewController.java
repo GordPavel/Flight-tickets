@@ -1,4 +1,4 @@
 package sample;
 
-public class EditRoutesOverview {
+public class EditRoutesOverviewController{
 }
