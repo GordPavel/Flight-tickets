@@ -41,7 +41,7 @@ public class SearchEngine {
 
         List<Route> set =  data.listRoutesWithPredicate(route -> true ).collect(Collectors.toList());
         List<Route> result = new ArrayList<>();
-        Pattern pattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern pattern = Pattern.compile(".*"+to.toUpperCase().replace("*",".*").replace("?",".")+".*");
 
         for (Route route:set) {
             Matcher matcher=pattern.matcher(route.getTo().toUpperCase());
@@ -61,7 +61,7 @@ public class SearchEngine {
 
         List<Route> set =  data.listRoutesWithPredicate(route -> true ).collect(Collectors.toList());
         List<Route> result = new ArrayList<>();
-        Pattern pattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern pattern = Pattern.compile(".*"+from.toUpperCase().replace("*",".*").replace("?",".")+".*");
 
         for (Route route:set) {
             Matcher matcher=pattern.matcher(route.getFrom().toUpperCase());
@@ -81,7 +81,7 @@ public class SearchEngine {
 
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
-        Pattern pattern = Pattern.compile(number.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern pattern = Pattern.compile(".*"+number.toUpperCase().replace("*",".*").replace("?",".")+".*");
 
         for (Flight flight:list) {
             Matcher matcher=pattern.matcher(flight.getNumber().toUpperCase());
@@ -101,8 +101,8 @@ public class SearchEngine {
 
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
-        Pattern patternTo = Pattern.compile(route.getTo().toUpperCase().replace("*",".*").replace("?","."));
-        Pattern patternFrom = Pattern.compile(route.getFrom().toUpperCase().replace("*",".*").replace("?","."));
+        Pattern patternTo = Pattern.compile(".*"+route.getTo().toUpperCase().replace("*",".*").replace("?",".")+".*");
+        Pattern patternFrom = Pattern.compile(".*"+route.getFrom().toUpperCase().replace("*",".*").replace("?",".")+".*");
         for (Flight flight:list) {
             Matcher matcherTo=patternTo.matcher(flight.getRoute().getTo().toUpperCase());
             Matcher matcherFrom=patternFrom.matcher(flight.getRoute().getFrom().toUpperCase());
@@ -122,7 +122,7 @@ public class SearchEngine {
 
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
-        Pattern patternTo = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern patternTo = Pattern.compile(".*"+to.toUpperCase().replace("*",".*").replace("?",".")+".*");
         for (Flight flight:list) {
             Matcher matcherTo=patternTo.matcher(flight.getRoute().getTo().toUpperCase());
             if (matcherTo.matches()){
@@ -141,7 +141,7 @@ public class SearchEngine {
 
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
-        Pattern patternFrom = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern patternFrom = Pattern.compile(".*"+from.toUpperCase().replace("*",".*").replace("?",".")+".*");
         for (Flight flight:list) {
             Matcher matcherFrom=patternFrom.matcher(flight.getRoute().getFrom().toUpperCase());
             if (matcherFrom.matches()){
@@ -160,7 +160,7 @@ public class SearchEngine {
 
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
-        Pattern pattern = Pattern.compile(id.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern pattern = Pattern.compile(".*"+id.toUpperCase().replace("*",".*").replace("?",".")+".*");
         for (Flight flight:list) {
             Matcher matcher=pattern.matcher(flight.getPlaneID().toUpperCase());
             if (matcher.matches()){
@@ -296,10 +296,10 @@ public class SearchEngine {
     public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startDeparture, Date stopDeparture, Date startArrival, Date stopArrival)
     {
 
-        Pattern numberPattern = Pattern.compile(number.toUpperCase().replace("*",".*").replace("?","."));
-        Pattern fromPattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
-        Pattern toPattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
-        Pattern planeIDPattern = Pattern.compile(planeID.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern numberPattern = Pattern.compile(".*"+number.toUpperCase().replace("*",".*").replace("?",".")+".*");
+        Pattern fromPattern = Pattern.compile(".*"+from.toUpperCase().replace("*",".*").replace("?",".")+".*");
+        Pattern toPattern = Pattern.compile(".*"+to.toUpperCase().replace("*",".*").replace("?",".")+".*");
+        Pattern planeIDPattern = Pattern.compile(".*"+planeID.toUpperCase().replace("*",".*").replace("?",".")+".*");
 
         return data.listFlightsWithPredicate(flight ->
                 (number != "" ? numberPattern.matcher(flight.getNumber().toUpperCase()).matches() : true )
@@ -326,8 +326,8 @@ public class SearchEngine {
     public List<Route> searchRoute(String from, String to)
     {
 
-        Pattern fromPattern = Pattern.compile(from.toUpperCase().replace("*",".*").replace("?","."));
-        Pattern toPattern = Pattern.compile(to.toUpperCase().replace("*",".*").replace("?","."));
+        Pattern fromPattern = Pattern.compile(".*"+from.toUpperCase().replace("*",".*").replace("?",".")+".*");
+        Pattern toPattern = Pattern.compile(".*"+to.toUpperCase().replace("*",".*").replace("?",".")+".*");
 
         return data.listRoutesWithPredicate(route ->
                 ( to != "" ? toPattern.matcher(route.getTo().toUpperCase()).matches() : true )
