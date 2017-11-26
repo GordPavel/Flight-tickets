@@ -25,7 +25,6 @@ public class EditFlightsOverviewController{
 
         box.setItems(list);
     }
-
     private void closeWindow(Event event) {
         Stage stage = (Stage) ((Parent) event.getSource()).getScene().getWindow();
         stage.close();
