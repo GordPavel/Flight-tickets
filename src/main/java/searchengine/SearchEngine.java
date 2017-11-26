@@ -181,7 +181,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getArraivalDate().after(from)&&flight.getArraivalDate().before(to)){
+            if (flight.getArrivalDate().after(from)&&flight.getArrivalDate().before(to)){
                 result.add(flight);
             }
         }
@@ -198,7 +198,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getArraivalDate().equals(exact)){
+            if (flight.getArrivalDate().equals(exact)){
                 result.add(flight);
             }
         }
@@ -254,7 +254,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getDepartureDate().after(fromDeparture)&&flight.getDepartureDate().before(toDeparture)&&flight.getArraivalDate().after(fromArrival)&&flight.getArraivalDate().before(toArrival)){
+            if (flight.getDepartureDate().after(fromDeparture)&&flight.getDepartureDate().before(toDeparture)&&flight.getArrivalDate().after(fromArrival)&&flight.getArrivalDate().before(toArrival)){
                 result.add(flight);
             }
         }
@@ -272,7 +272,7 @@ public class SearchEngine {
         List<Flight> list =  data.listFlightsWithPredicate(flight -> true ).collect(Collectors.toList());
         List<Flight> result = new ArrayList<Flight>();
         for (Flight flight:list) {
-            if (flight.getDepartureDate().equals(exactArrival)&&flight.getArraivalDate().equals(exactDeparture)){
+            if (flight.getDepartureDate().equals(exactArrival)&&flight.getArrivalDate().equals(exactDeparture)){
                 result.add(flight);
             }
         }
@@ -308,8 +308,8 @@ public class SearchEngine {
                 && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID().toUpperCase()).matches() : true )
                 && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
                 && ( route!= null ? route.equals(flight.getRoute()) : true )
-                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArraivalDate()) : true)
-                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArraivalDate().after(startArrival)&&flight.getArraivalDate().before(stopArrival) : true)
+                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArrivalDate()) : true)
+                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArrivalDate().after(startArrival)&&flight.getArrivalDate().before(stopArrival) : true)
                 && ( (startDeparture!= null)&&(stopDeparture==null) ? startDeparture.equals(flight.getDepartureDate()) : true)
                 && ( (startDeparture!= null)&&(stopDeparture!=null) ? flight.getDepartureDate().after(startDeparture)&&flight.getDepartureDate().before(stopDeparture) : true)
         ).collect(Collectors.toList());
