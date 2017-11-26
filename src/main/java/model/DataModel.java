@@ -20,7 +20,7 @@ public class DataModel{
     /**
      Default constructor
      */
-    private DataModel(){
+    DataModel(){
     }
 
     private static class InstanceHolder{
@@ -85,7 +85,7 @@ public class DataModel{
      duplicates number
      */
     public Boolean addFlight( Flight flight ) throws FlightAndRouteException{
-        if( !flight.getDepartureDate().before( flight.getArraivalDate() ) ){
+        if( !flight.getDepartureDate().before( flight.getArrivalDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( flights.stream().anyMatch( flight1 -> flight1.getNumber().equals( flight.getNumber() ) ) ){
@@ -93,9 +93,10 @@ public class DataModel{
         }
         if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
                                                   Objects.equals( flight1.getPlaneID() , flight.getPlaneID() ) &&
-                                                  Objects.equals( flight1.getDepartureDate() , flight.getDepartureDate() ) &&
-                                                  Objects.equals( flight1.getArraivalDate() ,
-                                                                  flight.getArraivalDate() ) ) ){
+                                                  Objects.equals( flight1.getDepartureDate() ,
+                                                                  flight.getDepartureDate() ) &&
+                                                  Objects.equals( flight1.getArrivalDate() ,
+                                                                  flight.getArrivalDate() ) ) ){
             throw new FaRSameNameException( "New flight duplicates someone another" );
         }
         if( routes.stream().noneMatch( route -> route.getId().equals( flight.getRoute().getId() ) ) ){
@@ -129,11 +130,11 @@ public class DataModel{
     public Boolean editFlight( Flight flight , Route newRoute , String newPlaneId , Date newArriveDate ,
                                Date newDepartureDate ) throws FlightAndRouteException{
         if( !( newArriveDate != null ? newArriveDate : flight.getDepartureDate() )
-                .before( newDepartureDate != null ? newDepartureDate : flight.getArraivalDate() ) ){
+                .before( newDepartureDate != null ? newDepartureDate : flight.getArrivalDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( routes.stream().noneMatch( route -> route.getId().equals(
-                newRoute.getId() != null ? newRoute.getId() : flight.getRoute().getId() ) ) ){
+        if( routes.stream().noneMatch(
+                route -> route.getId().equals( newRoute != null ? newRoute.getId() : flight.getRoute().getId() ) ) ){
             throw new FaRNotRelatedData( "Flight's routes doesn't exists in database" );
         }
         Optional<Flight> flightOptional =
@@ -148,15 +149,15 @@ public class DataModel{
                                            newPlaneId != null ? newPlaneId : flight.getPlaneID() ) &&
                            Objects.equals( flight1.getDepartureDate() ,
                                            newArriveDate != null ? newArriveDate : flight.getDepartureDate() ) &&
-                           Objects.equals( flight1.getArraivalDate() , newDepartureDate != null ? newDepartureDate :
-                                                                        flight.getArraivalDate() ) ) ){
+                           Objects.equals( flight1.getArrivalDate() ,
+                                           newDepartureDate != null ? newDepartureDate : flight.getArrivalDate() ) ) ){
             throw new FaRSameNameException( "New flight duplicates someone another" );
         }
         Flight editedFLight = flightOptional.get();
         editedFLight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
         editedFLight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
         editedFLight.setDepartureDate( newArriveDate != null ? newArriveDate : flight.getDepartureDate() );
-        editedFLight.setArraivalDate( newDepartureDate != null ? newDepartureDate : flight.getArraivalDate() );
+        editedFLight.setArrivalDate( newDepartureDate != null ? newDepartureDate : flight.getArrivalDate() );
         return true;
     }
 
@@ -304,7 +305,11 @@ public class DataModel{
             Map<Boolean, List<Serializable>> flightsAndRoutes =
                     data.stream().collect( Collectors.partitioningBy( item -> item instanceof Flight ) );
             flightsAndRoutes.get( false ).stream().map( serializable -> ( Route ) serializable ).forEach( route -> {
-                if( !addRoute( route ) ) failedData.add( route );
+                try{
+                    if( !addRoute( route ) ) failedData.add( route );
+                }catch( FaRSameNameException e ){
+                    failedData.add( route );
+                }
             } );
             flightsAndRoutes.get( true ).stream().map( serializable -> ( Flight ) serializable ).forEach( flight -> {
                 try{
