@@ -4,7 +4,6 @@ import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
 import exceptions.FaRSameNameException;
-import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +16,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,9 +40,9 @@ class DataModelTest{
         IntStream.rangeClosed( 1 , 10 ).mapToObj(
                 i -> new Flight( String.format( "number%d" , i ) , routes.get( ( i - 1 ) % routes.size() ) ,
                                  String.format( "planeId%d" , i + 1 ) , Date.from(
-                        LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
+                        LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) , Date.from(
-                        LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
+                        LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) ) ).forEach( dataModel::addFlight );
     }
 
@@ -57,10 +53,10 @@ class DataModelTest{
 
     @Test
     void listAllAirports(){
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" ) ,
                               dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) ,
                               "Check all airports" );
-        assertIterableEquals( List.of( "port3" ) ,
+        assertIterableEquals( Collections.singletonList( "port3" ) ,
                               dataModel.listAllAirportsWithPredicate( airport -> airport.endsWith( "3" ) )
                                        .collect( Collectors.toList() ) , "Check filtered airports" );
     }
@@ -69,7 +65,7 @@ class DataModelTest{
     void addRoute(){
         Route addition = new Route( "port1" , "port4" );
         assertTrue( dataModel.addRoute( addition ) , "Route added" );
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" , "port4" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
         assertEquals( addition , dataModel.listRoutesWithPredicate( route -> route.equals( addition ) ).findFirst()
@@ -94,7 +90,7 @@ class DataModelTest{
         Route route = dataModel.listRoutesWithPredicate( route1 -> true ).skip( 2 ).limit( 1 ).findFirst().get();
         assertTrue( dataModel.editRoute( route , "port4" , null ) ,
                     "Change route( port2 -> port3 ) to route( port4 -> port3 )" );
-        assertIterableEquals( List.of( "port1" , "port2" , "port3" , "port4" ) ,
+        assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
         assertFalse(
@@ -110,9 +106,11 @@ class DataModelTest{
 
     @Test
     void listAllFlights(){
-        List<Flight> flights = List.of( new Flight( "number1" , new Route( "port1" , "port2" ) , "planeId2" , Date.from(
-                LocalDateTime.of( 2010 , 12 , 15 , 10 , 30 ).atZone( ZoneId.systemDefault() ).toInstant() ) , Date.from(
-                LocalDateTime.of( 2010 , 12 , 15 , 12 , 30 ).atZone( ZoneId.systemDefault() ).toInstant() ) ) );
+        List<Flight> flights = Collections.singletonList(
+                new Flight( "number1" , new Route( "port1" , "port2" ) , "planeId2" , Date.from(
+                        LocalDateTime.of( 2010 , 12 , 15 , 10 , 30 ).atZone( ZoneId.systemDefault() ).toInstant() ) ,
+                            Date.from( LocalDateTime.of( 2010 , 12 , 15 , 12 , 30 ).atZone( ZoneId.systemDefault() )
+                                                    .toInstant() ) ) );
         assertIterableEquals( flights ,
                               dataModel.listFlightsWithPredicate( flight -> flight.getNumber().equals( "number1" ) )
                                        .collect( Collectors.toList() ) , "Find one flight" );
@@ -120,9 +118,9 @@ class DataModelTest{
         flights = IntStream.rangeClosed( 1 , 10 ).mapToObj(
                 i -> new Flight( String.format( "number%d" , i ) , routes.get( ( i - 1 ) % routes.size() ) ,
                                  String.format( "planeId%d" , i + 1 ) , Date.from(
-                        LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
+                        LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) , Date.from(
-                        LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
+                        LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) ) ).collect( Collectors.toList() );
         assertIterableEquals( flights ,
                               dataModel.listFlightsWithPredicate( flight -> true ).collect( Collectors.toList() ) ,
@@ -132,18 +130,19 @@ class DataModelTest{
                 .listFlightsWithPredicate( flight -> flight.getTravelTime().getTime() < 1000 * 60 * 60 * 4 + 1 )
                 .collect( Collectors.toList() ) , "Filter by travel time" );
 
-        flights = List.of( new Flight( String.format( "number%d" , 10 ) , routes.get( 9 % routes.size() ) ,
-                                       String.format( "planeId%d" , 10 + 1 ) , Date.from(
-                LocalDateTime.of( 2009 + 10 , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() ) ,
-                                       Date.from( LocalDateTime.of( 2009 + 10 , 12 , 15 , 11 + 10 , 30 )
-                                                               .atZone( ZoneId.of( "Europe/Moscow" ) )
-                                                               .toInstant() ) ) );
+        flights = Collections.singletonList(
+                new Flight( String.format( "number%d" , 10 ) , routes.get( 9 % routes.size() ) ,
+                            String.format( "planeId%d" , 10 + 1 ) , Date.from(
+                        LocalDateTime.of( 2009 + 10 , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
+                                     .toInstant() ) , Date.from(
+                        LocalDateTime.of( 2009 + 10 , 12 , 15 , 11 + 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
+                                     .toInstant() ) ) );
         Date startRange = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         Date endRange = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         assertIterableEquals( flights , dataModel.listFlightsWithPredicate(
-                flight -> checkDateBetweenTwoDates( flight.getDepartureDate().getTime() , startRange.getTime() ,
+                flight -> checkDateBetweenTwoDates( flight.getArrivalDate().getTime() , startRange.getTime() ,
                                                     endRange.getTime() ) ).collect( Collectors.toList() ) ,
                               "Filter departure date" );
     }
@@ -151,9 +150,9 @@ class DataModelTest{
     @Test
     void addNewFLight(){
         Date arrive = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         Date departure = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         Flight newFlight =
                 new Flight( "11" , dataModel.listRoutesWithPredicate( route -> true ).limit( 1 ).findFirst().get() ,
                             "plane" , arrive , departure );
@@ -175,9 +174,9 @@ class DataModelTest{
         assertFalse( dataModel.listFlightsWithPredicate( flight -> flight.getNumber().equals( flightNumber ) ).findAny()
                               .isPresent() , "There is no flight with this number" );
         Date arrive = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         Date departure = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() );
+                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         Flight newFlight =
                 new Flight( flightNumber , dataModel.listRoutesWithPredicate( route -> true ).findAny().get() ,
                             "plane" , arrive , departure );
@@ -192,16 +191,16 @@ class DataModelTest{
                     "Changed " + "departure " + "time to 1 " + "hour later" );
         assertThrows( FaRDateMismatchException.class , () -> dataModel.editFlight( editedFLight , null , null , null ,
                                                                                    Date.from( Instant.ofEpochMilli(
-                                                                                           editedFLight.getArriveDate()
+                                                                                           editedFLight.getArrivalDate()
                                                                                                        .getTime() -
                                                                                            1000 * 60 * 60 ) ) ) ,
                       "Can't set departure date before arrival" );
         Flight notFromDatabaseFlight = new Flight( String.format( "number%d" , 15 ) ,
                                                    dataModel.listRoutesWithPredicate( route -> true ).findAny().get() ,
                                                    String.format( "planeId%d" , 16 ) , Date.from(
-                LocalDateTime.of( 2009 + 15 , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) ).toInstant() ) ,
+                LocalDateTime.of( 2009 + 15 , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() ) ,
                                                    Date.from( LocalDateTime.of( 2009 + 15 , 12 , 15 , 23 , 30 )
-                                                                           .atZone( ZoneId.of( "Europe/Moscow" ) )
+                                                                           .atZone( ZoneId.of( "Europe/Samara" ) )
                                                                            .toInstant() ) );
         assertThrows( FaRIllegalEditedData.class ,
                       () -> dataModel.editFlight( notFromDatabaseFlight , null , null , null , null ) ,
@@ -218,36 +217,42 @@ class DataModelTest{
                                                  dataModel.listRoutesWithPredicate( route -> true ) )
                                         .collect( Collectors.toList() );
         File file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        dataModel.exportToFile( file );
-        dataModel.importFromFile( file );
-        assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
-                                   dataModel.listRoutesWithPredicate( route -> true ) ).parallel()
-                          .allMatch( data::contains ) , "All deserialize data exists in old data" );
-        Files.deleteIfExists( file.toPath() );
+        try{
+            dataModel.exportToFile( file );
+            dataModel.importFromFile( file );
+            assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
+                                       dataModel.listRoutesWithPredicate( route -> true ) ).parallel()
+                              .allMatch( data::contains ) , "All deserialize data exists in old data" );
+        }finally{
+            Files.deleteIfExists( file.toPath() );
+        }
         DataModel anotherMode = new DataModel();
-        List<Route> copyRoutes =
-                dataModel.listRoutesWithPredicate( route -> true ).limit( 1 ).collect( Collectors.toList() );
-        List<Route> newRoutes = Stream.of( new Route( "port4" , "port5" ) , new Route( "port5" , "port4" ) )
-                                      .collect( Collectors.toList() );
-        Stream.concat( copyRoutes.stream() , newRoutes.stream() ).forEach( anotherMode::addRoute );
-        List<Route> routes = anotherMode.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
-        List<Flight> copyFlights =
-                dataModel.listFlightsWithPredicate( flight -> true ).limit( 2 ).collect( Collectors.toList() );
-        List<Flight> newFlights = IntStream.rangeClosed( 10 , 15 ).mapToObj(
-                i -> new Flight( String.format( "number%d" , i ) , routes.get( ( i - 1 ) % routes.size() ) ,
-                                 String.format( "planeId%d" , i + 1 ) , Date.from(
-                        LocalDateTime.of( 2000 + i , 12 , 15 , 7 , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
-                                     .toInstant() ) , Date.from(
-                        LocalDateTime.of( 2000 + i , 12 , 15 , 8 + i , 30 ).atZone( ZoneId.of( "Europe/Moscow" ) )
-                                     .toInstant() ) ) ).collect( Collectors.toList() );
-        Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherMode::addFlight );
-        file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        anotherMode.exportToFile( file );
-        List<Serializable> copyData =
-                Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
-        assertTrue( dataModel.mergeData( file ).stream().anyMatch( copyData::contains ) ,
-                    "All copies were returned from method" );
-        Files.deleteIfExists( file.toPath() );
+        try{
+            List<Route> copyRoutes =
+                    dataModel.listRoutesWithPredicate( route -> true ).limit( 1 ).collect( Collectors.toList() );
+            List<Route> newRoutes = Stream.of( new Route( "port4" , "port5" ) , new Route( "port5" , "port4" ) )
+                                          .collect( Collectors.toList() );
+            Stream.concat( copyRoutes.stream() , newRoutes.stream() ).forEach( anotherMode::addRoute );
+            List<Route> routes = anotherMode.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
+            List<Flight> copyFlights =
+                    dataModel.listFlightsWithPredicate( flight -> true ).limit( 2 ).collect( Collectors.toList() );
+            List<Flight> newFlights = IntStream.rangeClosed( 10 , 15 ).mapToObj(
+                    i -> new Flight( String.format( "number%d" , i ) , routes.get( ( i - 1 ) % routes.size() ) ,
+                                     String.format( "planeId%d" , i + 1 ) , Date.from(
+                            LocalDateTime.of( 2000 + i , 12 , 15 , 7 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
+                                         .toInstant() ) , Date.from(
+                            LocalDateTime.of( 2000 + i , 12 , 15 , 8 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
+                                         .toInstant() ) ) ).collect( Collectors.toList() );
+            Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherMode::addFlight );
+            file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
+            anotherMode.exportToFile( file );
+            List<Serializable> copyData =
+                    Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
+            assertTrue( dataModel.mergeData( file ).stream().anyMatch( copyData::contains ) ,
+                        "All copies were returned from method" );
+        }finally{
+            Files.deleteIfExists( file.toPath() );
+        }
     }
 
     @Test
@@ -278,11 +283,10 @@ class DataModelTest{
         List<Route> databaseRoutes = dataModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
         List<Flight> flights = IntStream.range( 11 , 23 ).mapToObj(
                 i -> new Flight( "number" + i , databaseRoutes.get( i % databaseRoutes.size() ) ,
-                                 "planeID" + ( i + 15 ) ,
-                                 Date.from( Instant.ofEpochMilli( Instant.now().toEpochMilli()
-                                                                  - 1000L * 60 * 60 * 24 * addingFlights ) ) ,
-                                 Date.from( Instant.ofEpochMilli( Instant.now().toEpochMilli()
-                                                                  + 1000L * 60 * 60 * 24 * addingFlights ) ) ) )
+                                 "planeID" + ( i + 15 ) , Date.from(
+                        Instant.ofEpochMilli( Instant.now().toEpochMilli() - 1000L * 60 * 60 * 24 * addingFlights ) ) ,
+                                 Date.from( Instant.ofEpochMilli(
+                                         Instant.now().toEpochMilli() + 1000L * 60 * 60 * 24 * addingFlights ) ) ) )
                                         .limit( addingFlights ).collect( Collectors.toList() );
         CountDownLatch  flightsLatch   = new CountDownLatch( addingFlights );
         ExecutorService flightsService = Executors.newFixedThreadPool( addingFlights );

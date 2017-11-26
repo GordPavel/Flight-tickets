@@ -15,12 +15,12 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , Date departureDate , Date arraivalDate ){
+    public Flight( String number , Route route , String planeID , Date departureDate , Date arrivalDate ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
         this.departureDate = departureDate;
-        this.arraivalDate = arraivalDate;
+        this.arrivalDate = arrivalDate;
     }
 
     /**
@@ -78,27 +78,27 @@ public class Flight implements Serializable, Cloneable{
     /**
      Stores date and time, when plane have to land
      */
-    private Date arraivalDate;
+    private Date arrivalDate;
 
-    public Date getArraivalDate(){
-        return arraivalDate;
+    public Date getArrivalDate(){
+        return arrivalDate;
     }
 
-    void setArraivalDate(Date date ){
-        this.arraivalDate = date;
+    void setArrivalDate( Date date ){
+        this.arrivalDate = date;
     }
 
     /**
-     @return countable field, difference between arraivalDate and departureDate
+     @return countable field, difference between arrivalDate and departureDate
      */
     public Date getTravelTime(){
-        return Date.from( Instant.ofEpochMilli( arraivalDate.getTime() - departureDate.getTime() ) );
+        return Date.from( Instant.ofEpochMilli( arrivalDate.getTime() - departureDate.getTime() ) );
     }
 
     @Override
     public int hashCode(){
         return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ departureDate.hashCode() ^
-               arraivalDate.hashCode();
+               arrivalDate.hashCode();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class Flight implements Serializable, Cloneable{
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
                planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate) &&
-               arraivalDate.equals( flight.arraivalDate);
+               arrivalDate.equals( flight.arrivalDate );
     }
 
     @Override
@@ -117,7 +117,7 @@ public class Flight implements Serializable, Cloneable{
         clone.route = ( Route ) this.route.clone();
         clone.planeID = this.planeID;
         clone.departureDate = ( Date ) this.departureDate.clone();
-        clone.arraivalDate = ( Date ) this.arraivalDate.clone();
+        clone.arrivalDate = ( Date ) this.arrivalDate.clone();
         return clone;
     }
 
@@ -135,7 +135,7 @@ public class Flight implements Serializable, Cloneable{
         LocalDateTime departureLocalDate =
                 LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
         LocalDateTime arrivalLocalDate =
-                LocalDateTime.ofInstant( arraivalDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
+                LocalDateTime.ofInstant( arrivalDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
         return String
                 .format( "Flight number %s, takes at %s from %s, launches at %s at %s, flies by %s plane" , number ,
                         departureLocalDate.format( formatter ) , route.getFrom() ,
