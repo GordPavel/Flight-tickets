@@ -1,7 +1,6 @@
 package model;
 
 import exceptions.*;
-import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ class DataModelTest{
         assertThrows( FaRSameNameException.class , () -> dataModel.addRoute( addition ) ,
                       "Can't add this route more times" );
         assertThrows( FaRUnacceptableSymbolException.class ,
-                      () -> dataModel.addRoute( new Route( "port!4" , "port6" ) ) , "Illegal symbols" );
+                      () -> dataModel.addRoute( new Route( "port*4" , "port6" ) ) , "Illegal symbols" );
     }
 
     @Test
@@ -142,9 +141,8 @@ class DataModelTest{
         Date endRange = Date.from(
                 LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
         assertIterableEquals( flights , dataModel.listFlightsWithPredicate(
-                flight -> checkDateBetweenTwoDates( flight.getArriveDate().getTime() , startRange.getTime() ,
-                                                    endRange.getTime() ) ).collect( Collectors.toList() ) ,
-                              "Filter departure date" );
+                flight -> checkDateBetweenTwoDates( flight.getArriveDate() , startRange , endRange ) )
+                                                 .collect( Collectors.toList() ) , "Filter departure date" );
     }
 
 
@@ -209,8 +207,9 @@ class DataModelTest{
                       "Must take previous version from database" );
     }
 
-    private Boolean checkDateBetweenTwoDates( Long actual , Long start , Long end ){
-        return start <= actual && actual < end;
+    private Boolean checkDateBetweenTwoDates( Date actual , Date startRange , Date endRange ){
+        return !( startRange != null ? startRange : Date.from( Instant.ofEpochMilli( 0L ) ) ).after( actual ) &&
+               actual.before( endRange != null ? endRange : Date.from( Instant.ofEpochMilli( Long.MAX_VALUE ) ) );
     }
 
     @Test

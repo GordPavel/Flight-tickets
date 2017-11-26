@@ -7,14 +7,18 @@ import model.Route;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class SearchEngineTest{
 
@@ -39,7 +43,34 @@ class SearchEngineTest{
 
     @Test
     void searchRoutes(){
-        searchEngine.findRoute( "ort" , "3 " ).forEach( System.out::println );
+        assertIterableEquals( dataModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() ) ,
+                              searchEngine.findRoute( "port" , null ).collect( Collectors.toList() ) , "All routes" );
+        assertIterableEquals( Arrays.asList( new Route( "port11" , "port2" ) , new Route( "port1" , "port3" ) ) ,
+                              searchEngine.findRoute( "port1" , null ).collect( Collectors.toList() ) ,
+                              "Starts with port1" );
+        Route newRoute = new Route( "port15" , "port1" );
+        dataModel.addRoute( newRoute );
+        assertEquals( newRoute , searchEngine.findRoute( "port15" , "port1" ).findFirst().get() , "Find new route" );
     }
 
+    @Test
+    void searchFlights(){
+        assertIterableEquals(
+                dataModel.listFlightsWithPredicate( flight -> flight.getRoute().getFrom().equals( "port3" ) )
+                         .collect( Collectors.toList() ) ,
+                searchEngine.findFlight( null , "port3" , null , null , null , null , null , null )
+                            .collect( Collectors.toList() ) , "Find by departure airport" );
+        Flight flight = dataModel.listFlightsWithPredicate( flight1 -> true ).findAny()
+                                 .orElseThrow( IllegalStateException::new );
+        assertEquals( flight , searchEngine.findFlight( null , null , null , null , Date.from(
+                Instant.ofEpochMilli( flight.getDepartureDate().getTime() - 86400000L ) ) , Date.from(
+                Instant.ofEpochMilli( flight.getDepartureDate().getTime() + 86400000L ) ) , null , null ).findFirst()
+                                           .get() , "Search by departure time in one day range" );
+        List<Flight> flights =
+                dataModel.listFlightsWithPredicate( flight1 -> flight1.getArriveDate().after( flight.getArriveDate() ) )
+                         .collect( Collectors.toList() );
+        assertIterableEquals( flights , searchEngine
+                .findFlight( null , null , null , null , null , null , flight.getArriveDate() , null )
+                .collect( Collectors.toList() ) );
+    }
 }

@@ -89,7 +89,7 @@ public class DataModel{
         if( flight.getArriveDate().before( flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?*!]]*" );
         if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -141,7 +141,7 @@ public class DataModel{
                 .before( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
         if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -195,7 +195,7 @@ public class DataModel{
      @throws FaRSameNameException if new route's arrival and departure points duplicate someone another in database
      */
     public Boolean addRoute( Route route ){
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
         if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -236,7 +236,7 @@ public class DataModel{
      another
      */
     public Boolean editRoute( Route route , String newArrivalAirport , String newDestinationAirport ){
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
         if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }

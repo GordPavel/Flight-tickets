@@ -65,19 +65,6 @@ public class Flight implements Serializable, Cloneable{
     }
 
     /**
-     Stores date and time, when plane have to launch
-     */
-    private Date arriveDate;
-
-    public Date getArriveDate(){
-        return arriveDate;
-    }
-
-    void setArriveDate( Date date ){
-        this.arriveDate = date;
-    }
-
-    /**
      Stores date and time, when plane have to take off
      */
     private Date departureDate;
@@ -88,6 +75,19 @@ public class Flight implements Serializable, Cloneable{
 
     void setDepartureDate( Date date ){
         this.departureDate = date;
+    }
+
+    /**
+     Stores date and time, when plane have to launch
+     */
+    private Date arriveDate;
+
+    public Date getArriveDate(){
+        return arriveDate;
+    }
+
+    void setArriveDate( Date date ){
+        this.arriveDate = date;
     }
 
     /**

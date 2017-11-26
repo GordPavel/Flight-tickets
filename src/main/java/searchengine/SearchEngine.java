@@ -1,13 +1,14 @@
 package searchengine;
 
-import model.*;
+import model.DataModel;
+import model.Flight;
+import model.Route;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /*
@@ -37,32 +38,32 @@ public class SearchEngine{
      @return all routes that matches this requirements
      */
     public Stream<Route> findRoute( String from , String to ){
-        return data.listRoutesWithPredicate(
-                route -> ( from == null || Pattern.matches( ".*" + from + ".*" , route.getFrom() ) ) &&
-                         ( to == null || Pattern.matches( ".*" + to + ".*" , route.getTo() ) ) );
+        return data.listRoutesWithPredicate( route -> generatePredicate( from ).test( route.getFrom() ) &&
+                                                      generatePredicate( to ).test( route.getTo() ) );
     }
 
     public Stream<Flight> findFlight( String number , String from , String to , String plane ,
                                       Date startDepartureDateRange , Date endDepartureDateRange ,
                                       Date startArriveDateRange , Date endArriveDateRange ){
-        return data.listFlightsWithPredicate(
-                flight -> ( number == null || Pattern.matches( ".*" + number + ".*" , flight.getNumber() ) ) &&
-                          ( from == null || Pattern.matches( ".*" + from + ".*" , flight.getRoute().getFrom() ) ) &&
-                          ( to == null || Pattern.matches( ".*" + to + ".*" , flight.getRoute().getTo() ) ) &&
-                          ( plane == null || Pattern.matches( ".*" + plane + ".*" , flight.getPlaneID() ) ) &&
-                          checkDateBetweenTwoDates( flight.getDepartureDate().getTime() ,
-                                                    startDepartureDateRange != null ? startArriveDateRange.getTime() :
-                                                    Date.from( Instant.MIN ).getTime() ,
-                                                    endDepartureDateRange != null ? endDepartureDateRange.getTime() :
-                                                    Date.from( Instant.MAX ).getTime() ) &&
-                          checkDateBetweenTwoDates( flight.getDepartureDate().getTime() ,
-                                                    startArriveDateRange != null ? startArriveDateRange.getTime() :
-                                                    Date.from( Instant.MIN ).getTime() ,
-                                                    endArriveDateRange != null ? endArriveDateRange.getTime() :
-                                                    Date.from( Instant.MAX ).getTime() ) );
+        return data.listFlightsWithPredicate( flight -> generatePredicate( number ).test( flight.getNumber() ) &&
+                                                        generatePredicate( from ).test( flight.getRoute().getFrom() ) &&
+                                                        generatePredicate( to ).test( flight.getRoute().getTo() ) &&
+                                                        generatePredicate( plane ).test( flight.getPlaneID() ) &&
+                                                        checkDateBetweenTwoDates( flight.getDepartureDate() ,
+                                                                                  startDepartureDateRange ,
+                                                                                  endDepartureDateRange ) &&
+                                                        checkDateBetweenTwoDates( flight.getArriveDate() ,
+                                                                                  startArriveDateRange ,
+                                                                                  endArriveDateRange ) );
     }
 
-    private Boolean checkDateBetweenTwoDates( Long actual , Long start , Long end ){
-        return start <= actual && actual < end;
+    private Predicate<String> generatePredicate( String from ){
+        return Optional.ofNullable( from ).map( s -> Pattern.compile( ".*" + s + ".*" ).asPredicate() )
+                       .orElse( s -> true );
+    }
+
+    private Boolean checkDateBetweenTwoDates( Date actual , Date startRange , Date endRange ){
+        return !( startRange != null ? startRange : Date.from( Instant.ofEpochMilli( 0L ) ) ).after( actual ) &&
+               actual.before( endRange != null ? endRange : Date.from( Instant.ofEpochMilli( Long.MAX_VALUE ) ) );
     }
 }
