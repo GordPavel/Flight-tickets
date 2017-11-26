@@ -9,15 +9,15 @@
     <children>
         <TextField layoutX="170.0" layoutY="80.0" prefHeight="25.0" prefWidth="150.0"/>
         <Button layoutX="43.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
-                text="Accept"/>
+                text="Accept" focusTraversable="false"/>
         <Label layoutX="95.0" layoutY="20.0" prefHeight="27.0" prefWidth="355.0"
                text="Please enter new data for a chosen route.">
             <font>
                 <Font name="System Bold Italic" size="18.0"/>
             </font>
         </Label>
-        <Button layoutX="382.0" layoutY="244.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
-                text="Cancel"/>
+        <Button fx:id="cancelEditRoutesButton" layoutX="382.0" layoutY="244.0" mnemonicParsing="false"  onAction="#handleCancelAction" prefHeight="25.0" prefWidth="75.0"
+                text="Cancel" />
         <TextField layoutX="170.0" layoutY="145.0" prefHeight="17.0" prefWidth="149.0"/>
         <Label layoutX="45.0" layoutY="85.0" prefHeight="17.0" prefWidth="64.0" text="Departure:">
             <font>
@@ -30,6 +30,6 @@
             </font>
         </Label>
         <Button layoutX="380.0" layoutY="145.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
-                text="Clear"/>
+                text="Clear" focusTraversable="false"/>
     </children>
 </AnchorPane>

@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -26,9 +27,11 @@ public class RoutesFlightsOverviewController{
     public Button editFlightButton;
     public Button searchFlightButton;
     public Button deleteFlightButton;
+    public TextField textField1;
 
 
     public void handleAddRouteButton( ActionEvent actionEvent ){
+
         Parent addRouteWindow;
         Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         try{
@@ -47,6 +50,8 @@ public class RoutesFlightsOverviewController{
             oldStage.setOpacity( 0.9 );
             popUp.showAndWait();
             oldStage.setOpacity( 1 );
+
+
 
         }catch( IOException e ){
             e.printStackTrace();
@@ -153,4 +158,6 @@ public class RoutesFlightsOverviewController{
             e.printStackTrace();
         }
     }
+
+    
 }

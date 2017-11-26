@@ -14,11 +14,14 @@ public class Main extends Application{
         primaryStage.setTitle( "Routes and flights" );
         primaryStage.setScene( new Scene( root , 700 , 500 ) );
         primaryStage.setResizable( false );
+        setUserAgentStylesheet(STYLESHEET_CASPIAN);
         primaryStage.show();
+
     }
 
 
     public static void main( String[] args ){
+
         launch( args );
     }
 }
