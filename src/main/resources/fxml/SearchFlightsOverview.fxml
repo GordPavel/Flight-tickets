@@ -48,7 +48,7 @@
             </font>
         </Label>
         <TextField fx:id="flightTimeFromTextField" layoutX="381.0" layoutY="105.0" prefHeight="25.0" prefWidth="60.0" />
-        <ChoiceBox fx:id="RouteBox" layoutX="150.0" layoutY="340.0" prefHeight="22.0" prefWidth="145.0" />
+        <ChoiceBox fx:id="routeBox" layoutX="150.0" layoutY="340.0" prefHeight="22.0" prefWidth="145.0" />
         <Label layoutX="30.0" layoutY="345.0" prefHeight="17.0" prefWidth="75.0" text="Route:">
             <font>
                 <Font name="System Italic" size="12.0" />

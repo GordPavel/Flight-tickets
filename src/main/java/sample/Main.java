@@ -46,8 +46,6 @@ public class Main extends Application{
         model.addRoute(route2);
         model.addRoute(route3);
 
-        System.out.println(flight1);
-
         model.addFlight(flight1);
         model.addFlight(flight2);
         model.addFlight(flight3);

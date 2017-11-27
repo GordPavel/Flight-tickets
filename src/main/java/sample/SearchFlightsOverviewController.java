@@ -5,56 +5,60 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.Route;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 //import java.awt.*;
 
+
+/**
+ * Controller for flight search view
+ * Allows to search flights in DataModel with params
+ *
+ */
 public class SearchFlightsOverviewController{
 
+
+    /**
+     * Connecting to FXML items
+     */
     @FXML
-    TextField numberField;
+    TextField numberField;                      //text field, pattern string for searching by flight number
     @FXML
-    TextField planeID;
+    TextField planeID;                          //text field, pattern string for searching by plain id
     @FXML
-    TextField flightTimeToTextField;
+    TextField flightTimeToTextField;            //text field, converting to date for searching by travel time (less then this)
     @FXML
-    TextField flightTimeFromTextField;
+    TextField flightTimeFromTextField;          //text field, converting to date for searching by travel time (more then this)
     @FXML
-    TextField departureDateFromTextField;
+    TextField departureDateFromTextField;       //text field, add time component to departureFrom date
     @FXML
-    TextField departureDateToTextField;
+    TextField departureDateToTextField;         //text field, add time component to departureTo date
     @FXML
-    TextField arrivingDateFromTextField;
+    TextField arrivingDateFromTextField;        //text field, add time component to arrivingFrom date
     @FXML
-    TextField arrivingDateToTextField;
+    TextField arrivingDateToTextField;          //text field, add time component to arrivingTo date
     @FXML
-    DatePicker arrivingDateFromDatePicker;
+    DatePicker arrivingDateFromDatePicker;      //DatePicker, date for searching by arriving date (more then this or exact if arrivingTo==null)
     @FXML
-    DatePicker arrivingDateToDatePicker;
+    DatePicker arrivingDateToDatePicker;        //DatePicker, date for searching by arriving date (less then this)
     @FXML
-    DatePicker departureDateFromDatePicker;
+    DatePicker departureDateFromDatePicker;     //DatePicker, date for searching by departure date (more then this or exact if departureTo==null)
     @FXML
-    DatePicker departureDateToDatePicker;
+    DatePicker departureDateToDatePicker;       //DatePicker, date for searching by departure date (less then this)
     @FXML
-    ChoiceBox<Route> RouteBox;
+    ChoiceBox<Route> routeBox;                  //ChoiceBox with routes, existing in DataModel, search by route
     @FXML
-    Button searchSearchFlightsButton;
+    Button searchSearchFlightsButton;           //Search button
     @FXML
-    CheckBox flightTimeCheckBox;
+    CheckBox flightTimeCheckBox;                //CheckBox, if checked - search will use travelDate
 
 
 
@@ -62,19 +66,31 @@ public class SearchFlightsOverviewController{
         Stage stage = (Stage) ((Parent) event.getSource()).getScene().getWindow();
         stage.close();
     }
+
+    /**
+     * Cancel button, close window
+     * @param actionEvent
+     */
     @FXML
     public void handleCancelAction(ActionEvent actionEvent) {
         closeWindow(actionEvent);
 
     }
+
+    /**
+     * Clear button. Clears all fields
+     * @param actionEvent
+     */
     @FXML
     public void handleClearAction(ActionEvent actionEvent) {
         departureDateFromDatePicker.setValue(null);
         departureDateToDatePicker.setValue(null);
         arrivingDateToDatePicker.setValue(null);
         arrivingDateFromDatePicker.setValue(null);
+        routeBox.setValue(null);
         numberField.clear();
         planeID.clear();
+        flightTimeCheckBox.setSelected(false);
         departureDateToTextField.setText("00:00");
         departureDateFromTextField.setText("00:00");
         arrivingDateToTextField.setText("00:00");
@@ -84,72 +100,71 @@ public class SearchFlightsOverviewController{
 
 
     }
+
+    /**
+     * Search button. Collect all parameters from window and generate request to search in flights, stored in model
+     * @param event
+     */
     @FXML
     public void handleSearchAction(ActionEvent event){
 
+
+        /**
+         * converting dates for search
+         */
         DateFormat format = new SimpleDateFormat("dd.MM.yyyy hh:mm");
         DateFormat travelFormat = new SimpleDateFormat("hh:mm");
 
         Date dfDate=null;
 
-        if (departureDateFromDatePicker.getValue()!=null)
-        {
+        if (departureDateFromDatePicker.getValue()!=null) {
             try {
                 dfDate = format.parse(departureDateFromDatePicker.getEditor().getText()+" "+departureDateFromTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
         }
 
         Date dtDate=null;
 
-        if (departureDateToDatePicker.getValue()!=null)
-        {
+        if (departureDateToDatePicker.getValue()!=null) {
             try {
                 dtDate = format.parse(departureDateToDatePicker.getEditor().getText()+" "+departureDateToTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
         }
 
         Date afDate=null;
 
-        if (arrivingDateFromDatePicker.getValue()!=null)
-        {
+        if (arrivingDateFromDatePicker.getValue()!=null) {
             try {
                 afDate = format.parse(arrivingDateFromDatePicker.getEditor().getText()+" "+arrivingDateFromTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
         }
 
         Date atDate=null;
 
-        if (arrivingDateToDatePicker.getValue()!=null)
-        {
+        if (arrivingDateToDatePicker.getValue()!=null) {
             try {
                 atDate = format.parse(arrivingDateToDatePicker.getEditor().getText()+" "+arrivingDateToTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
         }
 
         Date tfDate=null;
 
-
             try {
                 tfDate = travelFormat.parse(flightTimeFromTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
 
@@ -159,24 +174,23 @@ public class SearchFlightsOverviewController{
             try {
                 ttDate = travelFormat.parse(flightTimeToTextField.getText());
             }
-            catch (ParseException e)
-            {
+            catch (ParseException e) {
 
             }
 
-        System.out.println(RouteBox.getValue());
-        System.out.println(Main.getEngine().searchFlight(numberField.getText(),RouteBox.getValue(),"","", planeID.getText(),
-            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
 
+        System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
+            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
 
     }
 
 
-
-
+    /**
+     * initialization of view
+     */
     @FXML
     public void initialize() {
-        RouteBox.getItems().addAll(Main.getEngine().searchRoute("*","*"));
+        routeBox.getItems().addAll(Main.getEngine().searchRoute("*","*"));
         departureDateToTextField.setText("00:00");
         departureDateFromTextField.setText("00:00");
         arrivingDateToTextField.setText("00:00");
@@ -264,7 +278,11 @@ public class SearchFlightsOverviewController{
 
     }
 
+    /**
+     * Correct time format checking. If any time is incorrect - search button disables
+     */
     private void checkTimeTextFields(){
+
         Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
         Pattern travelPattern = Pattern.compile("[0-9][0-9][:][0-5][0-9]");
         if (pattern.matcher(arrivingDateToTextField.getCharacters()).matches()
@@ -272,8 +290,7 @@ public class SearchFlightsOverviewController{
                 &&pattern.matcher(departureDateFromTextField.getCharacters()).matches()
                 &&pattern.matcher(departureDateToTextField.getCharacters()).matches()
                 &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches()
-                &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches())
-        {
+                &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches()) {
             searchSearchFlightsButton.setDisable(false);
         }
         else {
