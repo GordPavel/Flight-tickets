@@ -123,6 +123,9 @@ public class Flight implements Serializable, Cloneable{
 
 
     /**
+     Парикмахер обращается к клиенту : Вам висок косой?
+     Клиент: Нет, машинкой.
+
      Looks like "Flight number (number), takes at (dd.MM.yyyy HH:mm) from (arrival airportId), launches at
      (dd.MM.yyyy HH:mm) at (departure airportId),
      flies by (planeId) plane"

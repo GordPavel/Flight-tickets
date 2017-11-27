@@ -104,6 +104,15 @@ class DataModelTest{
                       "New data can't duplicate another route" );
     }
 
+
+    /*
+    На собеседовании:
+    — А у Вас есть какое нибудь хобби?
+    — Вообще-то есть парочка.
+    Достает чучело свиньи из кармана.
+    — Таксидермия охуенная тема!
+    — И некромантия, - добавляет свинья.
+     */
     @Test
     void listAllFlights(){
         List<Flight> flights = Collections.singletonList(
@@ -112,8 +121,7 @@ class DataModelTest{
                             Date.from( LocalDateTime.of( 2010 , 12 , 15 , 12 , 30 ).atZone( ZoneId.systemDefault() )
                                                     .toInstant() ) ) );
         assertIterableEquals( flights ,
-                              dataModel.listFlightsWithPredicate( flight -> flight.getNumber().equals( "number1" ) )
-                                       .collect( Collectors.toList() ) , "Find one flight" );
+                              dataModel.listFlightsWithPredicate( flight -> flight.getNumber().equals( "number1" ) ).collect( Collectors.toList() ) , "Find one flight" );
         List<Route> routes = dataModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
         flights = IntStream.rangeClosed( 1 , 10 ).mapToObj(
                 i -> new Flight( String.format( "number%d" , i ) , routes.get( ( i - 1 ) % routes.size() ) ,
@@ -126,9 +134,8 @@ class DataModelTest{
                               dataModel.listFlightsWithPredicate( flight -> true ).collect( Collectors.toList() ) ,
                               "Check all flights" );
         flights = dataModel.listFlightsWithPredicate( flight -> true ).limit( 3 ).collect( Collectors.toList() );
-        assertIterableEquals( flights , dataModel
-                .listFlightsWithPredicate( flight -> flight.getTravelTime().getTime() < 1000 * 60 * 60 * 4 + 1 )
-                .collect( Collectors.toList() ) , "Filter by travel time" );
+        assertIterableEquals( flights , dataModel.listFlightsWithPredicate( flight -> flight.getTravelTime().getTime() < 1000 * 60 * 60 * 4 + 1 )
+                                                 .collect( Collectors.toList() ) , "Filter by travel time" );
 
         flights = Collections.singletonList(
                 new Flight( String.format( "number%d" , 10 ) , routes.get( 9 % routes.size() ) ,
@@ -255,6 +262,12 @@ class DataModelTest{
         }
     }
 
+
+    /*
+    У Змея Горыныча одна голова спит , а две тихо базарят:
+    - Слушай ,этот козел чо - в пидоры подался?
+    - Ага..А в жопу нас всех ебут!
+     */
     @Test
     void concurrency() throws InterruptedException, ExecutionException{
         int    addingRoutes = 2;
@@ -282,12 +295,10 @@ class DataModelTest{
         int         addingFlights  = 12;
         List<Route> databaseRoutes = dataModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
         List<Flight> flights = IntStream.range( 11 , 23 ).mapToObj(
-                i -> new Flight( "number" + i , databaseRoutes.get( i % databaseRoutes.size() ) ,
-                                 "planeID" + ( i + 15 ) , Date.from(
+                i -> new Flight( "number" + i , databaseRoutes.get( i % databaseRoutes.size() ) , "planeID" + ( i + 15 ) , Date.from(
                         Instant.ofEpochMilli( Instant.now().toEpochMilli() - 1000L * 60 * 60 * 24 * addingFlights ) ) ,
                                  Date.from( Instant.ofEpochMilli(
-                                         Instant.now().toEpochMilli() + 1000L * 60 * 60 * 24 * addingFlights ) ) ) )
-                                        .limit( addingFlights ).collect( Collectors.toList() );
+                                         Instant.now().toEpochMilli() + 1000L * 60 * 60 * 24 * addingFlights ) ) ) ).limit( addingFlights ).collect( Collectors.toList() );
         CountDownLatch  flightsLatch   = new CountDownLatch( addingFlights );
         ExecutorService flightsService = Executors.newFixedThreadPool( addingFlights );
         flightsService.invokeAll( flights.stream().map( ( Function<Flight, Callable<Void>> ) flight -> () -> {

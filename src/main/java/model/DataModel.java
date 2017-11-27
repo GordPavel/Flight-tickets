@@ -105,6 +105,17 @@ public class DataModel{
         return flights.addIfAbsent( flight );
     }
 
+     /*         ^          ^
+     *		\______    ______/
+     *       \  * \   / *   /
+     *        -----   ------           /----\
+     *              ||               -< Boo! |
+     *             /__\                \----/
+     *       \______________/
+     *        \/\/\/\/\/\/\/
+     *         ------------
+     */
+
     /**
      @param number number of flight to be removed
 
@@ -140,6 +151,7 @@ public class DataModel{
         Optional<Flight> flightOptional =
                 flights.stream().filter( flight1 -> flight1.getNumber().equals( flight.getNumber() ) ).findAny();
         if( !flightOptional.isPresent() ){
+//            This exception should never happen, if it does gods help us.
             throw new FaRIllegalEditedData(
                     String.format( "Flight with number %s doesn't consists" , flight.getNumber() ) );
         }
