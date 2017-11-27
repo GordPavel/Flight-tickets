@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -12,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="570.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.EditFlightsOverviewController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="570.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.SearchFlightsOverviewController">
     <children>
         <Label layoutX="30.0" layoutY="85.0" prefHeight="10.0" prefWidth="60.0" text="Number:">
             <font>
@@ -24,11 +20,11 @@
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <TextField layoutX="150.0" layoutY="80.0" />
-        <TextField layoutX="150.0" layoutY="130.0" />
-        <Button focusTraversable="false" layoutX="430.0" layoutY="395.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Search" />
+        <TextField fx:id="numberField" layoutX="150.0" layoutY="80.0" />
+        <TextField fx:id="planeID" layoutX="150.0" layoutY="130.0" />
+        <Button fx:id="searchSearchFlightsButton" focusTraversable="false" layoutX="430.0" layoutY="395.0" mnemonicParsing="false" onAction="#handleSearchAction" prefHeight="25.0" prefWidth="75.0" text="Search" />
         <Button fx:id="cancelSearchFlightsButton" layoutX="40.0" layoutY="395.0" mnemonicParsing="false" onAction="#handleCancelAction" prefHeight="25.0" prefWidth="75.0" text="Cancel" />
-        <Label layoutX="30.0" layoutY="245.0" prefHeight="17.0" prefWidth="75.0" text="ArrivingDate." underline="true">
+        <Label layoutX="30.0" layoutY="265.0" prefHeight="17.0" prefWidth="75.0" text="ArrivingDate." underline="true">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
@@ -43,38 +39,38 @@
                 <Font name="System Bold Italic" size="18.0" />
             </font>
         </Label>
-        <DatePicker layoutX="185.0" layoutY="180.0" prefHeight="25.0" prefWidth="85.0" />
-        <DatePicker layoutX="185.0" layoutY="240.0" prefHeight="25.0" prefWidth="85.0" />
+        <DatePicker fx:id="departureDateFromDatePicker" layoutX="185.0" layoutY="180.0" prefHeight="25.0" prefWidth="113.0" />
+        <DatePicker fx:id="arrivingDateFromDatePicker" layoutX="185.0" layoutY="260.0" prefHeight="25.0" prefWidth="113.0" />
         <Label layoutX="330.0" layoutY="70.0" prefHeight="17.0" prefWidth="86.0" text="Flight time:" underline="true">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <TextField layoutX="381.0" layoutY="105.0" prefHeight="25.0" prefWidth="60.0" />
-        <ChoiceBox fx:id="box" layoutX="150.0" layoutY="315.0" prefHeight="22.0" prefWidth="145.0" />
-        <Label layoutX="30.0" layoutY="320.0" prefHeight="17.0" prefWidth="75.0" text="Route:">
+        <TextField fx:id="flightTimeFromTextField" layoutX="381.0" layoutY="105.0" prefHeight="25.0" prefWidth="60.0" />
+        <ChoiceBox fx:id="RouteBox" layoutX="150.0" layoutY="340.0" prefHeight="22.0" prefWidth="145.0" />
+        <Label layoutX="30.0" layoutY="345.0" prefHeight="17.0" prefWidth="75.0" text="Route:">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <DatePicker layoutX="320.0" layoutY="180.0" prefHeight="25.0" prefWidth="85.0" />
+        <DatePicker fx:id="departureDateToDatePicker" layoutX="185.0" layoutY="218.0" prefHeight="25.0" prefWidth="113.0" />
         <Label layoutX="140.0" layoutY="185.0" prefHeight="17.0" prefWidth="31.0" text="from:">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <Label layoutX="290.0" layoutY="185.0" prefHeight="17.0" prefWidth="19.0" text="to:">
+        <Label layoutX="155.0" layoutY="223.0" prefHeight="17.0" prefWidth="19.0" text="to:">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <DatePicker layoutX="320.0" layoutY="240.0" prefHeight="25.0" prefWidth="85.0" />
-        <Label layoutX="140.0" layoutY="245.0" prefHeight="17.0" prefWidth="31.0" text="from:">
+        <DatePicker fx:id="arrivingDateToDatePicker" layoutX="185.0" layoutY="295.0" prefHeight="25.0" prefWidth="113.0" />
+        <Label layoutX="140.0" layoutY="265.0" prefHeight="17.0" prefWidth="31.0" text="from:">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
         </Label>
-        <Label layoutX="290.0" layoutY="245.0" prefHeight="17.0" prefWidth="19.0" text="to:">
+        <Label layoutX="155.0" layoutY="300.0" prefHeight="17.0" prefWidth="19.0" text="to:">
             <font>
                 <Font name="System Italic" size="12.0" />
             </font>
@@ -88,7 +84,11 @@
          <font>
             <Font name="System Italic" size="12.0" />
          </font></Label>
-      <TextField layoutX="480.0" layoutY="105.0" prefHeight="25.0" prefWidth="60.0" />
-      <Button layoutX="430.0" layoutY="315.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Clear" focusTraversable="false"/>
+      <TextField fx:id="flightTimeToTextField" layoutX="480.0" layoutY="105.0" prefHeight="25.0" prefWidth="60.0" />
+      <Button fx:id="ClearSearchFlightsButton" focusTraversable="false" layoutX="430.0" layoutY="340.0" mnemonicParsing="false" onAction="#handleClearAction" prefHeight="25.0" prefWidth="75.0" text="Clear" />
+      <TextField fx:id="departureDateFromTextField" layoutX="337.0" layoutY="180.0" prefHeight="25.0" prefWidth="86.0" />
+      <TextField fx:id="departureDateToTextField" layoutX="337.0" layoutY="218.0" prefHeight="25.0" prefWidth="86.0" />
+      <TextField fx:id="arrivingDateFromTextField" layoutX="337.0" layoutY="261.0" prefHeight="25.0" prefWidth="86.0" />
+      <TextField fx:id="arrivingDateToTextField" layoutX="337.0" layoutY="295.0" prefHeight="25.0" prefWidth="86.0" />
     </children>
 </AnchorPane>

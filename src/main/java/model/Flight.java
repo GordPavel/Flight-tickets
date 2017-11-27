@@ -1,12 +1,11 @@
 package model;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  Entity to store data about each flight.
@@ -16,12 +15,12 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , Date arriveDate , Date departureDate ){
+    public Flight( String number , Route route , String planeID , Date departureDate , Date arrivalDate ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
-        this.arriveDate = arriveDate;
         this.departureDate = departureDate;
+        this.arrivalDate = arrivalDate;
     }
 
     /**
@@ -46,7 +45,7 @@ public class Flight implements Serializable, Cloneable{
         return route;
     }
 
-    public void setRoute( Route route ){
+    void setRoute( Route route ){
         this.route = route;
     }
 
@@ -59,25 +58,12 @@ public class Flight implements Serializable, Cloneable{
         return planeID;
     }
 
-    public void setPlaneID( String planeID ){
+    void setPlaneID( String planeID ){
         this.planeID = planeID;
     }
 
     /**
      Stores date and time, when plane have to take off
-     */
-    private Date arriveDate;
-
-    public Date getArriveDate(){
-        return arriveDate;
-    }
-
-    public void setArriveDate( Date date ){
-        this.arriveDate = date;
-    }
-
-    /**
-     Stores date and time, when plane have to launch
      */
     private Date departureDate;
 
@@ -85,21 +71,34 @@ public class Flight implements Serializable, Cloneable{
         return departureDate;
     }
 
-    public void setDepartureDate( Date date ){
+    void setDepartureDate(Date date ){
         this.departureDate = date;
     }
 
     /**
-     @return countable field, difference between departureDate and arriveDate
+     Stores date and time, when plane have to land
+     */
+    private Date arrivalDate;
+
+    public Date getArrivalDate(){
+        return arrivalDate;
+    }
+
+    void setArrivalDate( Date date ){
+        this.arrivalDate = date;
+    }
+
+    /**
+     @return countable field, difference between arrivalDate and departureDate
      */
     public Date getTravelTime(){
-        return Date.from( departureDate.toInstant().minusMillis( arriveDate.getTime() ) );
+        return Date.from( Instant.ofEpochMilli( arrivalDate.getTime() - departureDate.getTime() ) );
     }
 
     @Override
     public int hashCode(){
-        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ arriveDate.hashCode() ^
-               departureDate.hashCode();
+        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ departureDate.hashCode() ^
+               arrivalDate.hashCode();
     }
 
     @Override
@@ -107,8 +106,8 @@ public class Flight implements Serializable, Cloneable{
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
-               planeID.equals( flight.planeID ) && arriveDate.equals( flight.arriveDate ) &&
-               departureDate.equals( flight.departureDate );
+               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate) &&
+               arrivalDate.equals( flight.arrivalDate );
     }
 
     @Override
@@ -117,13 +116,16 @@ public class Flight implements Serializable, Cloneable{
         clone.number = this.number;
         clone.route = ( Route ) this.route.clone();
         clone.planeID = this.planeID;
-        clone.arriveDate = ( Date ) this.arriveDate.clone();
         clone.departureDate = ( Date ) this.departureDate.clone();
+        clone.arrivalDate = ( Date ) this.arrivalDate.clone();
         return clone;
     }
 
 
     /**
+     Парикмахер обращается к клиенту : Вам висок косой?
+     Клиент: Нет, машинкой.
+
      Looks like "Flight number (number), takes at (dd.MM.yyyy HH:mm) from (arrival airportId), launches at
      (dd.MM.yyyy HH:mm) at (departure airportId),
      flies by (planeId) plane"
@@ -133,14 +135,14 @@ public class Flight implements Serializable, Cloneable{
     @Override
     public String toString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
-        LocalDateTime arrivalLocalDate =
-                LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
         LocalDateTime departureLocalDate =
-                LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
+                LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
+        LocalDateTime arrivalLocalDate =
+                LocalDateTime.ofInstant( arrivalDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
         return String
                 .format( "Flight number %s, takes at %s from %s, launches at %s at %s, flies by %s plane" , number ,
-                         arrivalLocalDate.format( formatter ) , route.getFrom() ,
-                         departureLocalDate.format( formatter ) , route.getTo() , planeID );
+                        departureLocalDate.format( formatter ) , route.getFrom() ,
+                        arrivalLocalDate.format( formatter ) , route.getTo() , planeID );
     }
 
     /**
