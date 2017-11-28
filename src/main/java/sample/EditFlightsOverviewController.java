@@ -1,35 +1,91 @@
 package sample;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class EditFlightsOverviewController{
+import model.Route;
+
+import java.time.LocalDate;
+import java.util.Date;
+
+/**
+ * Controller for editing a flight view
+ * Allows to enter data for editing the chosen flight
+ */
+
+public class EditFlightsOverviewController {
+
+    private Controller controller = new Controller();
+
     @FXML
-    ChoiceBox<String> box;
-
-    ObservableList<String> list = FXCollections.observableArrayList();
-
+    ChoiceBox<Route> box;
     @FXML
-    private void initialize() {
+    TextField number;
+    @FXML
+    TextField planeID;
+    @FXML
+    DatePicker departureDate;
+    @FXML
+    DatePicker arrivingDate;
 
 
-        list.add("Москва - Самара");
-        list.add("Париж - Лос-Анджелес");
-        list.add("Лондон - Санкт-Галлен");
+    /**
+     * @param event Clear Button. Clear all the fields in the window
+     */
+    @FXML
+    private void clearData(ActionEvent event) {
 
-        box.setItems(list);
+        number.clear();
+        planeID.clear();
+        departureDate.setValue(LocalDate.now());
+        arrivingDate.setValue(LocalDate.now());
     }
+
+    /**
+     * @param actionEvent Edit Button. Edit data about the chosen flight
+     */
+    @FXML
+    private void handleEditAction(ActionEvent actionEvent) {
+
+        Date arrivDate = new Date(arrivingDate.getValue().toEpochDay());
+        Date departDate = new Date(departureDate.getValue().toEpochDay());
+        if (arrivDate.compareTo(departDate) < 0) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Incorrect data about date");
+            alert.setHeaderText("Flight has incorrect dates");
+            alert.setContentText("Please enter correct parameters for a flight.");
+
+            alert.showAndWait();
+        } else {
+            controller.model.editFlight(Controller.flightForEdit, box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate);
+            controller.updateFlights();
+            closeWindow(actionEvent);
+        }
+    }
+
+    /**
+     *
+     * @param actionEvent
+     * Cancel Button. Close the window.
+     */
+    public void handleCancelAction(ActionEvent actionEvent)
+    {
+        closeWindow(actionEvent);
+    }
+
     private void closeWindow(Event event) {
         Stage stage = (Stage) ((Parent) event.getSource()).getScene().getWindow();
         stage.close();
     }
-    public void handleCancelAction(ActionEvent actionEvent) {
-        closeWindow(actionEvent);
-    }
+
+
 }
