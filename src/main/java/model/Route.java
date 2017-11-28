@@ -54,7 +54,7 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     @Override
     public int compareTo( Route o ){
-        int from = this.from.compareToIgnoreCase( o.to );
+        int from = this.from.compareToIgnoreCase( o.from );
         return from != 0 ? from : this.to.compareToIgnoreCase( o.to );
     }
 
@@ -82,4 +82,5 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     public String toString(){
         return String.format( "Route from %s to %s" , from , to );
     }
+
 }

@@ -126,7 +126,7 @@ class DataModelTest{
                               "Check all flights" );
         flights = dataModel.listFlightsWithPredicate( flight -> true ).limit( 3 ).collect( Collectors.toList() );
         assertIterableEquals( flights , dataModel
-                .listFlightsWithPredicate( flight -> flight.getTravelTime().getTime() < 1000 * 60 * 60 * 4 + 1 )
+                .listFlightsWithPredicate( flight -> flight.getTravelTime() < 1000 * 60 * 60 * 4 + 1 )
                 .collect( Collectors.toList() ) , "Filter by travel time" );
 
         flights = Collections.singletonList(

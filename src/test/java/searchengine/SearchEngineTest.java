@@ -73,4 +73,5 @@ class SearchEngineTest{
                 .findFlight( null , null , null , null , null , null , flight.getArriveDate() , null )
                 .collect( Collectors.toList() ) );
     }
+
 }

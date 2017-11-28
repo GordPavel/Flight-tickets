@@ -27,7 +27,7 @@ public class SearchEngine{
     /**
      @param data - datamodel
      */
-    SearchEngine( DataModel data ){
+    public SearchEngine( DataModel data ){
         this.data = data;
     }
 
@@ -58,7 +58,7 @@ public class SearchEngine{
     }
 
     private Predicate<String> generatePredicate( String from ){
-        return Optional.ofNullable( from ).map( s -> Pattern.compile( ".*" + s + ".*" ).asPredicate() )
+        return Optional.ofNullable( from ).map( s -> Pattern.compile( ".*" + s.toLowerCase() + ".*" ).asPredicate() )
                        .orElse( s -> true );
     }
 

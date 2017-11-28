@@ -1,13 +1,11 @@
 package model;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  Entity to store data about each flight.
@@ -45,6 +43,14 @@ public class Flight implements Serializable, Cloneable{
 
     public Route getRoute(){
         return route;
+    }
+
+    public String getFrom(){
+        return route.getFrom();
+    }
+
+    public String getTo(){
+        return route.getTo();
     }
 
     void setRoute( Route route ){
@@ -93,8 +99,8 @@ public class Flight implements Serializable, Cloneable{
     /**
      @return countable field, difference between departureDate and arriveDate in milliseconds
      */
-    public Date getTravelTime(){
-        return Date.from( Instant.ofEpochMilli( arriveDate.getTime() - departureDate.getTime() ) );
+    public Long getTravelTime(){
+        return Duration.between( departureDate.toInstant() , arriveDate.toInstant() ).abs().toMillis();
     }
 
     @Override
@@ -138,18 +144,22 @@ public class Flight implements Serializable, Cloneable{
                 LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
         LocalDateTime arrivalLocalDate =
                 LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
-        return String
-                .format( "Flight number %s, takes at %s from %s, launches at %s at %s, flies by %s plane" , number ,
-                         departureLocalDate.format( formatter ) , route.getFrom() ,
-                         arrivalLocalDate.format( formatter ) , route.getTo() , planeID );
+        return String.format(
+                "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
+                "plane" , number , departureLocalDate.format( formatter ) , route.getFrom() ,
+                arrivalLocalDate.format( formatter ) , route.getTo() , millisToHoursAndMinutes( getTravelTime() ) ,
+                planeID );
     }
 
-    /**
-     @param airportId Specify the airportId, which timezone you want to know
+    private String millisToHoursAndMinutes( Long startMilli ){
+        startMilli /= 1000; // sum of second
+        long sumMinute = startMilli / 60; // sum of minute
+        long minute    = sumMinute % 60; // minute
+        long hour      = sumMinute / 60; // hour
+        return String.format( "%d:%02d" , hour , minute );
+    }
 
-     @return ZoneId of specified airport
-     */
     private ZoneId zoneIdFromAirPortId( String airportId ){
-        return ZoneId.of( "Europe/Moscow" );
+        return ZoneId.of( "Europe/Samara" );
     }
 }

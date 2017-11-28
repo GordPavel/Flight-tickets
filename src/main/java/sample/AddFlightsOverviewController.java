@@ -1,25 +1,18 @@
 package sample;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 
-public class AddFlightsOverviewController {
+public class AddFlightsOverviewController{
+
+    @FXML public TextField        numberField;
+    @FXML public TextField        planeIdField;
+    @FXML public ListView<String> routesList;
+    @FXML public TextField        searchField;
 
     @FXML
-    ChoiceBox<String> box;
+    private void initialize(){
 
-    ObservableList<String> list = FXCollections.observableArrayList();
-
-    @FXML
-    private void initialize() {
-
-
-        list.add("Москва - Самара");
-        list.add("Париж - Лос-Анджелес");
-        list.add("Лондон - Санкт-Галлен");
-
-        box.setItems(list);
     }
 }
