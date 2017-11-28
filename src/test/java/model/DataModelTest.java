@@ -104,6 +104,15 @@ class DataModelTest{
                       "New data can't duplicate another route" );
     }
 
+
+    /*
+    На собеседовании:
+    — А у Вас есть какое нибудь хобби?
+    — Вообще-то есть парочка.
+    Достает чучело свиньи из кармана.
+    — Таксидермия охуенная тема!
+    — И некромантия, - добавляет свинья.
+     */
     @Test
     void listAllFlights(){
         List<Flight> flights = Collections.singletonList(
