@@ -24,7 +24,7 @@ import java.time.ZoneId;
 public class RoutesFlightsOverviewController {
 
 
-    private Controller controller = new Controller();
+    private Controller controller = Controller.getInstance();
 
     private static final String EDIT_ROUTE_WINDOW = "Edit a route";
     private static final String ADD_ROUTE_WINDOW = "Add a route";
@@ -67,6 +67,21 @@ public class RoutesFlightsOverviewController {
     @FXML
     TextArea detailsTextArea;
 
+    @FXML
+    private void handleUpdateRouteAction(ActionEvent actionEvent){
+
+        routeTable.setItems(controller.getRoutes());
+        routeTable.refresh();
+    }
+
+    @FXML
+    private void handleUpdateFlightAction(ActionEvent actionEvent){
+
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
+    }
+
+
 
     public RoutesFlightsOverviewController() {
 
@@ -78,6 +93,8 @@ public class RoutesFlightsOverviewController {
      */
     public void initialize() {
 
+        controller.updateFlights();
+        controller.updateRoutes();
         departureColumn.setCellValueFactory(new PropertyValueFactory<Route, String>("from"));
         destinationColumn.setCellValueFactory(new PropertyValueFactory<Route, String>("to"));
         routeTable.setItems(controller.getRoutes());
@@ -161,7 +178,6 @@ public class RoutesFlightsOverviewController {
         Parent addRouteWindow;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
 
-        routeTable.refresh();
         try {
             addRouteWindow = FXMLLoader.load(getClass().getResource("/fxml/AddRoutesOverview.fxml"));
 
@@ -206,8 +222,6 @@ public class RoutesFlightsOverviewController {
         } else {
             controller.setRouteForEdit(selectedRoute);
 
-            routeTable.refresh();
-
             try {
                 editRouteWindow = FXMLLoader.load(getClass().getResource("/fxml/EditRoutesOverview.fxml"));
 
@@ -242,8 +256,6 @@ public class RoutesFlightsOverviewController {
     public void handleAddFlightButton(ActionEvent actionEvent) {
         Parent addFlightWindow;
         Stage oldStage = (Stage) ((Parent) actionEvent.getSource()).getScene().getWindow();
-
-        flightTable.refresh();
 
         try {
             addFlightWindow = FXMLLoader.load(getClass().getResource("/fxml/AddFlightsOverview.fxml"));
@@ -288,7 +300,6 @@ public class RoutesFlightsOverviewController {
         } else {
             controller.setFlightForEdit(selectedFlight);
 
-            flightTable.refresh();
             try {
                 editFlightWindow = FXMLLoader.load(getClass().getResource("/fxml/EditFlightsOverview.fxml"));
 
@@ -359,7 +370,6 @@ public class RoutesFlightsOverviewController {
 
             controller.updateRoutes();
             routeTable.setItems(controller.getRoutes());
-            routeTable.refresh();
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Empty Search ");
             alert.setHeaderText("No parameters");

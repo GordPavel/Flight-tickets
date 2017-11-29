@@ -179,8 +179,8 @@ public class SearchFlightsOverviewController{
             }
 
 
-        System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
-            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
+       // System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
+          //  dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
 
     }
 

@@ -16,7 +16,7 @@ import model.Route;
 
 public class AddRoutesOverviewController {
 
-    private Controller controller = new Controller();
+    private Controller controller = Controller.getInstance();
 
     @FXML
     TextField departureTextField;
@@ -36,6 +36,7 @@ public class AddRoutesOverviewController {
 
             controller.model.addRoute(new Route(departureTextField.getText(), destinationTextField.getText()));
             controller.updateRoutes();
+            controller.getRoutes().forEach(System.out::println);
 
         } else {
 

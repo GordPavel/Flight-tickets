@@ -23,7 +23,7 @@ import java.util.Date;
 
 public class EditFlightsOverviewController {
 
-    private Controller controller = new Controller();
+    private Controller controller = Controller.getInstance();
 
     @FXML
     ChoiceBox<Route> box;
@@ -35,6 +35,15 @@ public class EditFlightsOverviewController {
     DatePicker departureDate;
     @FXML
     DatePicker arrivingDate;
+
+    /**
+     * initialization of view
+     */
+    @FXML
+    private void initialize() {
+
+        box.setItems(controller.getRoutes());
+    }
 
 
     /**
@@ -57,7 +66,7 @@ public class EditFlightsOverviewController {
 
         Date arrivDate = new Date(arrivingDate.getValue().toEpochDay());
         Date departDate = new Date(departureDate.getValue().toEpochDay());
-        if (arrivDate.compareTo(departDate) < 0) {
+        if (arrivDate.getTime() <= departDate.getTime()) {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Incorrect data about date");

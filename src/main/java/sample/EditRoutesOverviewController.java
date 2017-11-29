@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 
 public class EditRoutesOverviewController {
 
-    private Controller controller = new Controller();
+    private Controller controller = Controller.getInstance();
 
     @FXML
     TextField departureTextField;

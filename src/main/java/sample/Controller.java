@@ -17,6 +17,15 @@ import java.util.stream.Collectors;
  */
 public class Controller {
 
+    Controller(){}
+
+    private static class InstanceHolder{
+        private static final Controller instance = new Controller();
+    }
+    public static synchronized Controller getInstance(){
+        return Controller.InstanceHolder.instance;
+    }
+
     static DataModel model = DataModel.getInstance();
     static SearchEngine searchEngine = new SearchEngine(model);
     private ObservableList<Route> routes;
@@ -24,11 +33,11 @@ public class Controller {
     public static Route routeForEdit;
     public static Flight flightForEdit;
 
-    public Controller() {
+    /*public Controller() {
 
         this.routes = FXCollections.observableArrayList((Collection<? extends Route>) model.listRoutesWithPredicate(route -> true).collect(Collectors.toCollection(ArrayList::new)));
         this.flights = FXCollections.observableArrayList((Collection<? extends Flight>) model.listFlightsWithPredicate(flight -> true).collect(Collectors.toCollection(ArrayList::new)));
-    }
+    }*/
 
 
     public ObservableList<Route> getRoutes() {
