@@ -89,7 +89,7 @@ public class DataModel{
         if( flight.getArriveDate().before( flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?*!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,?*!]]+" );
         if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -142,7 +142,7 @@ public class DataModel{
                 .before( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
         if( !pattern.matcher( flight.getNumber() ).matches() || !pattern.matcher( flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -196,7 +196,8 @@ public class DataModel{
      @throws FaRSameNameException if new route's arrival and departure points duplicate someone another in database
      */
     public Boolean addRoute( Route route ){
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
+        if( route.getFrom().equals( route.getTo() ) ) throw new FaRSameNameException( "Same airports" );
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
         if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
@@ -227,8 +228,8 @@ public class DataModel{
      Use this method instead Route.setFrom() or Route.setTo()
 
      @param route                 edited route.
-     @param newArrivalAirport     new value of arrival airport. if it's null, value won't change
-     @param newDestinationAirport new value of departure airport. if it's null, value won't change
+     @param newDestinationAirport new value of arrival airport. if it's null, value won't change
+     @param newArriveAirport      new value of departure airport. if it's null, value won't change
 
      @return true , if it has correct data and doesn't duplicate someone another, false instead.
 
@@ -236,9 +237,14 @@ public class DataModel{
      @throws FaRSameNameException it duplicates someone
      another
      */
-    public Boolean editRoute( Route route , String newArrivalAirport , String newDestinationAirport ){
-        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
-        if( !pattern.matcher( route.getFrom() ).matches() || !pattern.matcher( route.getTo() ).matches() ){
+    public Boolean editRoute( Route route , String newDestinationAirport , String newArriveAirport ){
+        if( ( newDestinationAirport != null ? newDestinationAirport : route.getFrom() )
+                .equals( newArriveAirport != null ? newArriveAirport : route.getFrom() ) ){
+            throw new FaRSameNameException( "Same " + "airports" );
+        }
+        Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
+        if( !pattern.matcher( newDestinationAirport != null ? newArriveAirport : route.getFrom() ).matches() ||
+            !pattern.matcher( newArriveAirport != null ? newArriveAirport : route.getTo() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
         Optional<Route> routeOptional =
@@ -247,17 +253,17 @@ public class DataModel{
             throw new FaRIllegalEditedData( "This route doesn't contains in database" );
         }
         if( routes.stream().anyMatch( route1 -> Objects.equals( route1.getFrom() ,
-                                                                newArrivalAirport != null ? newArrivalAirport :
+                                                                newDestinationAirport != null ? newDestinationAirport :
                                                                 route.getFrom() ) && Objects.equals( route1.getTo() ,
-                                                                                                     newDestinationAirport !=
+                                                                                                     newArriveAirport !=
                                                                                                      null ?
-                                                                                                     newDestinationAirport :
+                                                                                                     newArriveAirport :
                                                                                                      route.getTo() ) ) ){
             throw new FaRSameNameException( "This new route duplicates someone another" );
         }
         Route editedRoute = routeOptional.get();
-        editedRoute.setFrom( newArrivalAirport != null ? newArrivalAirport : route.getFrom() );
-        editedRoute.setTo( newDestinationAirport != null ? newDestinationAirport : route.getTo() );
+        editedRoute.setFrom( newDestinationAirport != null ? newDestinationAirport : route.getFrom() );
+        editedRoute.setTo( newArriveAirport != null ? newArriveAirport : route.getTo() );
         return true;
     }
 

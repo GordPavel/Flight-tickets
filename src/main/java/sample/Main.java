@@ -1,6 +1,8 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.DataModel;
 import model.Flight;
@@ -32,7 +34,12 @@ public class Main extends Application{
                         LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) ) ).forEach( dataModel::addFlight );
 
-        new RoutesFlightsOverviewController( primaryStage );
+        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/MainWindow.fxml" ) );
+        loader.setController( new MainWindowController( primaryStage ) );
+        primaryStage.setTitle( "Routes and flights" );
+        primaryStage.setScene( new Scene( loader.load() ) );
+        primaryStage.setResizable( false );
+        primaryStage.show();
     }
 
     public static void main( String[] args ){

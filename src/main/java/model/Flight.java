@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,12 +46,19 @@ public class Flight implements Serializable, Cloneable{
         return route;
     }
 
-    public String getFrom(){
-        return route.getFrom();
+    //    For javafx Table View
+    public String getRouteString(){
+        return getRoute().getFrom() + "->" + getRoute().getTo();
     }
 
-    public String getTo(){
-        return route.getTo();
+    private SimpleDateFormat format = new SimpleDateFormat( "dd.MM.yyyy HH:mm" );
+
+    public String getDepartureDateString(){
+        return format.format( departureDate );
+    }
+
+    public String getArriveDateString(){
+        return format.format( arriveDate );
     }
 
     void setRoute( Route route ){

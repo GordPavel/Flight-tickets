@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<VBox prefHeight="600.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1"
+>
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu fx:id="menuBar" mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" text="New"/>
+            <MenuItem mnemonicParsing="false" text="Open…"/>
+            <MenuItem mnemonicParsing="false" text="Merge"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Save"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Quit"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <MenuItem fx:id="addRoute" mnemonicParsing="false" text="Add route"/>
+            <MenuItem fx:id="editRoute" mnemonicParsing="false" text="Edit Route"/>
+            <MenuItem mnemonicParsing="false" text="Remove route"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Add flight"/>
+            <MenuItem mnemonicParsing="false" text="Edit flight"/>
+            <MenuItem mnemonicParsing="false" text="Remove flight"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="About MyHelloApp"/>
+        </Menu>
+    </MenuBar>
+    <SplitPane dividerPositions="0.2505567928730512, 0.7216035634743875" focusTraversable="true" VBox.vgrow="ALWAYS">
+        <AnchorPane maxWidth="220.0" minWidth="220.0" prefWidth="220.0" SplitPane.resizableWithParent="false">
+            <TableView fx:id="routesTableView" layoutX="-1.0" layoutY="53.0" maxWidth="220.0" minWidth="220.0"
+                       prefHeight="517.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="53.0">
+                <columns>
+                    <TableColumn minWidth="106.2726594209671" prefWidth="110.0" resizable="false" text="From"/>
+                    <TableColumn minWidth="106.45449829101562" prefWidth="108.0" resizable="false" text="To"/>
+                </columns>
+            </TableView>
+            <Label alignment="CENTER" layoutX="64.0" layoutY="5.0" maxWidth="220.0" minWidth="220.0" prefHeight="20.0"
+                   prefWidth="220.0" text="Routes" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
+                <font>
+                    <Font name="Monaco" size="20.0"/>
+                </font>
+            </Label>
+            <TextField fx:id="searchDepartureAirport" alignment="CENTER" layoutX="23.0" layoutY="33.0" maxWidth="110.0"
+                       minWidth="110.0" prefHeight="27.0" prefWidth="110.0" promptText="search from"
+                       AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0"/>
+            <TextField fx:id="searchArrivalAirport" alignment="CENTER" layoutX="103.0" layoutY="25.0" maxWidth="110.0"
+                       minWidth="110.0" prefHeight="27.0" prefWidth="110.0" promptText="search to"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
+        </AnchorPane>
+        <AnchorPane id="Content" maxWidth="452.0" minWidth="347.0" prefHeight="570.0" prefWidth="347.0"
+                    SplitPane.resizableWithParent="false">
+            <TableView fx:id="flightsTableView" layoutX="9.0" layoutY="11.0" maxWidth="443.0" minWidth="305.0"
+                       prefHeight="545.0" prefWidth="422.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+                <columns>
+                    <TableColumn editable="false" resizable="false" text="Number"/>
+                    <TableColumn editable="false" prefWidth="93.0" resizable="false" text="Route"/>
+                    <TableColumn editable="false" prefWidth="130.0" resizable="false" text="Take off time"/>
+                    <TableColumn editable="false" prefWidth="130.0" resizable="false" text="Launch time"/>
+                </columns>
+            </TableView>
+            <Label alignment="CENTER" layoutX="77.0" layoutY="2.0" maxWidth="434.0" minWidth="305.0" prefHeight="25.0"
+                   prefWidth="382.0" text="Flights" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="53.0"
+                   AnchorPane.topAnchor="0.0">
+                <font>
+                    <Font name="Monaco" size="20.0"/>
+                </font>
+            </Label>
+            <Button fx:id="searchButton" layoutX="397.0" layoutY="-1.0" maxHeight="40.0" maxWidth="40.0"
+                    minHeight="24.0" minWidth="25.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="25.0"/>
+        </AnchorPane>
+        <AnchorPane maxWidth="220.0" minWidth="220.0" prefWidth="220.0" SplitPane.resizableWithParent="false">
+            <Label alignment="CENTER" maxWidth="220.0" minWidth="220.0" prefHeight="20.0" prefWidth="220.0"
+                   text="Flight details" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <font>
+                    <Font name="Monaco" size="20.0"/>
+                </font>
+            </Label>
+            <TextArea editable="false" layoutX="31.0" layoutY="40.0" maxWidth="220.0" minWidth="220.0" prefWidth="220.0"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
+        </AnchorPane>
+    </SplitPane>
+</VBox>

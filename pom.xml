@@ -55,6 +55,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>np.com.ngopal</groupId>
+            <artifactId>javafx-autocomplete-field</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>RELEASE</version>
