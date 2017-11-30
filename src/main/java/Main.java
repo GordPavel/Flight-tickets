@@ -42,13 +42,6 @@ public class Main {
             System.out.println(route);
         }*/
 
-        List<Flight> flights = searchEngine.searchFlight("q*r1", null,"","","",null,
-                null, null, null);
-
-        for (Flight flight:flights)
-        {
-            System.out.println(flight);
-        }
 
     }
 }

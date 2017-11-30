@@ -25,7 +25,7 @@ public class SearchEngine {
 
 
     /**
-      @param data - datamodel
+     @param data - datamodel
      */
     public SearchEngine (DataModel data)
     {
@@ -293,7 +293,9 @@ public class SearchEngine {
      @return list of flights, filtred by predicate, generated from params
      */
 
-    public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID, Date startDeparture, Date stopDeparture, Date startArrival, Date stopArrival)
+    public List<Flight> searchFlight(String number, Route route, String from, String to, String planeID,
+                                     Date startDeparture, Date stopDeparture, Date startArrival, Date stopArrival,
+                                     Date travelFrom, Date travelTo)
     {
 
         Pattern numberPattern = Pattern.compile(".*"+number.toUpperCase().replace("*",".*").replace("?",".")+".*");
@@ -303,15 +305,15 @@ public class SearchEngine {
 
         return data.listFlightsWithPredicate(flight ->
                 (number != "" ? numberPattern.matcher(flight.getNumber().toUpperCase()).matches() : true )
-                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
-                && ( to != "" ? toPattern.matcher(flight.getRoute().getTo().toUpperCase()).matches() : true )
-                && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID().toUpperCase()).matches() : true )
-                && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
-                && ( route!= null ? route.equals(flight.getRoute()) : true )
-                && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArrivalDate()) : true)
-                && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArrivalDate().after(startArrival)&&flight.getArrivalDate().before(stopArrival) : true)
-                && ( (startDeparture!= null)&&(stopDeparture==null) ? startDeparture.equals(flight.getDepartureDate()) : true)
-                && ( (startDeparture!= null)&&(stopDeparture!=null) ? flight.getDepartureDate().after(startDeparture)&&flight.getDepartureDate().before(stopDeparture) : true)
+                        && ( from != "" ? fromPattern.matcher(flight.getRoute().getFrom().toUpperCase()).matches() : true )
+                        && ( to != "" ? toPattern.matcher(flight.getRoute().getTo().toUpperCase()).matches() : true )
+                        && ( planeID != "" ? planeIDPattern.matcher(flight.getPlaneID().toUpperCase()).matches() : true )
+                        && ( route!= null ? route.equals(flight.getRoute()) : true )
+                        && ( travelFrom!= null ? flight.getTravelTime().before(travelTo)&&flight.getTravelTime().after(travelFrom) : true )
+                        && ( (startArrival!= null)&&(stopArrival==null) ? startArrival.equals(flight.getArrivalDate()) : true)
+                        && ( (startArrival!= null)&&(stopArrival!=null) ? flight.getArrivalDate().after(startArrival)&&flight.getArrivalDate().before(stopArrival) : true)
+                        && ( (startDeparture!= null)&&(stopDeparture==null) ? startDeparture.equals(flight.getDepartureDate()) : true)
+                        && ( (startDeparture!= null)&&(stopDeparture!=null) ? flight.getDepartureDate().after(startDeparture)&&flight.getDepartureDate().before(stopDeparture) : true)
         ).collect(Collectors.toList());
     }
 

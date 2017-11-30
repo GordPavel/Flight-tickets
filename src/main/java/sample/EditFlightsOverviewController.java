@@ -5,16 +5,18 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import model.Route;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Controller for editing a flight view
@@ -35,7 +37,12 @@ public class EditFlightsOverviewController {
     DatePicker departureDate;
     @FXML
     DatePicker arrivingDate;
-
+    @FXML
+    Button editEditFlightsOverview;
+    @FXML
+    TextField arrivingTime;
+    @FXML
+    TextField departureTime;
     /**
      * initialization of view
      */
@@ -43,6 +50,94 @@ public class EditFlightsOverviewController {
     private void initialize() {
 
         box.setItems(controller.getRoutes());
+
+        departureDate.getEditor().setDisable(true);
+        arrivingDate.getEditor().setDisable(true);
+
+        arrivingTime.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+            Matcher matcher = pattern.matcher(arrivingTime.getText());
+            if (!matcher.matches())
+            {
+                arrivingTime.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                arrivingTime.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        departureTime.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+            Matcher matcher = pattern.matcher(departureTime.getText());
+            if (!matcher.matches())
+            {
+                departureTime.setStyle("-fx-text-inner-color: red;");
+            }else if (controller.getFlights().stream().anyMatch(flight -> flight.getNumber().equals( number.getText())))
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Number already exist");
+                alert.setHeaderText("Flight with this number already exist");
+                alert.setContentText("Please enter correct number.");
+
+                alert.showAndWait();
+            } else if (box.getValue()==null)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Route isn`t chosen");
+                alert.setHeaderText("Flight must have route");
+                alert.setContentText("Choose route");
+
+                alert.showAndWait();
+            } else if (planeID.getText().equals(""))
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("You have no plain");
+                alert.setHeaderText("Flight must have plain");
+                alert.setContentText("Write plain data");
+
+                alert.showAndWait();
+            }else if (controller.getFlights().stream().anyMatch(flight -> flight.getPlaneID().equals( planeID.getText())))
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Two flights for plain");
+                alert.setHeaderText("Some flight have same plain");
+                alert.setContentText("Write another plain data");
+
+                alert.showAndWait();
+            }
+            else {
+                departureTime.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+
+        number.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Matcher matcher = pattern.matcher(number.getCharacters());
+            if (!matcher.matches())
+            {
+                number.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                number.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        planeID.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Matcher matcher = pattern.matcher(planeID.getCharacters());
+            if (!matcher.matches())
+            {
+                planeID.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                planeID.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
     }
 
 
@@ -64,8 +159,25 @@ public class EditFlightsOverviewController {
     @FXML
     private void handleEditAction(ActionEvent actionEvent) {
 
-        Date arrivDate = new Date(arrivingDate.getValue().toEpochDay());
-        Date departDate = new Date(departureDate.getValue().toEpochDay());
+
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+
+        Date arrivDate = new Date();
+        Date departDate = new Date();
+
+        try {
+            arrivDate = format.parse(arrivingDate.getEditor().getText()+" "+arrivingTime.getText());
+        }
+        catch (ParseException e) {
+
+        }
+
+        try {
+            departDate = format.parse(departureDate.getEditor().getText()+" "+departureTime.getText());
+        }
+        catch (ParseException e) {
+
+        }
         if (arrivDate.getTime() <= departDate.getTime()) {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -96,5 +208,20 @@ public class EditFlightsOverviewController {
         stage.close();
     }
 
+    private void checkTimeTextFields(){
+
+        Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+        Pattern timePattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+
+        if (pattern.matcher(number.getText()).matches()
+                &&pattern.matcher(planeID.getText()).matches()
+                &&timePattern.matcher(departureTime.getText()).matches()
+                &&timePattern.matcher(arrivingTime.getText()).matches()) {
+            editEditFlightsOverview.setDisable(false);
+        }
+        else {
+            editEditFlightsOverview.setDisable(true);
+        }
+    }
 
 }

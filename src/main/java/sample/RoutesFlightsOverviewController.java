@@ -318,7 +318,8 @@ public class RoutesFlightsOverviewController {
                 ((DatePicker) (editFlightWindow.getChildrenUnmodifiable().get(9))).setValue(selectedFlight.getDepartureDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 ((DatePicker) (editFlightWindow.getChildrenUnmodifiable().get(10))).setValue(selectedFlight.getArrivalDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 ((ChoiceBox<Route>) (editFlightWindow.getChildrenUnmodifiable().get(11))).setValue(selectedFlight.getRoute());
-
+                ((TextField) (editFlightWindow.getChildrenUnmodifiable().get(14))).setText(selectedFlight.getDepartureDate().toInstant().atZone(ZoneId.systemDefault()).toLocalTime().toString());
+                ((TextField) (editFlightWindow.getChildrenUnmodifiable().get(15))).setText(selectedFlight.getArrivalDate().toInstant().atZone(ZoneId.systemDefault()).toLocalTime().toString());
                 oldStage.setOpacity(0.9);
                 popUp.showAndWait();
                 oldStage.setOpacity(1);

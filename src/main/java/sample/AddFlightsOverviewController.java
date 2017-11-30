@@ -5,18 +5,20 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import javafx.stage.Stage;
 import model.Flight;
 import model.Route;
 
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Controller for adding flight view
@@ -37,6 +39,12 @@ public class AddFlightsOverviewController {
     DatePicker departureDate;
     @FXML
     DatePicker arrivingDate;
+    @FXML
+    Button addAddFlightsOverview;
+    @FXML
+    TextField arrivingTime;
+    @FXML
+    TextField departureTime;
 
     /**
      * initialization of view
@@ -46,8 +54,67 @@ public class AddFlightsOverviewController {
 
 
         departureDate.setValue(LocalDate.now());
-        arrivingDate.setValue(LocalDate.now());
+        arrivingDate.setValue(LocalDate.now().plusDays(1));
         box.setItems(controller.getRoutes());
+
+        departureDate.getEditor().setDisable(true);
+        arrivingDate.getEditor().setDisable(true);
+
+        arrivingTime.setText("00:00");
+        departureTime.setText("00:00");
+
+        arrivingTime.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+            Matcher matcher = pattern.matcher(arrivingTime.getText());
+            if (!matcher.matches())
+            {
+                arrivingTime.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                arrivingTime.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        departureTime.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+            Matcher matcher = pattern.matcher(arrivingTime.getText());
+            if (!matcher.matches())
+            {
+                departureTime.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                departureTime.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        number.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Matcher matcher = pattern.matcher(number.getCharacters());
+            if (!matcher.matches())
+            {
+                number.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                number.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        planeID.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Matcher matcher = pattern.matcher(planeID.getCharacters());
+            if (!matcher.matches())
+            {
+                planeID.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                planeID.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
     }
 
     /**
@@ -57,8 +124,25 @@ public class AddFlightsOverviewController {
     @FXML
     private void handleAddAction(ActionEvent actionEvent) {
 
-        Date arrivDate = new Date(arrivingDate.getValue().toEpochDay());
-        Date departDate = new Date(departureDate.getValue().toEpochDay());
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy hh:mm");
+
+        Date arrivDate = new Date();
+        Date departDate = new Date();
+
+        try {
+            arrivDate = format.parse(arrivingDate.getEditor().getText()+" "+arrivingTime.getText());
+        }
+        catch (ParseException e) {
+
+        }
+
+        try {
+            departDate = format.parse(departureDate.getEditor().getText()+" "+departureTime.getText());
+        }
+        catch (ParseException e) {
+
+        }
+
         if (arrivDate.getTime() <= departDate.getTime()) {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -67,7 +151,41 @@ public class AddFlightsOverviewController {
             alert.setContentText("Please enter correct parameters for a new flight.");
 
             alert.showAndWait();
-        } else {
+        } else if (controller.getFlights().stream().anyMatch(flight -> flight.getNumber().equals( number.getText())))
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Number already exist");
+            alert.setHeaderText("Flight with this number already exist");
+            alert.setContentText("Please enter correct number.");
+
+            alert.showAndWait();
+        } else if (box.getValue()==null)
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Route isn`t chosen");
+            alert.setHeaderText("Flight must have route");
+            alert.setContentText("Choose route");
+
+            alert.showAndWait();
+        } else if (planeID.getText().equals(""))
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("You have no plain");
+            alert.setHeaderText("Flight must have plain");
+            alert.setContentText("Write plain data");
+
+            alert.showAndWait();
+        }
+        else if (controller.getFlights().stream().anyMatch(flight -> flight.getPlaneID().equals( planeID.getText())))
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Two flights for plain");
+            alert.setHeaderText("Some flight have same plain");
+            alert.setContentText("Write another plain data");
+
+            alert.showAndWait();
+        }
+        else {
 
             controller.model.addFlight(new Flight(number.getText(), box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate));
             controller.updateFlights();
@@ -86,6 +204,8 @@ public class AddFlightsOverviewController {
         planeID.clear();
         departureDate.setValue(LocalDate.now());
         arrivingDate.setValue(LocalDate.now());
+        arrivingTime.setText("00:00");
+        departureTime.setText("00:00");
     }
 
     /**
@@ -102,5 +222,21 @@ public class AddFlightsOverviewController {
         stage.close();
     }
 
+
+    private void checkTimeTextFields(){
+
+        Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+        Pattern timePattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
+
+        if (pattern.matcher(number.getText()).matches()
+                &&pattern.matcher(planeID.getText()).matches()
+                &&timePattern.matcher(departureTime.getText()).matches()
+                &&timePattern.matcher(arrivingTime.getText()).matches()) {
+            addAddFlightsOverview.setDisable(false);
+        }
+        else {
+            addAddFlightsOverview.setDisable(true);
+        }
+    }
 
 }

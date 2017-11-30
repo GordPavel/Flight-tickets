@@ -179,8 +179,8 @@ public class SearchFlightsOverviewController{
             }
 
 
-       // System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
-          //  dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
+        System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
+            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
 
     }
 
@@ -197,9 +197,13 @@ public class SearchFlightsOverviewController{
         arrivingDateFromTextField.setText("00:00");
         flightTimeFromTextField.setText("00:00");
         flightTimeToTextField.setText("00:00");
+        departureDateToDatePicker.getEditor().setDisable(true);
+        departureDateFromDatePicker.getEditor().setDisable(true);
+        arrivingDateFromDatePicker.getEditor().setDisable(true);
+        arrivingDateToDatePicker.getEditor().setDisable(true);
 
         departureDateFromTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(departureDateFromTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -212,7 +216,7 @@ public class SearchFlightsOverviewController{
         });
 
         departureDateToTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(departureDateToTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -225,7 +229,7 @@ public class SearchFlightsOverviewController{
         });
 
         arrivingDateFromTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(arrivingDateFromTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -238,7 +242,7 @@ public class SearchFlightsOverviewController{
         });
 
         arrivingDateToTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(arrivingDateToTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -251,7 +255,7 @@ public class SearchFlightsOverviewController{
         });
 
         flightTimeFromTextField.textProperty().addListener((observable,oldValue,newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(flightTimeFromTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -264,7 +268,7 @@ public class SearchFlightsOverviewController{
         });
 
         flightTimeToTextField.textProperty().addListener((observable,oldValue,newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9][0-9][:][0-5][0-9]");
+            Pattern pattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
             Matcher matcher = pattern.matcher(flightTimeToTextField.getCharacters());
             if (!matcher.matches())
             {
@@ -285,6 +289,7 @@ public class SearchFlightsOverviewController{
 
         Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
         Pattern travelPattern = Pattern.compile("[0-9][0-9][:][0-5][0-9]");
+        Pattern datePattern = Pattern.compile("[0-31][.][1-12].[0-9]+");
         if (pattern.matcher(arrivingDateToTextField.getCharacters()).matches()
                 &&pattern.matcher(arrivingDateFromTextField.getCharacters()).matches()
                 &&pattern.matcher(departureDateFromTextField.getCharacters()).matches()
