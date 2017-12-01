@@ -1,5 +1,6 @@
 package sample;
 
+import exceptions.FlightAndRouteException;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -58,10 +59,19 @@ public class EditRoutesOverviewController {
         }
         else {
 
+            try {
+                controller.model.editRoute(Controller.routeForEdit, departureTextField.getText(), destinationTextField.getText());
+                controller.updateRoutes();
+                closeWindow(actionEvent);
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
 
-            controller.model.editRoute(Controller.routeForEdit, departureTextField.getText(), destinationTextField.getText());
-            controller.updateRoutes();
-            closeWindow(actionEvent);
+                alert.showAndWait();
+            }
         }
 
 

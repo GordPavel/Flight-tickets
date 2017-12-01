@@ -1,6 +1,7 @@
 package sample;
 
 
+import exceptions.FlightAndRouteException;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -187,9 +188,19 @@ public class AddFlightsOverviewController {
         }
         else {
 
-            controller.model.addFlight(new Flight(number.getText(), box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate));
-            controller.updateFlights();
-            closeWindow(actionEvent);
+            try {
+                controller.model.addFlight(new Flight(number.getText(), box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate));
+                controller.updateFlights();
+                closeWindow(actionEvent);
+            } catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
+
+                alert.showAndWait();
+            }
         }
     }
 

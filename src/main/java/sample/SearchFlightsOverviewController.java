@@ -1,5 +1,6 @@
 package sample;
 
+import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -181,10 +182,20 @@ public class SearchFlightsOverviewController{
             catch (ParseException e) {
 
             }
+        try {
+            controller.setFlights(FXCollections.observableArrayList(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(), "", "", planeID.getText(),
+                    dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate : null, flightTimeCheckBox.isSelected() ? ttDate : null)));
+            closeWindow(event);
+        }
+        catch (FlightAndRouteException e)
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Model exception");
+            alert.setHeaderText("Model throw an exception");
+            alert.setContentText(e.getMessage());
 
-        controller.setFlights(FXCollections.observableArrayList(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
-            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null)));
-        closeWindow(event);
+            alert.showAndWait();
+        }
     }
 
 

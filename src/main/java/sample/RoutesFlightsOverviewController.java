@@ -1,5 +1,6 @@
 package sample;
 
+import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -9,11 +10,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.Flight;
 import model.Route;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.regex.Matcher;
@@ -170,10 +173,20 @@ public class RoutesFlightsOverviewController {
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if (selectedRoute != null) {
 
-            routeTable.getItems().remove(selectedRoute);
-            controller.model.removeRoute(selectedRoute);
-            controller.updateRoutes();
-            routeTable.refresh();
+            try {
+                routeTable.getItems().remove(selectedRoute);
+                controller.model.removeRoute(selectedRoute);
+                controller.updateRoutes();
+                routeTable.refresh();
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
+
+                alert.showAndWait();
+            }
         } else {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -194,10 +207,20 @@ public class RoutesFlightsOverviewController {
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         if (selectedFlight != null) {
 
-            flightTable.getItems().remove(selectedFlight);
-            controller.model.removeFlight(selectedFlight.getNumber());
-            controller.updateFlights();
-            flightTable.refresh();
+            try {
+                flightTable.getItems().remove(selectedFlight);
+                controller.model.removeFlight(selectedFlight.getNumber());
+                controller.updateFlights();
+                flightTable.refresh();
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
+
+                alert.showAndWait();
+            }
         } else {
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -207,6 +230,7 @@ public class RoutesFlightsOverviewController {
 
             alert.showAndWait();
         }
+
     }
 
     /**
@@ -239,6 +263,8 @@ public class RoutesFlightsOverviewController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        routeTable.setItems(controller.getRoutes());
+        routeTable.refresh();
     }
 
     /**
@@ -287,6 +313,8 @@ public class RoutesFlightsOverviewController {
                 e.printStackTrace();
             }
         }
+        routeTable.setItems(controller.getRoutes());
+        routeTable.refresh();
     }
 
     /**
@@ -317,6 +345,8 @@ public class RoutesFlightsOverviewController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
     }
 
     /**
@@ -368,6 +398,8 @@ public class RoutesFlightsOverviewController {
                 e.printStackTrace();
             }
         }
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
     }
 
     /**
@@ -397,6 +429,8 @@ public class RoutesFlightsOverviewController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
 
     }
 
@@ -419,18 +453,45 @@ public class RoutesFlightsOverviewController {
             alert.showAndWait();
 
         } else if (!departure.getText().equals("") && destination.getText().equals("")) {
+            try {
+                controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.findRoutesByDepartureAirport(departure.getText())));
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
 
-            controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.findRoutesByDepartureAirport(departure.getText())));
+                alert.showAndWait();
+            }
             routeTable.setItems(controller.getRoutes());
             routeTable.refresh();
         } else if (departure.getText().equals("") && !destination.getText().equals("")) {
+            try {
+                controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.findRoutesByArrivalAirport(destination.getText())));
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
 
-            controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.findRoutesByArrivalAirport(destination.getText())));
+                alert.showAndWait();
+            }
             routeTable.setItems(controller.getRoutes());
             routeTable.refresh();
         } else {
+            try {
+                controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.searchRoute(departure.getText(), destination.getText())));
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
 
-            controller.setRoutes(FXCollections.observableArrayList(Controller.searchEngine.searchRoute(departure.getText(), destination.getText())));
+                alert.showAndWait();
+            }
             routeTable.setItems(controller.getRoutes());
             routeTable.refresh();
         }
@@ -440,39 +501,69 @@ public class RoutesFlightsOverviewController {
     private void handleImportAction(ActionEvent actionEvent) {
 
 
-       /* FileChooser fileChooser = new FileChooser();
-
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(new Stage());
         try {
 
             controller.model.importFromFile(file);
+            controller.updateRoutes();
+            controller.updateFlights();
         } catch (IOException e) {
 
             e.printStackTrace();
         } catch (FlightAndRouteException e) {
 
             e.printStackTrace();
-        }*/
+        }
+        routeTable.setItems(controller.getRoutes());
+        routeTable.refresh();
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
     }
 
     @FXML
     private void handleExportAction(ActionEvent actionEvent) {
 
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(new Stage());
+        try {
+
+            controller.model.exportToFile(file);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        } catch (FlightAndRouteException e) {
+
+            e.printStackTrace();
+        }
 
     }
 
     @FXML
     private void handleMergeAction(ActionEvent actionEvent) {
 
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(new Stage());
+        try {
 
+            controller.model.mergeData(file);
+            controller.updateRoutes();
+            controller.updateFlights();
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        } catch (FlightAndRouteException e) {
+
+            e.printStackTrace();
+        }
+        routeTable.setItems(controller.getRoutes());
+        routeTable.refresh();
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
 
     }
 }
 
-//Stage stage = null;
-
-//FileChooser fileChooser;
-
-//File file = fileChooser.showOpenDialog(stage.getOwner());
 
 
 
