@@ -10,6 +10,8 @@ public class Route implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
+
+
     public Route( String from , String to ){
         this.from = from;
         this.to = to;
@@ -34,7 +36,7 @@ public class Route implements Serializable, Cloneable{
         return from;
     }
 
-    public void setFrom( String from ){
+    void setFrom( String from ){
         this.from = from;
     }
 
@@ -47,7 +49,7 @@ public class Route implements Serializable, Cloneable{
         return to;
     }
 
-    public void setTo( String to ){
+    void setTo( String to ){
         this.to = to;
     }
 
