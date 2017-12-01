@@ -80,7 +80,7 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     @Override
     public String toString(){
-        return String.format( "Route from %s to %s" , from , to );
+        return String.format( "%s -> %s" , from , to );
     }
 
 }

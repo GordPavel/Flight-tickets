@@ -5,23 +5,22 @@
 <?import javafx.scene.text.Font?>
 <VBox prefHeight="600.0" prefWidth="958.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
     <MenuBar prefHeight="29.0" prefWidth="958.0" VBox.vgrow="NEVER">
-        <Menu fx:id="menuBar" mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" text="New"/>
-            <MenuItem mnemonicParsing="false" text="Open…"/>
-            <MenuItem mnemonicParsing="false" text="Merge"/>
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem fx:id="newDatabase" mnemonicParsing="false" text="New"/>
+            <MenuItem fx:id="openDatabase" mnemonicParsing="false" text="Open"/>
+            <MenuItem fx:id="mergeCurrentWithExternal" mnemonicParsing="false" text="Merge"/>
             <SeparatorMenuItem mnemonicParsing="false"/>
-            <MenuItem mnemonicParsing="false" text="Save"/>
-            <SeparatorMenuItem mnemonicParsing="false"/>
-            <MenuItem mnemonicParsing="false" text="Quit"/>
+            <MenuItem fx:id="saveInCurrent" mnemonicParsing="false" text="Save"/>
+            <MenuItem fx:id="saveInFile" mnemonicParsing="false" text="Save as"/>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
             <MenuItem fx:id="addRoute" mnemonicParsing="false" text="Add route"/>
             <MenuItem fx:id="editRoute" mnemonicParsing="false" text="Edit Route"/>
-            <MenuItem mnemonicParsing="false" text="Remove route"/>
+            <MenuItem fx:id="removeRoute" mnemonicParsing="false" text="Remove route"/>
             <SeparatorMenuItem mnemonicParsing="false"/>
-            <MenuItem mnemonicParsing="false" text="Add flight"/>
-            <MenuItem mnemonicParsing="false" text="Edit flight"/>
-            <MenuItem mnemonicParsing="false" text="Remove flight"/>
+            <MenuItem fx:id="addFlight" mnemonicParsing="false" text="Add flight"/>
+            <MenuItem fx:id="editFlight" mnemonicParsing="false" text="Edit flight"/>
+            <MenuItem fx:id="removeFlight" mnemonicParsing="false" text="Remove flight"/>
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
             <MenuItem mnemonicParsing="false" text="About MyHelloApp"/>

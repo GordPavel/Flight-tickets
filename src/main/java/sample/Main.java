@@ -33,14 +33,11 @@ public class Main extends Application{
                                      .toInstant() ) , Date.from(
                         LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) ) ).forEach( dataModel::addFlight );
-        dataModel.addFlight( new Flight( String.format( "number%d" , 15 ) , routes.get( ( 14 ) % routes.size() ) ,
-                                         String.format( "planeId%d" , 16 ) , Date.from(
-                LocalDateTime.of( 2006 , 12 , 15 , 15 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() ) ,
-                                         Date.from( LocalDateTime.of( 2007 , 12 , 15 , 18 , 30 )
-                                                                 .atZone( ZoneId.of( "Europe/Samara" ) )
-                                                                 .toInstant() ) ) );
+
         FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/MainWindow.fxml" ) );
         loader.setController( new MainWindowController( primaryStage ) );
+        primaryStage.setX( 5 );
+        primaryStage.setY( 5 );
         primaryStage.setTitle( "Routes and flights" );
         primaryStage.setScene( new Scene( loader.load() ) );
         primaryStage.setResizable( false );

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<?import np.com.ngopal.control.AutoFillTextBox?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="515.0"
+            prefWidth="515.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
+    <Label layoutX="36.0" layoutY="297.0" text="Number:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <Label fx:id="planeLabel" layoutX="36.0" layoutY="356.0" text="Plane ID :">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <TextField fx:id="numberField" layoutX="154.0" layoutY="291.0"/>
+    <AutoFillTextBox fx:id="planeIdField" layoutX="154.0" layoutY="356.0" prefWidth="167"/>
+    <Button fx:id="add" layoutX="413.0" layoutY="324.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+            text="Add"/>
+    <Button fx:id="cancel" layoutX="413.0" layoutY="276.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+            text="Cancel"/>
+    <Button fx:id="clear" layoutX="413.0" layoutY="232.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
+            text="Clear"/>
+    <Label layoutX="36.0" layoutY="477.0" text="Arriving Date:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <Label layoutX="36.0" layoutY="416.0" text="Departure Date:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <Label layoutX="34.0" layoutY="52.0" prefHeight="17.0" prefWidth="94.0" text="Choose a route:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <DatePicker fx:id="departureDate" layoutX="154.0" layoutY="410.0" prefHeight="27.0" prefWidth="167.0"
+                promptText="dd.MM.yyy"/>
+    <DatePicker fx:id="arrivalDate" layoutX="154.0" layoutY="470.0" prefHeight="27.0" prefWidth="167.0"
+                promptText="dd.MM.yyy"/>
+    <Label layoutX="342.0" layoutY="416.0" text="Time:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <TextField fx:id="departureTime" layoutX="391.0" layoutY="410.0" prefHeight="25.0" prefWidth="75.0"
+               promptText="hh:mm"/>
+    <Label alignment="CENTER" contentDisplay="CENTER" layoutX="70.0" layoutY="14.0" prefHeight="20.0" prefWidth="360.0"
+           text="Please enter data for a new flight.">
+        <font>
+            <Font name="System Bold Italic" size="18.0"/>
+        </font>
+    </Label>
+    <Label layoutX="342.0" layoutY="477.0" text="Time:">
+        <font>
+            <Font name="System Italic" size="12.0"/>
+        </font>
+    </Label>
+    <TextField fx:id="arrivalTime" layoutX="391.0" layoutY="471.0" prefHeight="25.0" prefWidth="75.0"
+               promptText="hh:mm"/>
+    <ListView fx:id="routesListView" layoutX="36.0" layoutY="82.0" prefHeight="181.0" prefWidth="259.0"/>
+    <TextField fx:id="searchFrom" alignment="CENTER" layoutX="321.0" layoutY="82.0" promptText="search from airport"/>
+    <TextField fx:id="searchTo" alignment="CENTER" layoutX="321.0" layoutY="130.0" promptText="search to airport"/>
+</AnchorPane>

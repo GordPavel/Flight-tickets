@@ -7,19 +7,16 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import model.DataModel;
 import model.Route;
 import np.com.ngopal.control.AutoFillTextBox;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class AddAndEditRoute implements Initializable{
-    public Label                   label;
+public class AddAndEditRouteWindowController implements Initializable{
     public AutoFillTextBox<String> departureTextField;
     public AutoFillTextBox<String> destinationTextField;
     public Button                  add;
@@ -30,7 +27,8 @@ public class AddAndEditRoute implements Initializable{
     private Stage                thisWindow;
     private Route                editingRoute;
 
-    AddAndEditRoute( MainWindowController mainWindowController , Stage thisWindow , Route editingRoute ){
+    AddAndEditRouteWindowController( MainWindowController mainWindowController , Stage thisWindow ,
+                                     Route editingRoute ){
         this.mainWindowController = mainWindowController;
         this.thisWindow = thisWindow;
         this.editingRoute = editingRoute;
@@ -45,7 +43,6 @@ public class AddAndEditRoute implements Initializable{
         departureTextField.setLayoutY( add.getLayoutY() );
         destinationTextField.setData( data );
         if( editingRoute != null ){
-            label.setText( "Edit route" );
             add.setText( "Edit" );
             departureTextField.getTextbox().setText( editingRoute.getFrom() );
             destinationTextField.getTextbox().setText( editingRoute.getTo() );
@@ -54,10 +51,8 @@ public class AddAndEditRoute implements Initializable{
                     mainWindowController.setRoute( editingRoute , new Route( departureTextField.getText() ,
                                                                              destinationTextField.getText() ) );
                 }catch( FlightAndRouteException e ){
-                    Optional<ButtonType> answer =
-                            new Alert( Alert.AlertType.ERROR , e.getMessage() , ButtonType.CLOSE , ButtonType.FINISH )
-                                    .showAndWait();
-                    if( answer.get().equals( ButtonType.CLOSE ) ){
+                    if( new Alert( Alert.AlertType.ERROR , e.getMessage() , ButtonType.CLOSE , ButtonType.FINISH )
+                            .showAndWait().get().equals( ButtonType.CLOSE ) ){
                         return;
                     }
                 }
@@ -69,10 +64,8 @@ public class AddAndEditRoute implements Initializable{
                     mainWindowController
                             .addRoute( new Route( departureTextField.getText() , destinationTextField.getText() ) );
                 }catch( FlightAndRouteException e ){
-                    Optional<ButtonType> answer =
-                            new Alert( Alert.AlertType.ERROR , e.getMessage() , ButtonType.CLOSE , ButtonType.FINISH )
-                                    .showAndWait();
-                    if( answer.get().equals( ButtonType.CLOSE ) ){
+                    if( new Alert( Alert.AlertType.ERROR , e.getMessage() , ButtonType.CLOSE , ButtonType.FINISH )
+                            .showAndWait().get().equals( ButtonType.CLOSE ) ){
                         return;
                     }
                 }

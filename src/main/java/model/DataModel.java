@@ -86,6 +86,10 @@ public class DataModel{
      duplicates number
      */
     public Boolean addFlight( Flight flight ) throws FlightAndRouteException{
+        if( checkNumberField( flight ) || checkPlaneField( flight ) || checkRouteField( flight ) ||
+            checkDatesFields( flight ) ){
+            throw new FaRIllegalEditedData( "Empty data" );
+        }
         if( flight.getArriveDate().before( flight.getDepartureDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
@@ -134,7 +138,7 @@ public class DataModel{
      @throws FaRDateMismatchException if flight has incorrect dates
      @throws FaRIllegalEditedData     previous version of this flight doesn't exist in database
      @throws FaRNotRelatedData        it has route, that doesn't exist in database
-     @throws FaRSameNameException     it   duplicates in ( planeID && route && arrive date && departure date ).
+     @throws FaRSameNameException     it duplicates in ( planeID && route && arrive date && departure date ).
      */
     public Boolean editFlight( Flight flight , Route newRoute , String newPlaneId , Date newDepartureDate ,
                                Date newArriveDate ) throws FlightAndRouteException{
@@ -172,6 +176,22 @@ public class DataModel{
         editedFLight.setArriveDate( newArriveDate != null ? newArriveDate : flight.getArriveDate() );
         editedFLight.setDepartureDate( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() );
         return true;
+    }
+
+    private boolean checkDatesFields( Flight flight ){
+        return flight.getDepartureDate() == null || flight.getArriveDate() == null;
+    }
+
+    private boolean checkRouteField( Flight flight ){
+        return flight.getRoute() == null;
+    }
+
+    private boolean checkPlaneField( Flight flight ){
+        return flight.getPlaneID().isEmpty() || flight.getPlaneID() == null;
+    }
+
+    private boolean checkNumberField( Flight flight ){
+        return flight.getNumber() == null || flight.getNumber().isEmpty();
     }
 
 
@@ -401,7 +421,7 @@ public class DataModel{
         return d.getClass().equals( Flight.class ) || d.getClass().equals( Route.class );
     }
 
-    void clear(){
+    public void clear(){
         routes = new CopyOnWriteArrayList<>();
         flights = new CopyOnWriteArrayList<>();
     }

@@ -252,6 +252,12 @@ class DataModelTest{
     }
 
     @Test
+    void generateDataFile() throws IOException{
+        File file = new File( Files.createFile( Paths.get( "test.far" ) ).toUri() );
+        dataModel.exportToFile( file );
+    }
+
+    @Test
     @RepeatedTest( 10 )
     void concurrency() throws InterruptedException, ExecutionException{
         int    addingRoutes = 10;
