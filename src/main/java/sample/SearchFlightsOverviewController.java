@@ -1,5 +1,7 @@
 package sample;
 
+import exceptions.FlightAndRouteException;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -14,6 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 //import java.awt.*;
 
@@ -60,7 +65,7 @@ public class SearchFlightsOverviewController{
     @FXML
     CheckBox flightTimeCheckBox;                //CheckBox, if checked - search will use travelDate
 
-
+    Controller controller = Controller.getInstance();
 
     private void closeWindow(Event event) {
         Stage stage = (Stage) ((Parent) event.getSource()).getScene().getWindow();
@@ -177,11 +182,20 @@ public class SearchFlightsOverviewController{
             catch (ParseException e) {
 
             }
+        try {
+            controller.setFlights(FXCollections.observableArrayList(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(), "", "", planeID.getText(),
+                    dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate : null, flightTimeCheckBox.isSelected() ? ttDate : null)));
+            closeWindow(event);
+        }
+        catch (FlightAndRouteException e)
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Model exception");
+            alert.setHeaderText("Model throw an exception");
+            alert.setContentText(e.getMessage());
 
-
-        System.out.println(Main.getEngine().searchFlight(numberField.getText(), routeBox.getValue(),"","", planeID.getText(),
-            dfDate, dtDate, afDate, atDate, flightTimeCheckBox.isSelected() ? tfDate:null,flightTimeCheckBox.isSelected() ? ttDate:null));
-
+            alert.showAndWait();
+        }
     }
 
 
@@ -280,6 +294,32 @@ public class SearchFlightsOverviewController{
             checkTimeTextFields();
         });
 
+        planeID.textProperty().addListener((observable,oldValue,newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9\\-_\\*\\?\\w]*");
+            Matcher matcher = pattern.matcher(planeID.getCharacters());
+            if (!matcher.matches())
+            {
+                planeID.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                planeID.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
+        numberField.textProperty().addListener((observable,oldValue,newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9\\-_\\*\\?\\w]*");
+            Matcher matcher = pattern.matcher(numberField.getCharacters());
+            if (!matcher.matches())
+            {
+                numberField.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                numberField.setStyle("-fx-text-inner-color: black;");
+            }
+            checkTimeTextFields();
+        });
+
     }
 
     /**
@@ -290,12 +330,15 @@ public class SearchFlightsOverviewController{
         Pattern pattern = Pattern.compile("[0-2][0-9][:][0-5][0-9]");
         Pattern travelPattern = Pattern.compile("[0-9][0-9][:][0-5][0-9]");
         Pattern datePattern = Pattern.compile("[0-31][.][1-12].[0-9]+");
+        Pattern requestPattern = Pattern.compile("[0-9\\-_\\*\\?\\w]*");
         if (pattern.matcher(arrivingDateToTextField.getCharacters()).matches()
                 &&pattern.matcher(arrivingDateFromTextField.getCharacters()).matches()
                 &&pattern.matcher(departureDateFromTextField.getCharacters()).matches()
                 &&pattern.matcher(departureDateToTextField.getCharacters()).matches()
                 &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches()
-                &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches()) {
+                &&travelPattern.matcher(flightTimeFromTextField.getCharacters()).matches()
+                &&requestPattern.matcher(planeID.getCharacters()).matches()
+                &&requestPattern.matcher(numberField.getCharacters()).matches()) {
             searchSearchFlightsButton.setDisable(false);
         }
         else {

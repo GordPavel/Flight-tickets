@@ -1,5 +1,6 @@
 package sample;
 
+import exceptions.FlightAndRouteException;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -47,8 +48,8 @@ public class AddRoutesOverviewController {
 
             alert.showAndWait();
 
-        } else if((controller.getRoutes().stream().anyMatch(route -> route.getFrom().toUpperCase().equals( departureTextField.getText().toUpperCase())))
-                &&(controller.getRoutes().stream().anyMatch(route -> route.getTo().toUpperCase().equals( destinationTextField.getText().toUpperCase())))){
+        } else if(controller.getRoutes().stream().anyMatch(route -> route.getFrom().toUpperCase().equals( departureTextField.getText().toUpperCase())&&route.getTo().toUpperCase().equals( destinationTextField.getText().toUpperCase()))
+                ){
 
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Route already exist ");
@@ -59,11 +60,20 @@ public class AddRoutesOverviewController {
         }
         else {
 
+            try {
+                controller.model.addRoute(new Route(departureTextField.getText(), destinationTextField.getText()));
+                controller.updateRoutes();
+                controller.getRoutes().forEach(System.out::println);
+                closeWindow(actionEvent);
+            }catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
 
-            controller.model.addRoute(new Route(departureTextField.getText(), destinationTextField.getText()));
-            controller.updateRoutes();
-            controller.getRoutes().forEach(System.out::println);
-            closeWindow(actionEvent);
+                alert.showAndWait();
+            }
         }
 
 
@@ -100,7 +110,7 @@ public class AddRoutesOverviewController {
     private void initialize(){
 
         departureTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(departureTextField.getText());
             if (!matcher.matches())
             {
@@ -113,7 +123,7 @@ public class AddRoutesOverviewController {
         });
 
         destinationTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(destinationTextField.getText());
             if (!matcher.matches())
             {
@@ -130,7 +140,7 @@ public class AddRoutesOverviewController {
 
     private void checkTimeTextFields(){
 
-        Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+        Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
 
         if (pattern.matcher(departureTextField.getText()).matches()
                 &&pattern.matcher(destinationTextField.getText()).matches()) {

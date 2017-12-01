@@ -1,6 +1,7 @@
 package sample;
 
 
+import exceptions.FlightAndRouteException;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -114,7 +115,7 @@ public class EditFlightsOverviewController {
 
 
         number.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(number.getCharacters());
             if (!matcher.matches())
             {
@@ -127,7 +128,7 @@ public class EditFlightsOverviewController {
         });
 
         planeID.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(planeID.getCharacters());
             if (!matcher.matches())
             {
@@ -187,9 +188,20 @@ public class EditFlightsOverviewController {
 
             alert.showAndWait();
         } else {
-            controller.model.editFlight(Controller.flightForEdit, box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate);
-            controller.updateFlights();
-            closeWindow(actionEvent);
+            try {
+                controller.model.editFlight(Controller.flightForEdit, box.getSelectionModel().getSelectedItem(), planeID.getText(), departDate, arrivDate);
+                controller.updateFlights();
+                closeWindow(actionEvent);
+            }
+            catch (FlightAndRouteException e)
+            {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Model exception");
+                alert.setHeaderText("Model throw an exception");
+                alert.setContentText(e.getMessage());
+
+                alert.showAndWait();
+            }
         }
     }
 
@@ -210,7 +222,7 @@ public class EditFlightsOverviewController {
 
     private void checkTimeTextFields(){
 
-        Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+        Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
         Pattern timePattern = Pattern.compile("[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]");
 
         if (pattern.matcher(number.getText()).matches()
