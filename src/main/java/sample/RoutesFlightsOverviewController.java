@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +16,11 @@ import model.Route;
 
 import java.io.IOException;
 import java.time.ZoneId;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -103,6 +109,40 @@ public class RoutesFlightsOverviewController {
         flightTable.setItems(controller.getFlights());
         flightTable.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showFlightDetails(newValue));
+
+        destination.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9\\-_\\*\\?\\w]*");
+            Matcher matcher = pattern.matcher(destination.getText());
+            if (!matcher.matches())
+            {
+                destination.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                destination.setStyle("-fx-text-inner-color: black;");
+            }
+            Pattern departurePattern = Pattern.compile(".*"+departure.getText().toUpperCase().replace("*",".*").replace("?",".")+".*");
+            Pattern destinationPattern = Pattern.compile(".*"+destination.getText().toUpperCase().replace("*",".*").replace("?",".")+".*");
+
+            routeTable.setItems(controller.getRoutes().stream().filter( route -> departurePattern.matcher(route.getFrom().toUpperCase()).matches()&& destinationPattern.matcher(route.getTo().toUpperCase()).matches()).collect(Collectors.collectingAndThen(toList(), l -> FXCollections.observableArrayList(l))));
+        });
+
+        departure.textProperty().addListener((observable, oldValue, newValue) -> {
+            Pattern pattern = Pattern.compile("[0-9\\-_\\*\\?\\w]*");
+            Matcher matcher = pattern.matcher(departure.getText());
+            if (!matcher.matches())
+            {
+                departure.setStyle("-fx-text-inner-color: red;");
+            }
+            else {
+                departure.setStyle("-fx-text-inner-color: black;");
+            }
+
+            Pattern departurePattern = Pattern.compile(".*"+departure.getText().toUpperCase().replace("*",".*").replace("?",".")+".*");
+            Pattern destinationPattern = Pattern.compile(".*"+destination.getText().toUpperCase().replace("*",".*").replace("?",".")+".*");
+
+            routeTable.setItems(controller.getRoutes().stream().filter( route -> departurePattern.matcher(route.getFrom().toUpperCase()).matches()&&destinationPattern.matcher(route.getTo().toUpperCase()).matches()).collect(Collectors.collectingAndThen(toList(), l -> FXCollections.observableArrayList(l))));
+
+        });
     }
 
     /**
@@ -422,6 +462,7 @@ public class RoutesFlightsOverviewController {
 
     @FXML
     private void handleMergeAction(ActionEvent actionEvent) {
+
 
 
     }

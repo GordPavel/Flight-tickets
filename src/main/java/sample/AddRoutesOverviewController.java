@@ -100,7 +100,7 @@ public class AddRoutesOverviewController {
     private void initialize(){
 
         departureTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(departureTextField.getText());
             if (!matcher.matches())
             {
@@ -113,7 +113,7 @@ public class AddRoutesOverviewController {
         });
 
         destinationTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+            Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
             Matcher matcher = pattern.matcher(destinationTextField.getText());
             if (!matcher.matches())
             {
@@ -130,7 +130,7 @@ public class AddRoutesOverviewController {
 
     private void checkTimeTextFields(){
 
-        Pattern pattern = Pattern.compile("[0-9]*|[\\-_]*|\\w*");
+        Pattern pattern = Pattern.compile("[0-9\\-_\\w]*");
 
         if (pattern.matcher(departureTextField.getText()).matches()
                 &&pattern.matcher(destinationTextField.getText()).matches()) {
