@@ -239,11 +239,11 @@ public class DataModel{
      */
     public Boolean editRoute( Route route , String newDestinationAirport , String newArriveAirport ){
         if( ( newDestinationAirport != null ? newDestinationAirport : route.getFrom() )
-                .equals( newArriveAirport != null ? newArriveAirport : route.getFrom() ) ){
+                .equals( newArriveAirport != null ? newArriveAirport : route.getTo() ) ){
             throw new FaRSameNameException( "Same " + "airports" );
         }
         Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
-        if( !pattern.matcher( newDestinationAirport != null ? newArriveAirport : route.getFrom() ).matches() ||
+        if( !pattern.matcher( newDestinationAirport != null ? newDestinationAirport : route.getFrom() ).matches() ||
             !pattern.matcher( newArriveAirport != null ? newArriveAirport : route.getTo() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }

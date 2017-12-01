@@ -3,9 +3,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<VBox prefHeight="600.0" prefWidth="893.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1"
->
-    <MenuBar VBox.vgrow="NEVER">
+<VBox prefHeight="600.0" prefWidth="958.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
+    <MenuBar prefHeight="29.0" prefWidth="958.0" VBox.vgrow="NEVER">
         <Menu fx:id="menuBar" mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" text="New"/>
             <MenuItem mnemonicParsing="false" text="Open…"/>
@@ -28,7 +27,7 @@
             <MenuItem mnemonicParsing="false" text="About MyHelloApp"/>
         </Menu>
     </MenuBar>
-    <SplitPane dividerPositions="0.2505567928730512, 0.7216035634743875" focusTraversable="true" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.24751381215469614, 0.7524861878453039" focusTraversable="true" VBox.vgrow="ALWAYS">
         <AnchorPane maxWidth="220.0" minWidth="220.0" prefWidth="220.0" SplitPane.resizableWithParent="false">
             <TableView fx:id="routesTableView" layoutX="-1.0" layoutY="53.0" maxWidth="220.0" minWidth="220.0"
                        prefHeight="517.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -52,7 +51,7 @@
                        minWidth="110.0" prefHeight="27.0" prefWidth="110.0" promptText="search to"
                        AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
         </AnchorPane>
-        <AnchorPane id="Content" maxWidth="452.0" minWidth="347.0" prefHeight="570.0" prefWidth="347.0"
+        <AnchorPane id="Content" maxWidth="435.0" minWidth="347.0" prefHeight="570.0" prefWidth="347.0"
                     SplitPane.resizableWithParent="false">
             <TableView fx:id="flightsTableView" layoutX="9.0" layoutY="11.0" maxWidth="443.0" minWidth="305.0"
                        prefHeight="545.0" prefWidth="422.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -65,24 +64,28 @@
                 </columns>
             </TableView>
             <Label alignment="CENTER" layoutX="77.0" layoutY="2.0" maxWidth="434.0" minWidth="305.0" prefHeight="25.0"
-                   prefWidth="382.0" text="Flights" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="53.0"
+                   prefWidth="423.0" text="Flights" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="26.0"
                    AnchorPane.topAnchor="0.0">
                 <font>
                     <Font name="Monaco" size="20.0"/>
                 </font>
             </Label>
             <Button fx:id="searchButton" layoutX="397.0" layoutY="-1.0" maxHeight="40.0" maxWidth="40.0"
-                    minHeight="24.0" minWidth="25.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="25.0"/>
+                    minHeight="24.0" minWidth="25.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="25.0"
+                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
         </AnchorPane>
-        <AnchorPane maxWidth="220.0" minWidth="220.0" prefWidth="220.0" SplitPane.resizableWithParent="false">
-            <Label alignment="CENTER" maxWidth="220.0" minWidth="220.0" prefHeight="20.0" prefWidth="220.0"
-                   text="Flight details" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane maxWidth="288.0" minWidth="220.0" prefHeight="570.0" prefWidth="288.0"
+                    SplitPane.resizableWithParent="false">
+            <Label alignment="CENTER" maxWidth="234.0" minWidth="220.0" prefHeight="25.0" prefWidth="234.0"
+                   text="Flight details" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
                 <font>
                     <Font name="Monaco" size="20.0"/>
                 </font>
             </Label>
-            <TextArea editable="false" layoutX="31.0" layoutY="40.0" maxWidth="220.0" minWidth="220.0" prefWidth="220.0"
-                      AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
+            <TextArea fx:id="detailsArea" editable="false" layoutX="-1.0" layoutY="40.0" maxWidth="234.0"
+                      minWidth="220.0" prefHeight="545.0" prefWidth="234.0" AnchorPane.bottomAnchor="0.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
         </AnchorPane>
     </SplitPane>
 </VBox>

@@ -3,6 +3,7 @@ package model;
 import exceptions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -251,8 +252,9 @@ class DataModelTest{
     }
 
     @Test
+    @RepeatedTest( 10 )
     void concurrency() throws InterruptedException, ExecutionException{
-        int    addingRoutes = 2;
+        int    addingRoutes = 10;
         Random random       = new Random( System.currentTimeMillis() );
         List<Route> routes = Stream.generate(
                 () -> new Route( "port" + random.nextInt( 46 ) + 4 , "port" + random.nextInt( 50 ) + 50 ) )

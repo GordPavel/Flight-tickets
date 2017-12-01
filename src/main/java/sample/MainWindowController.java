@@ -37,6 +37,7 @@ public class MainWindowController implements Initializable{
     public MenuItem          editRoute;
     public TextField         searchDepartureAirport;
     public TextField         searchArrivalAirport;
+    public TextArea          detailsArea;
 
     private DataModel dataModel = DataModel.getInstance();
     private Stage thisStage;
@@ -65,8 +66,8 @@ public class MainWindowController implements Initializable{
         flightsColumns.get( 3 ).setCellValueFactory( new PropertyValueFactory<>( "arriveDateString" ) );
         updateFlightsList();
         ImageView imageView = new ImageView( new Image( "searchPic.png" ) );
-        imageView.setFitWidth( 24 );
-        imageView.setFitHeight( 24 );
+        imageView.setFitWidth( 60 );
+        imageView.setFitHeight( 60 );
         searchButton.setGraphic( imageView );
         searchButton.setContentDisplay( ContentDisplay.CENTER );
 
@@ -82,6 +83,9 @@ public class MainWindowController implements Initializable{
             toAirPort = newValue.isEmpty() ? null : newValue;
             updateRoutesList();
         } );
+
+        flightsTableView.setOnMouseClicked(
+                event -> detailsArea.setText( flightsTableView.getSelectionModel().getSelectedItem().toString() ) );
     }
 
     private void initSearchFlightWindow(){
@@ -90,7 +94,9 @@ public class MainWindowController implements Initializable{
             SearchFlightsController searchFlightsController = new SearchFlightsController( this , stage );
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightWindow.fxml" ) );
             loader.setController( searchFlightsController );
-            stage.setScene( new Scene( loader.load() ) );
+            Scene sce = new Scene( loader.load() );
+            sce.getStylesheets().add( getClass().getResource( "/fxml/text-field-time-error.css" ).toExternalForm() );
+            stage.setScene( sce );
             stage.setTitle( "Search flight" );
             stage.setResizable( false );
             stage.show();
@@ -196,8 +202,8 @@ public class MainWindowController implements Initializable{
                     .parse( new SimpleDateFormat( "dd.MM.yyyy HH:mm" ).format( date1 ) ,
                             DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" ) );
             if( date != null ){
-                LocalDateTime start = date.atTime( startTime != null ? startTime : LocalTime.MIN );
-                LocalDateTime end   = date.atTime( endTime != null ? endTime : LocalTime.MAX );
+                LocalDateTime start = LocalDateTime.of( date , startTime != null ? startTime : LocalTime.MIN );
+                LocalDateTime end   = LocalDateTime.of( date , endTime != null ? endTime : LocalTime.MAX );
                 return !localDateTime.isBefore( start ) && localDateTime.isBefore( end );
             }else{
                 return !localDateTime.toLocalTime().isBefore( startTime != null ? startTime : LocalTime.MIN ) &&

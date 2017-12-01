@@ -36,4 +36,5 @@
                prefWidth="74.0" promptText="hh:mm" text="23:59"/>
     <Label alignment="CENTER" layoutX="406.0" layoutY="187.0" text="-"/>
     <Label alignment="CENTER" layoutX="406.0" layoutY="222.0" text="-"/>
+    <Button fx:id="clear" layoutX="434.0" layoutY="258.0" mnemonicParsing="false" text="Clear"/>
 </AnchorPane>
