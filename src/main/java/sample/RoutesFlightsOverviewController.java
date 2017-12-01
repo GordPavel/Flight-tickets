@@ -18,7 +18,9 @@ import model.Route;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -503,22 +505,24 @@ public class RoutesFlightsOverviewController {
 
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(new Stage());
-        try {
+        if (file!=null) {
+            try {
 
-            controller.model.importFromFile(file);
-            controller.updateRoutes();
-            controller.updateFlights();
-        } catch (IOException e) {
+                controller.model.importFromFile(file);
+                controller.updateRoutes();
+                controller.updateFlights();
+            } catch (IOException e) {
 
-            e.printStackTrace();
-        } catch (FlightAndRouteException e) {
+                e.printStackTrace();
+            } catch (FlightAndRouteException e) {
 
-            e.printStackTrace();
+                e.printStackTrace();
+            }
+            routeTable.setItems(controller.getRoutes());
+            routeTable.refresh();
+            flightTable.setItems(controller.getFlights());
+            flightTable.refresh();
         }
-        routeTable.setItems(controller.getRoutes());
-        routeTable.refresh();
-        flightTable.setItems(controller.getFlights());
-        flightTable.refresh();
     }
 
     @FXML
@@ -526,17 +530,18 @@ public class RoutesFlightsOverviewController {
 
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(new Stage());
-        try {
+        if (file!=null) {
+            try {
 
-            controller.model.exportToFile(file);
-        } catch (IOException e) {
+                controller.model.exportToFile(file);
+            } catch (IOException e) {
 
-            e.printStackTrace();
-        } catch (FlightAndRouteException e) {
+                e.printStackTrace();
+            } catch (FlightAndRouteException e) {
 
-            e.printStackTrace();
+                e.printStackTrace();
+            }
         }
-
     }
 
     @FXML
@@ -544,22 +549,38 @@ public class RoutesFlightsOverviewController {
 
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(new Stage());
-        try {
+        ArrayList<Serializable> failedInMerge = new ArrayList<>();
+        if (file!=null) {
+            try {
 
-            controller.model.mergeData(file);
-            controller.updateRoutes();
-            controller.updateFlights();
-        } catch (IOException e) {
+                failedInMerge=new ArrayList<>(controller.model.mergeData(file));
 
-            e.printStackTrace();
-        } catch (FlightAndRouteException e) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Merge results");
+                alert.setHeaderText("Model have this problems with merge:");
+                String errors="";
+                for (Serializable element:failedInMerge)
+                {
+                    errors=errors+"-"+element.toString()+"\n";
+                }
+                alert.setContentText(errors);
 
-            e.printStackTrace();
+                alert.showAndWait();
+
+                controller.updateRoutes();
+                controller.updateFlights();
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            } catch (FlightAndRouteException e) {
+
+                e.printStackTrace();
+            }
+            routeTable.setItems(controller.getRoutes());
+            routeTable.refresh();
+            flightTable.setItems(controller.getFlights());
+            flightTable.refresh();
         }
-        routeTable.setItems(controller.getRoutes());
-        routeTable.refresh();
-        flightTable.setItems(controller.getFlights());
-        flightTable.refresh();
 
     }
 }
