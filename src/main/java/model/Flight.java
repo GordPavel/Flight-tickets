@@ -1,7 +1,8 @@
 package model;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -15,12 +16,12 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , Date departureDate , Date arrivalDate ){
+    public Flight( String number , Route route , String planeID , Date departureDate , Date arriveDate ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
         this.departureDate = departureDate;
-        this.arrivalDate = arrivalDate;
+        this.arriveDate = arriveDate;
     }
 
     /**
@@ -43,6 +44,21 @@ public class Flight implements Serializable, Cloneable{
 
     public Route getRoute(){
         return route;
+    }
+
+    //    For javafx Table View
+    public String getRouteString(){
+        return getRoute().getFrom() + "->" + getRoute().getTo();
+    }
+
+    private SimpleDateFormat format = new SimpleDateFormat( "dd.MM.yyyy HH:mm" );
+
+    public String getDepartureDateString(){
+        return format.format( departureDate );
+    }
+
+    public String getArriveDateString(){
+        return format.format( arriveDate );
     }
 
     void setRoute( Route route ){
@@ -71,34 +87,34 @@ public class Flight implements Serializable, Cloneable{
         return departureDate;
     }
 
-    void setDepartureDate(Date date ){
+    void setDepartureDate( Date date ){
         this.departureDate = date;
     }
 
     /**
-     Stores date and time, when plane have to land
+     Stores date and time, when plane have to launch
      */
-    private Date arrivalDate;
+    private Date arriveDate;
 
-    public Date getArrivalDate(){
-        return arrivalDate;
+    public Date getArriveDate(){
+        return arriveDate;
     }
 
-    void setArrivalDate( Date date ){
-        this.arrivalDate = date;
+    void setArriveDate( Date date ){
+        this.arriveDate = date;
     }
 
     /**
-     @return countable field, difference between arrivalDate and departureDate
+     @return countable field, difference between departureDate and arriveDate in milliseconds
      */
-    public Date getTravelTime(){
-        return Date.from( Instant.ofEpochMilli( arrivalDate.getTime() - departureDate.getTime() ) );
+    public Long getTravelTime(){
+        return Duration.between( departureDate.toInstant() , arriveDate.toInstant() ).abs().toMillis();
     }
 
     @Override
     public int hashCode(){
-        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ departureDate.hashCode() ^
-               arrivalDate.hashCode();
+        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ arriveDate.hashCode() ^
+               departureDate.hashCode();
     }
 
     @Override
@@ -106,8 +122,8 @@ public class Flight implements Serializable, Cloneable{
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
-               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate) &&
-               arrivalDate.equals( flight.arrivalDate );
+               planeID.equals( flight.planeID ) && arriveDate.equals( flight.arriveDate ) &&
+               departureDate.equals( flight.departureDate );
     }
 
     @Override
@@ -116,16 +132,13 @@ public class Flight implements Serializable, Cloneable{
         clone.number = this.number;
         clone.route = ( Route ) this.route.clone();
         clone.planeID = this.planeID;
+        clone.arriveDate = ( Date ) this.arriveDate.clone();
         clone.departureDate = ( Date ) this.departureDate.clone();
-        clone.arrivalDate = ( Date ) this.arrivalDate.clone();
         return clone;
     }
 
 
     /**
-     Парикмахер обращается к клиенту : Вам висок косой?
-     Клиент: Нет, машинкой.
-
      Looks like "Flight number (number), takes at (dd.MM.yyyy HH:mm) from (arrival airportId), launches at
      (dd.MM.yyyy HH:mm) at (departure airportId),
      flies by (planeId) plane"
@@ -136,21 +149,25 @@ public class Flight implements Serializable, Cloneable{
     public String toString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
         LocalDateTime departureLocalDate =
-                LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
+                LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
         LocalDateTime arrivalLocalDate =
-                LocalDateTime.ofInstant( arrivalDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
-        return String
-                .format( "Flight number %s, takes at %s from %s, launches at %s at %s, flies by %s plane" , number ,
-                        departureLocalDate.format( formatter ) , route.getFrom() ,
-                        arrivalLocalDate.format( formatter ) , route.getTo() , planeID );
+                LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
+        return String.format(
+                "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
+                "plane" , number , departureLocalDate.format( formatter ) , route.getFrom() ,
+                arrivalLocalDate.format( formatter ) , route.getTo() , millisToHoursAndMinutes( getTravelTime() ) ,
+                planeID );
     }
 
-    /**
-     @param airportId Specify the airportId, which timezone you want to know
+    private String millisToHoursAndMinutes( Long startMilli ){
+        startMilli /= 1000; // sum of second
+        long sumMinute = startMilli / 60; // sum of minute
+        long minute    = sumMinute % 60; // minute
+        long hour      = sumMinute / 60; // hour
+        return String.format( "%d:%02d" , hour , minute );
+    }
 
-     @return ZoneId of specified airport
-     */
     private ZoneId zoneIdFromAirPortId( String airportId ){
-        return ZoneId.of( "Europe/Moscow" );
+        return ZoneId.of( "Europe/Samara" );
     }
 }
