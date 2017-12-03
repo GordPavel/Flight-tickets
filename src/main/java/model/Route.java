@@ -10,11 +10,11 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
 
-
     public Route( String from , String to ){
         this.from = from;
         this.to = to;
     }
+
 
     private Integer id;
 

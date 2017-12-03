@@ -64,6 +64,7 @@ public class AddAndEditFlightWindowController implements Initializable{
             routesListView.getSelectionModel().select( editingFLight.getRoute() );
             routesListView.getFocusModel().focus( routesListView.getSelectionModel().getSelectedIndex() );
             numberField.setText( editingFLight.getNumber() );
+            numberField.setDisable( true );
             planeIdField.getTextbox().setText( editingFLight.getPlaneID() );
             departureDate.getEditor()
                          .setText( new SimpleDateFormat( "dd.MM.yyyy" ).format( editingFLight.getDepartureDate() ) );
@@ -71,6 +72,7 @@ public class AddAndEditFlightWindowController implements Initializable{
             arrivalDate.getEditor()
                        .setText( new SimpleDateFormat( "dd.MM.yyyy" ).format( editingFLight.getArriveDate() ) );
             arrivalTime.setText( new SimpleDateFormat( "HH:mm" ).format( editingFLight.getArriveDate() ) );
+            add.setText( "Edit" );
         }
 
         searchFrom.textProperty().addListener( ( observable , oldValue , newValue ) -> updateRoutesList() );

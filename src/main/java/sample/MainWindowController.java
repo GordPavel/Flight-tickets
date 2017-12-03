@@ -27,6 +27,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,6 +77,9 @@ public class MainWindowController implements Initializable{
             fileOptional.ifPresent( file -> {
                 try{
                     dataModel.importFromFile( file );
+                    thisStage.setTitle( file.getName() );
+                    updateRoutesList();
+                    updateFlightsList();
                 }catch( IOException e ){
                     e.printStackTrace();
                 }

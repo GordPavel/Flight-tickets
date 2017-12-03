@@ -1,10 +1,8 @@
 package model;
 
 import exceptions.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -186,8 +184,9 @@ class DataModelTest{
     @Test
     void editFlight(){
         Flight editedFLight = dataModel.listFlightsWithPredicate( flight -> true ).findAny().get();
-        assertTrue( dataModel.editFlight( editedFLight , null , null , null , Date.from(
-                Instant.ofEpochMilli( editedFLight.getArriveDate().getTime() + 1000 * 60 * 60 ) ) ) ,
+        assertTrue( dataModel.editFlight( editedFLight , null , null , Date.from(
+                Instant.ofEpochMilli( editedFLight.getDepartureDate().getTime() + 1000 * 60 * 60 ) ) , Date.from(
+                Instant.ofEpochMilli( editedFLight.getArriveDate().getTime() + 1000 * 60 * 60 * 2 ) ) ) ,
                     "Changed departure time to 1 hour later" );
         assertThrows( FaRDateMismatchException.class , () -> dataModel.editFlight( editedFLight , null , null , null ,
                                                                                    Date.from( Instant.ofEpochMilli(
@@ -214,24 +213,27 @@ class DataModelTest{
     }
 
     @Test
-    void serializationAndDeserialization() throws IOException{
+    void serializationAndDeserialization() throws IOException, ClassNotFoundException{
         List<Serializable> data = Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
                                                  dataModel.listRoutesWithPredicate( route -> true ) )
                                         .collect( Collectors.toList() );
         File file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        dataModel.exportToFile( file );
-        dataModel.importFromFile( file );
-        assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
-                                   dataModel.listRoutesWithPredicate( route -> true ) ).parallel()
-                          .allMatch( data::contains ) , "All deserialize data exists in old data" );
-        Files.deleteIfExists( file.toPath() );
-        DataModel anotherMode = new DataModel();
+        try{
+            dataModel.exportToFile( file );
+            dataModel.importFromFile( file );
+            assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
+                                       dataModel.listRoutesWithPredicate( route -> true ) ).parallel()
+                              .allMatch( data::contains ) , "All deserialize data exists in old data" );
+        }finally{
+            Files.deleteIfExists( file.toPath() );
+        }
+        DataModel anotherModel = new DataModel();
         List<Route> copyRoutes =
                 dataModel.listRoutesWithPredicate( route -> true ).limit( 1 ).collect( Collectors.toList() );
         List<Route> newRoutes = Stream.of( new Route( "port4" , "port5" ) , new Route( "port5" , "port4" ) )
                                       .collect( Collectors.toList() );
-        Stream.concat( copyRoutes.stream() , newRoutes.stream() ).forEach( anotherMode::addRoute );
-        List<Route> routes = anotherMode.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
+        Stream.concat( copyRoutes.stream() , newRoutes.stream() ).forEach( anotherModel::addRoute );
+        List<Route> routes = anotherModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
         List<Flight> copyFlights =
                 dataModel.listFlightsWithPredicate( flight -> true ).limit( 2 ).collect( Collectors.toList() );
         List<Flight> newFlights = IntStream.rangeClosed( 10 , 15 ).mapToObj(
@@ -241,17 +243,27 @@ class DataModelTest{
                                      .toInstant() ) , Date.from(
                         LocalDateTime.of( 2000 + i , 12 , 15 , 8 + i , 30 ).atZone( ZoneId.of( "Europe/Samara" ) )
                                      .toInstant() ) ) ).collect( Collectors.toList() );
-        Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherMode::addFlight );
+        Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherModel::addFlight );
         file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        anotherMode.exportToFile( file );
-        List<Serializable> copyData =
-                Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
-        assertTrue( dataModel.mergeData( file ).stream().anyMatch( copyData::contains ) ,
-                    "All copies were returned from method" );
-        Files.deleteIfExists( file.toPath() );
+        try{
+            anotherModel.exportToFile( file );
+            List<Serializable> copyData =
+                    Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
+            assertTrue( dataModel.mergeData( file ).stream().anyMatch( copyData::contains ) ,
+                        "All copies were returned from method" );
+            List<Serializable> newData =
+                    Stream.concat( newFlights.stream() , newRoutes.stream() ).collect( Collectors.toList() );
+            assertTrue( newData.stream().allMatch( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
+                                                                  dataModel.listRoutesWithPredicate( route -> true ) )
+                                                         .collect( Collectors.toList() )::contains ) ,
+                        "All new data in base" );
+        }finally{
+            Files.deleteIfExists( file.toPath() );
+        }
     }
 
     @Test
+    @Disabled
     void generateDataFile() throws IOException{
         File file = new File( Files.createFile( Paths.get( "test.far" ) ).toUri() );
         dataModel.exportToFile( file );
