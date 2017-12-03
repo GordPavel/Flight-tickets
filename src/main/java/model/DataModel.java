@@ -366,7 +366,7 @@ public class DataModel{
      Method closes stream.
 
      @param data collection of data to serialize
-     @param file where serialize the data
+     x   @param file where serialize the data
 
      @throws IllegalArgumentException if collection contains not just flights and routes
      */
