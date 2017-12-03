@@ -303,8 +303,7 @@ public class DataModel{
 
      @throws IOException If other I/O error has occurred.
      */
-    public Collection<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException,
-                                                                            ClassNotFoundException{
+    public Collection<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( additionalData );
         List<Route>                      failedRoutes     = new ArrayList<>();
         List<Flight>                     failedFlights    = new ArrayList<>();
@@ -367,7 +366,7 @@ public class DataModel{
      Method closes stream.
 
      @param data collection of data to serialize
-     x   @param file where serialize the data
+     @param file where serialize the data
 
      @throws IllegalArgumentException if collection contains not just flights and routes
      */
