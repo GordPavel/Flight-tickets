@@ -270,7 +270,7 @@ public class DataModel{
      */
     public void importFromFile( File file ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( file );
-        if( !routesAndFlights.values().parallelStream().allMatch(
+        if( !routesAndFlights.values().parallelStream().flatMap( Collection::stream ).allMatch(
                 serializable -> serializable.getClass().equals( Route.class ) ||
                                 serializable.getClass().equals( Flight.class ) ) ){
             throw new IllegalArgumentException( "One object neither Route, nor Flight class" );
@@ -312,14 +312,14 @@ public class DataModel{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( additionalData );
         List<Serializable>               failedData       = new ArrayList<>();
         routesAndFlights.get( true ).removeIf( route -> {
-            Boolean isRoute = route.getClass().equals( Route.class );
-            if( !isRoute ) failedData.add( route );
-            return isRoute;
+            Boolean isNotRoute = !route.getClass().equals( Route.class );
+            if( isNotRoute ) failedData.add( route );
+            return isNotRoute;
         } );
         routesAndFlights.get( false ).removeIf( flight -> {
-            Boolean isFlight = flight.getClass().equals( Flight.class );
-            if( !isFlight ) failedData.add( flight );
-            return isFlight;
+            Boolean isNotFlight = !flight.getClass().equals( Flight.class );
+            if( isNotFlight ) failedData.add( flight );
+            return isNotFlight;
         } );
         List<Route>  failedRoutes  = new ArrayList<>();
         List<Flight> failedFlights = new ArrayList<>();
