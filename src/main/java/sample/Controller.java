@@ -33,7 +33,8 @@ public class Controller {
     private       ObservableList<Flight> flights;
     public static Route                  routeForEdit;
     public static Flight                 flightForEdit;
-    private       ObservableList<Serializable> mergeElements;
+    private       ObservableList<Flight> mergeFlights;
+    private       ObservableList<Route> mergeRoutes;
 
     /*public Controller() {
 
@@ -62,12 +63,18 @@ public class Controller {
         this.flights = flights;
     }
 
-    public void setMergeElements(ObservableList<Serializable> mergeElements) {
-        this.mergeElements = mergeElements;
+    public void setMergeFlights(ObservableList<Flight> mergeFlights) {
+        this.mergeFlights = mergeFlights;
     }
 
-    public ObservableList<Serializable> getMergeElements() {
-        return mergeElements;
+    public ObservableList<Flight> getMergeFlights() {
+        return mergeFlights;
+    }
+
+    public void setMergeRoutes(ObservableList<Route> mergeRoutes) {this.mergeRoutes=mergeRoutes;}
+
+    public ObservableList<Route> getMergeRoutes() {
+        return mergeRoutes;
     }
 
     public void updateRoutes(){

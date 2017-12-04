@@ -133,6 +133,9 @@ public class RoutesFlightsOverviewController{
                 Controller.model.removeRoute( selectedRoute );
                 controller.updateRoutes();
                 routeTable.refresh();
+                controller.updateFlights();
+                flightTable.setItems(controller.getFlights());
+                flightTable.refresh();
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model exception" );
@@ -502,7 +505,7 @@ public class RoutesFlightsOverviewController{
 
                 failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
 
-                controller.setMergeElements(FXCollections.observableArrayList(failedInMerge));
+
 
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
