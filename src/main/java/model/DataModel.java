@@ -200,7 +200,7 @@ public class DataModel{
      */
     public Boolean addRoute( Route route ){
         if( route.getFrom().equals( route.getTo() ) ){
-            throw new IllegalArgumentException( "Departure and destination airports are similar" );
+            throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
         if( !( legalSymbolsChecker.matcher( route.getFrom() ).matches() &&
                legalSymbolsChecker.matcher( route.getTo() ).matches() ) ){
@@ -336,6 +336,10 @@ public class DataModel{
         } );
         routes.removeAll( failedRoutes );
         flights.forEach( flight -> {
+            if( flightSet.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber() , flight.getNumber() ) ) ){
+                failedFlights.add( flight );
+                return;
+            }
             if( !routeSet.contains( flight.getRoute() ) ){
                 failedFlights.add( flight );
                 return;

@@ -1,7 +1,6 @@
 package model;
 
 import exceptions.*;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -184,8 +183,7 @@ class DataModelTest{
     @Test
     void editFlight(){
         Flight editedFLight = dataModel.listFlightsWithPredicate( flight -> true ).findAny().get();
-        assertTrue( dataModel.editFlight( editedFLight , null , null , Date.from(
-                Instant.ofEpochMilli( editedFLight.getDepartureDate().getTime() + 1000 * 60 * 60 ) ) , Date.from(
+        assertTrue( dataModel.editFlight( editedFLight , null , null , null , Date.from(
                 Instant.ofEpochMilli( editedFLight.getArriveDate().getTime() + 1000 * 60 * 60 * 2 ) ) ) ,
                     "Changed departure time to 1 hour later" );
         assertThrows( FaRDateMismatchException.class , () -> dataModel.editFlight( editedFLight , null , null , null ,
