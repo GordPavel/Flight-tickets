@@ -108,33 +108,27 @@ public class RoutesFlightsOverviewController{
      */
 
     private void showFlightDetails( Flight flight ){
-
         if( flight != null ){
-
             detailsTextArea.setWrapText( true );
             detailsTextArea.setText( flight.toString() );
-
         }else{
             detailsTextArea.setText( "" );
         }
     }
 
     /**
-     @param event Delete Button (for routes). Delete the chosen route from model and TableView
      */
     @FXML
-    public void handleDeleteRouteButton( ActionEvent event ) throws ClassNotFoundException{
-
+    public void handleDeleteRouteButton() throws ClassNotFoundException{
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute != null ){
-
             try{
                 routeTable.getItems().remove( selectedRoute );
                 Controller.model.removeRoute( selectedRoute );
                 controller.updateRoutes();
                 routeTable.refresh();
                 controller.updateFlights();
-                flightTable.setItems(controller.getFlights());
+                flightTable.setItems( controller.getFlights() );
                 flightTable.refresh();
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
@@ -144,25 +138,20 @@ public class RoutesFlightsOverviewController{
                 alert.showAndWait();
             }
         }else{
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Route Selected" );
             alert.setContentText( "Please select a route in the table." );
-
             alert.showAndWait();
         }
     }
 
     /**
-     @param event Delete Button (for flights). Delete the chosen flight from model and TableView
      */
     @FXML
-    public void handleDeleteFlightButton( ActionEvent event ) throws ClassNotFoundException{
-
+    public void handleDeleteFlightButton() throws ClassNotFoundException{
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         if( selectedFlight != null ){
-
             try{
                 flightTable.getItems().remove( selectedFlight );
                 Controller.model.removeFlight( selectedFlight.getNumber() );
@@ -182,10 +171,8 @@ public class RoutesFlightsOverviewController{
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Flight Selected" );
             alert.setContentText( "Please select a flight in the table." );
-
             alert.showAndWait();
         }
-
     }
 
     /**
@@ -193,13 +180,10 @@ public class RoutesFlightsOverviewController{
      */
     @FXML
     public void handleAddRouteButton( ActionEvent actionEvent ){
-
         Parent addRouteWindow;
         Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
-
         try{
             addRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-
             Scene scene = new Scene( addRouteWindow );
             Stage popUp = new Stage();
 
@@ -220,6 +204,8 @@ public class RoutesFlightsOverviewController{
         }
         routeTable.setItems( controller.getRoutes() );
         routeTable.refresh();
+        flightTable.setItems( controller.getFlights() );
+        flightTable.refresh();
     }
 
     /**
@@ -230,7 +216,6 @@ public class RoutesFlightsOverviewController{
         Parent editRouteWindow;
         Stage  oldStage      = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         Route  selectedRoute = routeTable.getSelectionModel().getSelectedItem();
-
         if( selectedRoute == null ){
 
             Alert alert = new Alert( Alert.AlertType.WARNING );
@@ -239,7 +224,6 @@ public class RoutesFlightsOverviewController{
             alert.setContentText( "Please select a route to edit in the table." );
 
             alert.showAndWait();
-
         }else{
             controller.setRouteForEdit( selectedRoute );
 
@@ -264,14 +248,14 @@ public class RoutesFlightsOverviewController{
                 oldStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 oldStage.setOpacity( 1 );
-
-
+                routeTable.setItems( controller.getRoutes() );
+                routeTable.refresh();
+                flightTable.setItems( controller.getFlights() );
+                flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
             }
         }
-        routeTable.setItems( controller.getRoutes() );
-        routeTable.refresh();
     }
 
     /**
@@ -298,12 +282,11 @@ public class RoutesFlightsOverviewController{
             oldStage.setOpacity( 0.9 );
             popUp.showAndWait();
             oldStage.setOpacity( 1 );
-
+            flightTable.setItems( controller.getFlights() );
+            flightTable.refresh();
         }catch( IOException e ){
             e.printStackTrace();
         }
-        flightTable.setItems( controller.getFlights() );
-        flightTable.refresh();
     }
 
     /**
@@ -360,12 +343,12 @@ public class RoutesFlightsOverviewController{
                 popUp.showAndWait();
                 oldStage.setOpacity( 1 );
 
+                flightTable.setItems( controller.getFlights() );
+                flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
             }
         }
-        flightTable.setItems( controller.getFlights() );
-        flightTable.refresh();
     }
 
     /**
@@ -395,76 +378,13 @@ public class RoutesFlightsOverviewController{
         }catch( IOException e ){
             e.printStackTrace();
         }
-        flightTable.setItems( controller.getFlights() );
-        flightTable.refresh();
-
-    }
-
-    /**
-     */
-    @FXML
-    public void handleSearchRouteButton(){
-        if( departure.getText().equals( "" ) && destination.getText().equals( "" ) ){
-
-            controller.updateRoutes();
-            routeTable.setItems( controller.getRoutes() );
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Empty Search " );
-            alert.setHeaderText( "No parameters" );
-            alert.setContentText( "Please enter one of parameters for searching." );
-
-            alert.showAndWait();
-
-        }else if( !departure.getText().equals( "" ) && destination.getText().equals( "" ) ){
-            try{
-                controller.setRoutes( FXCollections.observableArrayList(
-                        Controller.searchEngine.findRoutesByDepartureAirport( departure.getText() ) ) );
-            }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
-                alert.setContentText( e.getMessage() );
-
-                alert.showAndWait();
-            }
-            routeTable.setItems( controller.getRoutes() );
-            routeTable.refresh();
-        }else if( departure.getText().equals( "" ) && !destination.getText().equals( "" ) ){
-            try{
-                controller.setRoutes( FXCollections.observableArrayList(
-                        Controller.searchEngine.findRoutesByArrivalAirport( destination.getText() ) ) );
-            }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
-                alert.setContentText( e.getMessage() );
-
-                alert.showAndWait();
-            }
-            routeTable.setItems( controller.getRoutes() );
-            routeTable.refresh();
-        }else{
-            try{
-                controller.setRoutes( FXCollections.observableArrayList(
-                        Controller.searchEngine.searchRoute( departure.getText() , destination.getText() ) ) );
-            }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
-                alert.setContentText( e.getMessage() );
-
-                alert.showAndWait();
-            }
-            routeTable.setItems( controller.getRoutes() );
-            routeTable.refresh();
-        }
     }
 
     @FXML
     private void handleImportAction(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
-        File        file        = fileChooser.showOpenDialog( new Stage() );
+        File file = fileChooser.showOpenDialog( new Stage() );
         if( file != null ){
             try{
                 Controller.model.importFromFile( file );
@@ -503,6 +423,7 @@ public class RoutesFlightsOverviewController{
         if( file != null ){
             try{
                 failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
+
 
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
