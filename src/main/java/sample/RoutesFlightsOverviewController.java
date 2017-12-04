@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -60,20 +59,6 @@ public class RoutesFlightsOverviewController{
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
 
-    @FXML
-    private void handleUpdateRouteAction( ActionEvent actionEvent ){
-        routeTable.setItems( controller.getRoutes() );
-        routeTable.refresh();
-    }
-
-    @FXML
-    private void handleUpdateFlightAction( ActionEvent actionEvent ){
-
-        flightTable.setItems( controller.getFlights() );
-        flightTable.refresh();
-    }
-
-
     public RoutesFlightsOverviewController(){
     }
 
@@ -93,45 +78,29 @@ public class RoutesFlightsOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
-        destination.textProperty().addListener( ( observable , oldValue , newValue ) -> {
-            Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
-            Matcher matcher = pattern.matcher( destination.getText() );
-            if( !matcher.matches() ){
-                destination.setStyle( "-fx-text-inner-color: red;" );
-            }else{
-                destination.setStyle( "-fx-text-inner-color: black;" );
-            }
-            Pattern departurePattern = Pattern.compile(
-                    ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
-            Pattern destinationPattern = Pattern.compile(
-                    ".*" + destination.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
-
-            routeTable.setItems( controller.getRoutes().stream().filter(
-                    route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
-                             destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
-        } );
-
         departure.textProperty().addListener( ( observable , oldValue , newValue ) -> {
-            Pattern pattern = Pattern.compile( "[\\w\\d[^\\s .,*?!]]*" );
-            Matcher matcher = pattern.matcher( departure.getText() );
-            if( !matcher.matches() ){
-                departure.setStyle( "-fx-text-inner-color: red;" );
-            }else{
-                departure.setStyle( "-fx-text-inner-color: black;" );
-            }
-
-            Pattern departurePattern = Pattern.compile(
-                    ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
-            Pattern destinationPattern = Pattern.compile(
-                    ".*" + destination.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
-
-            routeTable.setItems( controller.getRoutes().stream().filter(
-                    route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
-                             destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
-
+            searchListeners( newValue , departure );
         } );
+        destination.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+            searchListeners( newValue , destination );
+        } );
+    }
+
+    private void searchListeners( String newValue , TextField textField ){
+        if( !newValue.matches( "[\\w\\d[^\\s .,*?!+=-]]*" ) ){
+            textField.setStyle( "-fx-text-inner-color: red;" );
+        }else{
+            textField.setStyle( "-fx-text-inner-color: black;" );
+        }
+        Pattern departurePattern = Pattern.compile(
+                ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
+        Pattern destinationPattern = Pattern.compile(
+                ".*" + destination.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
+
+        routeTable.setItems( controller.getRoutes().stream().filter(
+                route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
+                         destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
     }
 
     /**
@@ -169,7 +138,6 @@ public class RoutesFlightsOverviewController{
                 alert.setTitle( "Model exception" );
                 alert.setHeaderText( "Model throw an exception" );
                 alert.setContentText( e.getMessage() );
-
                 alert.showAndWait();
             }
         }else{
