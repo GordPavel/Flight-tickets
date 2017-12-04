@@ -44,6 +44,8 @@ public class EditFlightsOverviewController{
 
         box.setItems( controller.getRoutes() );
 
+        number.setDisable(true);
+
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
 
@@ -63,36 +65,6 @@ public class EditFlightsOverviewController{
             Matcher matcher = pattern.matcher( departureTime.getText() );
             if( !matcher.matches() ){
                 departureTime.setStyle( "-fx-text-inner-color: red;" );
-            }else if( controller.getFlights().stream()
-                                .anyMatch( flight -> flight.getNumber().equals( number.getText() ) ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Number already exist" );
-                alert.setHeaderText( "Flight with this number already exist" );
-                alert.setContentText( "Please enter correct number." );
-
-                alert.showAndWait();
-            }else if( box.getValue() == null ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Route isn`t chosen" );
-                alert.setHeaderText( "Flight must have route" );
-                alert.setContentText( "Choose route" );
-
-                alert.showAndWait();
-            }else if( planeID.getText().equals( "" ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "You have no plain" );
-                alert.setHeaderText( "Flight must have plain" );
-                alert.setContentText( "Write plain data" );
-
-                alert.showAndWait();
-            }else if( controller.getFlights().stream()
-                                .anyMatch( flight -> flight.getPlaneID().equals( planeID.getText() ) ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Two flights for plain" );
-                alert.setHeaderText( "Some flight have same plain" );
-                alert.setContentText( "Write another plain data" );
-
-                alert.showAndWait();
             }else{
                 departureTime.setStyle( "-fx-text-inner-color: black;" );
             }
@@ -175,8 +147,8 @@ public class EditFlightsOverviewController{
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
+                alert.setTitle( "Model`s message" );
+                alert.setHeaderText( "Edited data incorrect:" );
                 alert.setContentText( e.getMessage() );
 
                 alert.showAndWait();
