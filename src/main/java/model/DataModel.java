@@ -270,6 +270,11 @@ public class DataModel{
      */
     public void importFromFile( File file ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( file );
+        if( !routesAndFlights.values().parallelStream().allMatch(
+                serializable -> serializable.getClass().equals( Route.class ) ||
+                                serializable.getClass().equals( Flight.class ) ) ){
+            throw new IllegalArgumentException( "One object neither Route, nor Flight class" );
+        }
         List<Route> routes =
                 routesAndFlights.get( true ).parallelStream().map( Route.class::cast ).collect( Collectors.toList() );
         List<Flight> flights =
@@ -305,8 +310,19 @@ public class DataModel{
      */
     public Collection<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( additionalData );
-        List<Route>                      failedRoutes     = new ArrayList<>();
-        List<Flight>                     failedFlights    = new ArrayList<>();
+        List<Serializable>               failedData       = new ArrayList<>();
+        routesAndFlights.get( true ).removeIf( route -> {
+            Boolean isRoute = route.getClass().equals( Route.class );
+            if( !isRoute ) failedData.add( route );
+            return isRoute;
+        } );
+        routesAndFlights.get( false ).removeIf( flight -> {
+            Boolean isFlight = flight.getClass().equals( Flight.class );
+            if( !isFlight ) failedData.add( flight );
+            return isFlight;
+        } );
+        List<Route>  failedRoutes  = new ArrayList<>();
+        List<Flight> failedFlights = new ArrayList<>();
         List<Route> routes =
                 routesAndFlights.get( true ).parallelStream().map( Route.class::cast ).collect( Collectors.toList() );
         List<Flight> flights =
@@ -332,7 +348,8 @@ public class DataModel{
         routes.forEach( route -> route.setId( routesPrimaryKeysGenerator.next() ) );
         this.routes.addAll( routes );
         this.flights.addAll( flights );
-        return Stream.concat( failedRoutes.stream() , failedFlights.stream() ).collect( Collectors.toList() );
+        return Stream.concat( Stream.concat( failedRoutes.stream() , failedFlights.stream() ) , failedData.stream() )
+                     .collect( Collectors.toList() );
     }
 
     private Map<Boolean, List<Serializable>> deserializeData( File file ) throws IOException{
@@ -341,10 +358,6 @@ public class DataModel{
             List<Serializable> data = new ArrayList<>();
             while( i++ < size ){
                 data.add( ( Serializable ) input.readObject() );
-            }
-            if( !data.parallelStream().allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
-                                                                 serializable.getClass().equals( Flight.class ) ) ){
-                throw new IllegalArgumentException( "One object neither Route, nor Flight class" );
             }
             return data.stream().collect(
                     Collectors.partitioningBy( serializable -> serializable.getClass().equals( Route.class ) ) );
