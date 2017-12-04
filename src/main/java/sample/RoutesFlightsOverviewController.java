@@ -504,15 +504,25 @@ public class RoutesFlightsOverviewController{
             try{
                 failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
 
-
-
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
                 StringBuilder errors = new StringBuilder();
+
+                ArrayList<Flight> mergeFlights = new ArrayList<>();
+                ArrayList<Route> mergeRoutes = new ArrayList<>();
                 for( Serializable element : failedInMerge ){
                     errors.append( "-" ).append( element.toString() ).append( "\n" );
+                    if (element instanceof Flight && !Controller.model.listFlightsWithPredicate(flight -> true).anyMatch(flight -> flight.equals(element))) {
+                        mergeFlights.add((Flight) element);
+                    }
+                    if (element instanceof Route) {
+                        mergeRoutes.add((Route) element);
+                    }
                 }
+
+                controller.setMergeFlights(FXCollections.observableArrayList(mergeFlights));
+                controller.setMergeRoutes(FXCollections.observableArrayList(mergeRoutes));
                 alert.setContentText( errors.toString() );
 
                 alert.showAndWait();
