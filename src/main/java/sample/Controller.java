@@ -7,6 +7,7 @@ import model.Flight;
 import model.Route;
 import searchengine.SearchEngine;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -32,6 +33,8 @@ public class Controller {
     private       ObservableList<Flight> flights;
     public static Route                  routeForEdit;
     public static Flight                 flightForEdit;
+    private       ObservableList<Flight> mergeFlights;
+    private       ObservableList<Route> mergeRoutes;
 
     /*public Controller() {
 
@@ -58,6 +61,20 @@ public class Controller {
     public void setFlights( ObservableList<Flight> flights ){
 
         this.flights = flights;
+    }
+
+    public void setMergeFlights(ObservableList<Flight> mergeFlights) {
+        this.mergeFlights = mergeFlights;
+    }
+
+    public ObservableList<Flight> getMergeFlights() {
+        return mergeFlights;
+    }
+
+    public void setMergeRoutes(ObservableList<Route> mergeRoutes) {this.mergeRoutes=mergeRoutes;}
+
+    public ObservableList<Route> getMergeRoutes() {
+        return mergeRoutes;
     }
 
     public void updateRoutes(){
