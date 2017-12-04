@@ -502,6 +502,8 @@ public class RoutesFlightsOverviewController{
 
                 failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
 
+                controller.setMergeElements(FXCollections.observableArrayList(failedInMerge));
+
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
@@ -512,6 +514,27 @@ public class RoutesFlightsOverviewController{
                 alert.setContentText( errors.toString() );
 
                 alert.showAndWait();
+
+
+                Parent mergeWindow;
+
+                try{
+                    mergeWindow = FXMLLoader.load( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
+
+                    Scene scene = new Scene( mergeWindow );
+                    Stage popUp = new Stage();
+
+                    popUp.initModality( Modality.APPLICATION_MODAL );
+                    popUp.setTitle( ADD_ROUTE_WINDOW );
+                    popUp.setScene( scene );
+                    popUp.setResizable( false );
+
+                    popUp.showAndWait();
+
+
+                }catch( IOException e ){
+                    e.printStackTrace();
+                }
 
                 controller.updateRoutes();
                 controller.updateFlights();
