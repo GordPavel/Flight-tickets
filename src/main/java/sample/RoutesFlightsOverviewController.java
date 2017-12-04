@@ -250,6 +250,7 @@ public class RoutesFlightsOverviewController{
                 oldStage.setOpacity( 1 );
                 routeTable.setItems( controller.getRoutes() );
                 routeTable.refresh();
+                controller.updateFlights();
                 flightTable.setItems( controller.getFlights() );
                 flightTable.refresh();
             }catch( IOException e ){
