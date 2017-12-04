@@ -21,7 +21,7 @@
         <TextField fx:id="planeID" layoutX="170.0" layoutY="150.0"/>
         <Button fx:id="editEditFlightsOverview" focusTraversable="false" layoutX="60.0" layoutY="395.0"
                 mnemonicParsing="false" onAction="#handleEditAction" prefHeight="25.0" prefWidth="75.0" text="Accept"/>
-        <Button fx:id="cancelEditFlightsButton" layoutX="434.0" layoutY="395.0" mnemonicParsing="false"
+        <Button layoutX="434.0" layoutY="395.0" mnemonicParsing="false"
                 onAction="#handleCancelAction" prefHeight="25.0" prefWidth="75.0" text="Cancel"/>
         <Button focusTraversable="false" layoutX="434.0" layoutY="90.0" mnemonicParsing="false" onAction="#clearData"
                 prefHeight="25.0" prefWidth="75.0" text="Clear"/>

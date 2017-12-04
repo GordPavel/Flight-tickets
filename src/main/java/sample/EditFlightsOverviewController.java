@@ -41,10 +41,9 @@ public class EditFlightsOverviewController{
      */
     @FXML
     private void initialize(){
-
         box.setItems( controller.getRoutes() );
 
-        number.setDisable(true);
+        number.setDisable( true );
 
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
@@ -97,11 +96,9 @@ public class EditFlightsOverviewController{
 
 
     /**
-     @param event Clear Button. Clear all the fields in the window
      */
     @FXML
-    private void clearData( ActionEvent event ){
-
+    private void clearData(){
         number.clear();
         planeID.clear();
         departureDate.setValue( LocalDate.now() );
@@ -113,26 +110,21 @@ public class EditFlightsOverviewController{
      */
     @FXML
     private void handleEditAction( ActionEvent actionEvent ){
-
-
         DateFormat format = new SimpleDateFormat( "dd.MM.yyyy hh:mm" );
-
         Date arrivDate  = new Date();
         Date departDate = new Date();
-
         try{
             arrivDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
-        }catch( ParseException e ){
+        }catch( ParseException ignored ){
 
         }
 
         try{
             departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getText() );
-        }catch( ParseException e ){
+        }catch( ParseException ignored ){
 
         }
         if( arrivDate.getTime() <= departDate.getTime() ){
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Incorrect data about date" );
             alert.setHeaderText( "Flight has incorrect dates" );
@@ -169,7 +161,6 @@ public class EditFlightsOverviewController{
     }
 
     private void checkTimeTextFields(){
-
         Pattern pattern     = Pattern.compile( "[0-9\\-_\\w]*" );
         Pattern timePattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
 

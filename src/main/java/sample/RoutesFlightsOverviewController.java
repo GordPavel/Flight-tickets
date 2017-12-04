@@ -350,9 +350,9 @@ public class RoutesFlightsOverviewController{
                 ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setText(
                         selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
                                       .toString() );
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) ).setText(
-                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
-                                      .toString() );
+                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
+                        .setText( selectedFlight.getArriveDate().
+                                toInstant().atZone( ZoneId.systemDefault() ).toLocalTime().toString() );
                 oldStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 oldStage.setOpacity( 1 );
@@ -398,10 +398,9 @@ public class RoutesFlightsOverviewController{
     }
 
     /**
-     @param actionEvent Search Button (for routes). Search necessary route in TableView.
      */
     @FXML
-    public void handleSearchRouteButton( ActionEvent actionEvent ){
+    public void handleSearchRouteButton(){
         if( departure.getText().equals( "" ) && destination.getText().equals( "" ) ){
 
             controller.updateRoutes();
@@ -459,8 +458,9 @@ public class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleImportAction( ActionEvent actionEvent ){
+    private void handleImportAction(){
         FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
         File        file        = fileChooser.showOpenDialog( new Stage() );
         if( file != null ){
             try{
@@ -478,12 +478,12 @@ public class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleExportAction( ActionEvent actionEvent ){
+    private void handleExportAction(){
         FileChooser fileChooser = new FileChooser();
-        File        file        = fileChooser.showOpenDialog( new Stage() );
+        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
+        File file = fileChooser.showSaveDialog( new Stage() );
         if( file != null ){
             try{
-
                 Controller.model.exportToFile( file );
             }catch( IOException | FlightAndRouteException e ){
                 e.printStackTrace();
@@ -492,14 +492,13 @@ public class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleMergeAction( ActionEvent actionEvent ){
-
+    private void handleMergeAction(){
         FileChooser             fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
         File                    file        = fileChooser.showOpenDialog( new Stage() );
         ArrayList<Serializable> failedInMerge;
         if( file != null ){
             try{
-
                 failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
 
                 Alert alert = new Alert( Alert.AlertType.WARNING );

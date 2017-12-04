@@ -106,10 +106,10 @@ public class DataModel{
         }
         if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getPlaneID() , flight.getPlaneID() ) &&
                                                   Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
-                                                  ( Objects.equals( flight1.getDepartureDate() ,
-                                                                    flight.getDepartureDate() ) ||
-                                                    Objects.equals( flight1.getArriveDate() ,
-                                                                    flight.getArriveDate() ) ) ) ){
+                                                  Objects.equals( flight1.getDepartureDate() ,
+                                                                  flight.getDepartureDate() ) &&
+                                                  Objects.equals( flight1.getArriveDate() ,
+                                                                  flight.getArriveDate() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         return flights.addIfAbsent( flight );
@@ -160,12 +160,12 @@ public class DataModel{
                                                                   flight.getPlaneID() ) &&
                                                   Objects.equals( flight1.getRoute() ,
                                                                   newRoute != null ? newRoute : flight.getRoute() ) &&
-                                                  ( Objects.equals( flight1.getDepartureDate() ,
-                                                                    newDepartureDate != null ? newDepartureDate :
-                                                                    flight.getDepartureDate() ) ||
-                                                    Objects.equals( flight1.getArriveDate() ,
-                                                                    newArriveDate != null ? newArriveDate :
-                                                                    flight.getArriveDate() ) ) ) ){
+                                                  Objects.equals( flight1.getDepartureDate() ,
+                                                                  newDepartureDate != null ? newDepartureDate :
+                                                                  flight.getDepartureDate() ) &&
+                                                  Objects.equals( flight1.getArriveDate() ,
+                                                                  newArriveDate != null ? newArriveDate :
+                                                                  flight.getArriveDate() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         Flight editingFlight =
