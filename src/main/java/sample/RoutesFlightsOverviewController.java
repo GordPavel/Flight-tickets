@@ -87,7 +87,7 @@ public class RoutesFlightsOverviewController{
     }
 
     private void searchListeners( String newValue , TextField textField ){
-        if( !newValue.matches( "[\\w\\d[^\\s .,*?!+=-]]*" ) ){
+        if( !newValue.matches( "[\\w\\d[^\\s .,!+=]]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
         }else{
             textField.setStyle( "-fx-text-inner-color: black;" );
@@ -379,6 +379,9 @@ public class RoutesFlightsOverviewController{
         }catch( IOException e ){
             e.printStackTrace();
         }
+
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
     }
 
     @FXML
