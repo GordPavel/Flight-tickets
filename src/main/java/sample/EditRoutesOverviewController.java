@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 
 import java.util.regex.Matcher;
@@ -95,8 +96,10 @@ public class EditRoutesOverviewController{
             Matcher matcher = pattern.matcher( departureTextField.getText() );
             if( !matcher.matches() ){
                 departureTextField.setStyle( "-fx-text-inner-color: red;" );
+                departureTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
             }else{
                 departureTextField.setStyle( "-fx-text-inner-color: black;" );
+                departureTextField.setTooltip(null);
             }
             checkTimeTextFields();
         } );
@@ -106,8 +109,10 @@ public class EditRoutesOverviewController{
             Matcher matcher = pattern.matcher( destinationTextField.getText() );
             if( !matcher.matches() ){
                 destinationTextField.setStyle( "-fx-text-inner-color: red;" );
+                destinationTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
             }else{
                 destinationTextField.setStyle( "-fx-text-inner-color: black;" );
+                destinationTextField.setTooltip(null);
             }
             checkTimeTextFields();
         } );

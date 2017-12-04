@@ -89,8 +89,10 @@ public class RoutesFlightsOverviewController{
     private void searchListeners( String newValue , TextField textField ){
         if( !newValue.matches( "[\\w\\d[^\\s .,!+=]]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
+            textField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _, ?, *"));
         }else{
             textField.setStyle( "-fx-text-inner-color: black;" );
+            textField.setTooltip(null);
         }
         Pattern departurePattern = Pattern.compile(
                 ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
