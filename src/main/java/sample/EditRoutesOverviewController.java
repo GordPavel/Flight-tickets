@@ -19,9 +19,7 @@ import java.util.regex.Pattern;
  */
 
 public class EditRoutesOverviewController{
-
     private Controller controller = Controller.getInstance();
-
     @FXML TextField departureTextField;
     @FXML TextField destinationTextField;
     @FXML Button    editEditRouteOverview;
@@ -32,29 +30,22 @@ public class EditRoutesOverviewController{
 
     @FXML
     private void handleEditAction( ActionEvent actionEvent ){
-
         if( departureTextField.getText().equals( "" ) || destinationTextField.getText().equals( "" ) ){
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Empty fields " );
             alert.setHeaderText( "No parameters" );
             alert.setContentText( "Please enter all parameters for adding a new route." );
-
             alert.showAndWait();
-
         }else if( ( controller.getRoutes().stream().anyMatch(
                 route -> route.getFrom().toUpperCase().equals( departureTextField.getText().toUpperCase() ) ) ) &&
                   ( controller.getRoutes().stream().anyMatch( route -> route.getTo().toUpperCase().equals(
                           destinationTextField.getText().toUpperCase() ) ) ) ){
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Route already exist " );
             alert.setHeaderText( "Route already exist" );
             alert.setContentText( "Please enter other parameters for adding a new route." );
-
             alert.showAndWait();
         }else{
-
             try{
                 Controller.model.editRoute( Controller.routeForEdit , departureTextField.getText() ,
                                             destinationTextField.getText() );
@@ -69,16 +60,13 @@ public class EditRoutesOverviewController{
                 alert.showAndWait();
             }
         }
-
-
     }
 
     /**
-     @param event Clear Button. Clear fields in the window for editing a route
      */
 
     @FXML
-    private void clearData( ActionEvent event ){
+    private void clearData(){
         departureTextField.clear();
         destinationTextField.clear();
     }
