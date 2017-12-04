@@ -41,6 +41,14 @@ public class RoutesFlightsOverviewController{
     private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
+    @FXML Button                      addRouteButton;
+    @FXML Button                      editRouteButton;
+    @FXML Button                      searchRouteButton;
+    @FXML Button                      deleteRouteButton;
+    @FXML Button                      addFlightButton;
+    @FXML Button                      editFlightButton;
+    @FXML Button                      searchFlightButton;
+    @FXML Button                      deleteFlightButton;
     @FXML TextField                   departure;
     @FXML TextField                   destination;
     @FXML TableView<Route>            routeTable;
@@ -58,6 +66,7 @@ public class RoutesFlightsOverviewController{
      initialization of view
      */
     public void initialize(){
+
         controller.updateFlights();
         controller.updateRoutes();
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
@@ -68,6 +77,7 @@ public class RoutesFlightsOverviewController{
         flightTable.setItems( controller.getFlights() );
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
+
         departure.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             searchListeners( newValue , departure );
         } );
@@ -77,10 +87,12 @@ public class RoutesFlightsOverviewController{
     }
 
     private void searchListeners( String newValue , TextField textField ){
-        if( !newValue.matches( "[\\w\\d[^\\s .,*?!+=-]]*" ) ){
+        if( !newValue.matches( "[\\w\\d[^\\s .,!+=]]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
+            textField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _, ?, *"));
         }else{
             textField.setStyle( "-fx-text-inner-color: black;" );
+            textField.setTooltip(null);
         }
         Pattern departurePattern = Pattern.compile(
                 ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
@@ -156,6 +168,7 @@ public class RoutesFlightsOverviewController{
                 alert.showAndWait();
             }
         }else{
+
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Flight Selected" );
@@ -175,14 +188,19 @@ public class RoutesFlightsOverviewController{
             addRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             Scene scene = new Scene( addRouteWindow );
             Stage popUp = new Stage();
+
             popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( oldStage );
+
             popUp.setTitle( ADD_ROUTE_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
+
             oldStage.setOpacity( 0.9 );
             popUp.showAndWait();
             oldStage.setOpacity( 1 );
+
+
         }catch( IOException e ){
             e.printStackTrace();
         }
@@ -201,31 +219,40 @@ public class RoutesFlightsOverviewController{
         Stage  oldStage      = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         Route  selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute == null ){
+
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Route Selected" );
             alert.setContentText( "Please select a route to edit in the table." );
+
             alert.showAndWait();
         }else{
             controller.setRouteForEdit( selectedRoute );
+
             try{
                 editRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/EditRoutesOverview.fxml" ) );
+
                 Scene scene = new Scene( editRouteWindow );
                 Stage popUp = new Stage();
+
                 popUp.initModality( Modality.APPLICATION_MODAL );
                 popUp.initOwner( oldStage );
+
                 popUp.setTitle( EDIT_ROUTE_WINDOW );
                 popUp.setScene( scene );
                 popUp.setResizable( false );
+
                 ( ( TextField ) ( editRouteWindow.getChildrenUnmodifiable().get( 0 ) ) )
                         .setText( selectedRoute.getFrom() );
                 ( ( TextField ) ( editRouteWindow.getChildrenUnmodifiable().get( 4 ) ) )
                         .setText( selectedRoute.getTo() );
+
                 oldStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 oldStage.setOpacity( 1 );
                 routeTable.setItems( controller.getRoutes() );
                 routeTable.refresh();
+                controller.updateFlights();
                 flightTable.setItems( controller.getFlights() );
                 flightTable.refresh();
             }catch( IOException e ){
@@ -241,15 +268,20 @@ public class RoutesFlightsOverviewController{
     public void handleAddFlightButton( ActionEvent actionEvent ){
         Parent addFlightWindow;
         Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
+
         try{
             addFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+
             Scene scene = new Scene( addFlightWindow );
             Stage popUp = new Stage();
+
             popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( oldStage );
+
             popUp.setTitle( ADD_FLIGHT_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
+
             oldStage.setOpacity( 0.9 );
             popUp.showAndWait();
             oldStage.setOpacity( 1 );
@@ -331,19 +363,27 @@ public class RoutesFlightsOverviewController{
         Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         try{
             editFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+
             Scene scene = new Scene( editFlightWindow );
             Stage popUp = new Stage();
-            popUp.initModality( Modality.NONE );
+
+            popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( oldStage );
+
             popUp.setTitle( SEARCH_FLIGHT_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
+
             oldStage.setOpacity( 0.9 );
             popUp.showAndWait();
             oldStage.setOpacity( 1 );
+
         }catch( IOException e ){
             e.printStackTrace();
         }
+
+        flightTable.setItems(controller.getFlights());
+        flightTable.refresh();
     }
 
     @FXML
@@ -382,9 +422,9 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     private void handleMergeAction(){
-        FileChooser fileChooser = new FileChooser();
+        FileChooser             fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
-        File                    file = fileChooser.showOpenDialog( new Stage() );
+        File                    file        = fileChooser.showOpenDialog( new Stage() );
         ArrayList<Serializable> failedInMerge;
         if( file != null ){
             try{
@@ -395,9 +435,21 @@ public class RoutesFlightsOverviewController{
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
                 StringBuilder errors = new StringBuilder();
+
+                ArrayList<Flight> mergeFlights = new ArrayList<>();
+                ArrayList<Route> mergeRoutes = new ArrayList<>();
                 for( Serializable element : failedInMerge ){
                     errors.append( "-" ).append( element.toString() ).append( "\n" );
+                    if (element instanceof Flight && !Controller.model.listFlightsWithPredicate(flight -> true).anyMatch(flight -> flight.equals(element))) {
+                        mergeFlights.add((Flight) element);
+                    }
+                    if (element instanceof Route) {
+                        mergeRoutes.add((Route) element);
+                    }
                 }
+
+                controller.setMergeFlights(FXCollections.observableArrayList(mergeFlights));
+                controller.setMergeRoutes(FXCollections.observableArrayList(mergeRoutes));
                 alert.setContentText( errors.toString() );
 
                 alert.showAndWait();

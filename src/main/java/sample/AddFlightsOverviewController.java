@@ -59,8 +59,10 @@ public class AddFlightsOverviewController{
             Matcher matcher = pattern.matcher( arrivingTime.getText() );
             if( !matcher.matches() ){
                 arrivingTime.setStyle( "-fx-text-inner-color: red;" );
+                arrivingTime.setTooltip(new Tooltip("Time format: hh:mm"));
             }else{
                 arrivingTime.setStyle( "-fx-text-inner-color: black;" );
+                arrivingTime.setTooltip(null);
             }
             checkTimeTextFields();
         } );
@@ -70,8 +72,10 @@ public class AddFlightsOverviewController{
             Matcher matcher = pattern.matcher( departureTime.getText() );
             if( !matcher.matches() ){
                 departureTime.setStyle( "-fx-text-inner-color: red;" );
+                departureTime.setTooltip(new Tooltip("Time format: hh:mm"));
             }else{
                 departureTime.setStyle( "-fx-text-inner-color: black;" );
+                departureTime.setTooltip(null);
             }
             checkTimeTextFields();
         } );
@@ -81,8 +85,10 @@ public class AddFlightsOverviewController{
             Matcher matcher = pattern.matcher( number.getCharacters() );
             if( !matcher.matches() ){
                 number.setStyle( "-fx-text-inner-color: red;" );
+                number.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
             }else{
                 number.setStyle( "-fx-text-inner-color: black;" );
+                number.setTooltip(null);
             }
             checkTimeTextFields();
         } );
@@ -92,8 +98,10 @@ public class AddFlightsOverviewController{
             Matcher matcher = pattern.matcher( planeID.getCharacters() );
             if( !matcher.matches() ){
                 planeID.setStyle( "-fx-text-inner-color: red;" );
+                planeID.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
             }else{
                 planeID.setStyle( "-fx-text-inner-color: black;" );
+                planeID.setTooltip(null);
             }
             checkTimeTextFields();
         } );
