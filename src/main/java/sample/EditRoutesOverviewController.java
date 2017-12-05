@@ -37,15 +37,6 @@ public class EditRoutesOverviewController{
             alert.setHeaderText( "No parameters" );
             alert.setContentText( "Please enter all parameters for adding a new route." );
             alert.showAndWait();
-        }else if( ( controller.getRoutes().stream().anyMatch(
-                route -> route.getFrom().toUpperCase().equals( departureTextField.getText().toUpperCase() ) ) ) &&
-                  ( controller.getRoutes().stream().anyMatch( route -> route.getTo().toUpperCase().equals(
-                          destinationTextField.getText().toUpperCase() ) ) ) ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Route already exist " );
-            alert.setHeaderText( "Route already exist" );
-            alert.setContentText( "Please enter other parameters for adding a new route." );
-            alert.showAndWait();
         }else{
             try{
                 Controller.model.editRoute( Controller.routeForEdit , departureTextField.getText() ,
@@ -54,8 +45,8 @@ public class EditRoutesOverviewController{
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
+                alert.setTitle( "Model`s message" );
+                alert.setHeaderText( "Model send message:" );
                 alert.setContentText( e.getMessage() );
 
                 alert.showAndWait();

@@ -45,16 +45,6 @@ public class AddRoutesOverviewController{
 
             alert.showAndWait();
 
-        }else if( controller.getRoutes().stream().anyMatch(
-                route -> route.getFrom().toUpperCase().equals( departureTextField.getText().toUpperCase() ) &&
-                         route.getTo().toUpperCase().equals( destinationTextField.getText().toUpperCase() ) ) ){
-
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Route already exist " );
-            alert.setHeaderText( "Route already exist" );
-            alert.setContentText( "Please enter other parameters for adding a new route." );
-
-            alert.showAndWait();
         }else{
 
             try{
@@ -64,8 +54,8 @@ public class AddRoutesOverviewController{
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
+                alert.setTitle( "Model`s message" );
+                alert.setHeaderText( "Model send message:" );
                 alert.setContentText( e.getMessage() );
 
                 alert.showAndWait();

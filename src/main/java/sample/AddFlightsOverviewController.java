@@ -139,14 +139,6 @@ public class AddFlightsOverviewController{
             alert.setContentText( "Please enter correct parameters for a new flight." );
 
             alert.showAndWait();
-        }else if( controller.getFlights().stream()
-                            .anyMatch( flight -> flight.getNumber().equals( number.getText() ) ) ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Number already exist" );
-            alert.setHeaderText( "Flight with this number already exist" );
-            alert.setContentText( "Please enter correct number." );
-
-            alert.showAndWait();
         }else if( box.getValue() == null ){
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Route isn`t chosen" );
@@ -161,14 +153,6 @@ public class AddFlightsOverviewController{
             alert.setContentText( "Write plain data" );
 
             alert.showAndWait();
-        }else if( controller.getFlights().stream()
-                            .anyMatch( flight -> flight.getPlaneID().equals( planeID.getText() ) ) ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Two flights for plain" );
-            alert.setHeaderText( "Some flight have same plain" );
-            alert.setContentText( "Write another plain data" );
-
-            alert.showAndWait();
         }else{
 
             try{
@@ -179,8 +163,8 @@ public class AddFlightsOverviewController{
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
+                alert.setTitle( "Model`s message" );
+                alert.setHeaderText( "Model send message" );
                 alert.setContentText( e.getMessage() );
 
                 alert.showAndWait();
