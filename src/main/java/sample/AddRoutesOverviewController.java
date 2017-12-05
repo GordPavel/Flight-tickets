@@ -50,7 +50,7 @@ public class AddRoutesOverviewController{
             try{
                 Controller.model.addRoute( new Route( departureTextField.getText() , destinationTextField.getText() ) );
                 controller.updateRoutes();
-                controller.getRoutes().forEach( System.out::println );
+                //controller.getRoutes().forEach( System.out::println );
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );

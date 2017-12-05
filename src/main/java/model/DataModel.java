@@ -98,7 +98,7 @@ public class DataModel{
         if( !flight.getDepartureDate().before( flight.getArriveDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber() , flight.getNumber() ) ) ){
+        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone's number" );
         }
         if( routes.stream().noneMatch( route -> Objects.equals( route.getId() , flight.getRoute().getId() ) ) ){
@@ -206,7 +206,7 @@ public class DataModel{
                legalSymbolsChecker.matcher( route.getTo() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
-        if( routes.contains( route ) ){
+        if( routes.stream().anyMatch(route1 -> route.getTo().toUpperCase().equals(route1.getTo().toUpperCase())&&route.getFrom().toUpperCase().equals(route1.getFrom().toUpperCase())) ){
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
         route.setId( routesPrimaryKeysGenerator.next() );
