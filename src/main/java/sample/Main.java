@@ -24,10 +24,11 @@ public class Main extends Application{
         Parent root = FXMLLoader.load( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
         primaryStage.setTitle( "Routes and flights" );
         primaryStage.setScene( new Scene( root , 700 , 500 ) );
+        primaryStage.setX( 5 );
+        primaryStage.setY( 5 );
         primaryStage.setResizable( false );
         setUserAgentStylesheet( STYLESHEET_CASPIAN );
         primaryStage.show();
-
     }
 
 

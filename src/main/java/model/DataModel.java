@@ -98,18 +98,18 @@ public class DataModel{
         if( !flight.getDepartureDate().before( flight.getArriveDate() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
+        if( flights.stream().anyMatch(
+                flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone's number" );
         }
         if( routes.stream().noneMatch( route -> Objects.equals( route.getId() , flight.getRoute().getId() ) ) ){
             throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
         }
-        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getPlaneID() , flight.getPlaneID() ) &&
-                                                  Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
-                                                  Objects.equals( flight1.getDepartureDate() ,
-                                                                  flight.getDepartureDate() ) &&
-                                                  Objects.equals( flight1.getArriveDate() ,
-                                                                  flight.getArriveDate() ) ) ){
+        if( flights.stream().anyMatch(
+                flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() , flight.getPlaneID().toUpperCase() ) &&
+                           Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
+                           Objects.equals( flight1.getDepartureDate() , flight.getDepartureDate() ) &&
+                           Objects.equals( flight1.getArriveDate() , flight.getArriveDate() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         return flights.addIfAbsent( flight );
@@ -122,7 +122,9 @@ public class DataModel{
      @return true , if this flight was removed, false in other case
      */
     public Boolean removeFlight( String number ){
-        return flights.removeIf( flight -> Objects.equals( flight.getNumber() , number ) );
+        return flights.removeIf(
+                flight -> Pattern.compile( number , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() )
+                                 .matches() );
     }
 
     /**
@@ -155,9 +157,9 @@ public class DataModel{
                 .equals( route.getId() , ( newRoute != null ? newRoute : flight.getRoute() ).getId() ) ) ){
             throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
         }
-        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getPlaneID() ,
-                                                                  newPlaneId != null ? newPlaneId :
-                                                                  flight.getPlaneID() ) &&
+        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
+                                                                  newPlaneId != null ? newPlaneId.toUpperCase() :
+                                                                  flight.getPlaneID().toUpperCase() ) &&
                                                   Objects.equals( flight1.getRoute() ,
                                                                   newRoute != null ? newRoute : flight.getRoute() ) &&
                                                   Objects.equals( flight1.getDepartureDate() ,
@@ -168,9 +170,9 @@ public class DataModel{
                                                                   flight.getArriveDate() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
-        Flight editingFlight =
-                flights.stream().filter( flight1 -> Objects.equals( flight1.getNumber() , flight.getNumber() ) )
-                       .findFirst().orElseThrow(
+        Flight editingFlight = flights.stream().filter(
+                flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) )
+                                      .findFirst().orElseThrow(
                         () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
         editingFlight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
         editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
@@ -199,14 +201,16 @@ public class DataModel{
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
     public Boolean addRoute( Route route ){
-        if( route.getFrom().equals( route.getTo() ) ){
+        if( route.getFrom().toUpperCase().equals( route.getTo().toUpperCase() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
         if( !( legalSymbolsChecker.matcher( route.getFrom() ).matches() &&
                legalSymbolsChecker.matcher( route.getTo() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Illegal symbols" );
         }
-        if( routes.stream().anyMatch(route1 -> route.getTo().toUpperCase().equals(route1.getTo().toUpperCase())&&route.getFrom().toUpperCase().equals(route1.getFrom().toUpperCase())) ){
+        if( routes.stream().anyMatch( route1 -> route.getTo().toUpperCase().equals( route1.getTo().toUpperCase() ) &&
+                                                route.getFrom().toUpperCase()
+                                                     .equals( route1.getFrom().toUpperCase() ) ) ){
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
         route.setId( routesPrimaryKeysGenerator.next() );
@@ -246,10 +250,10 @@ public class DataModel{
         if( route.getId() == null ){
             throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
         }
-        if( routes.stream().filter( route1 -> ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
-                                                      .equals( route1.getFrom() ) &&
-                                              ( newDestinationAirport != null ? newDestinationAirport : route.getTo() )
-                                                      .equals( route1.getTo() ) ).count() > 0 ){
+        if( routes.stream().filter( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
+                                                route.getFrom().toUpperCase() ).equals( route1.getFrom() ) &&
+                                              ( newDestinationAirport != null ? newDestinationAirport.toUpperCase() :
+                                                route.getTo().toUpperCase() ).equals( route1.getTo() ) ).count() > 0 ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
         editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );
@@ -330,13 +334,14 @@ public class DataModel{
         Set<Route>  routeSet  = new HashSet<>( this.routes );
         Set<Flight> flightSet = new HashSet<>( this.flights );
         routes.forEach( route -> {
-            if( !routeSet.add( route )||routeSet.stream().anyMatch(route1 -> route1.equals(route)) ){
+            if( !routeSet.add( route ) ){
                 failedRoutes.add( route );
             }
         } );
         routes.removeAll( failedRoutes );
         flights.forEach( flight -> {
-            if( flightSet.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
+            if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
+                                                               .matcher( flight1.getNumber() ).matches() ) ){
                 failedFlights.add( flight );
                 return;
             }
