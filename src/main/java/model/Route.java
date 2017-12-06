@@ -60,7 +60,7 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     @Override
     public int hashCode(){
-        return from.hashCode() ^ to.hashCode();
+        return from.toUpperCase().hashCode() ^ to.toUpperCase().hashCode();
     }
 
     @Override
