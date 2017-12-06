@@ -67,7 +67,7 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     public boolean equals( Object obj ){
         if( !( obj instanceof Route ) ) return false;
         Route route = ( Route ) obj;
-        return this.from.equals( route.from ) && this.to.equals( route.to );
+        return this.from.toUpperCase().equals( route.from.toUpperCase() ) && this.to.toUpperCase().equals( route.to.toUpperCase() );
     }
 
     @Override

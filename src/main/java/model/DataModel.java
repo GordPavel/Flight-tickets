@@ -330,13 +330,13 @@ public class DataModel{
         Set<Route>  routeSet  = new HashSet<>( this.routes );
         Set<Flight> flightSet = new HashSet<>( this.flights );
         routes.forEach( route -> {
-            if( !routeSet.add( route ) ){
+            if( !routeSet.add( route )||routeSet.stream().anyMatch(route1 -> route1.equals(route)) ){
                 failedRoutes.add( route );
             }
         } );
         routes.removeAll( failedRoutes );
         flights.forEach( flight -> {
-            if( flightSet.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber() , flight.getNumber() ) ) ){
+            if( flightSet.stream().anyMatch( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
                 failedFlights.add( flight );
                 return;
             }
