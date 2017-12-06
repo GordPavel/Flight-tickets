@@ -42,13 +42,13 @@ public class EditRoutesOverviewController{
                 Controller.model.editRoute( Controller.routeForEdit , departureTextField.getText() ,
                                             destinationTextField.getText() );
                 controller.updateRoutes();
+                Main.changed = true;
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model`s message" );
                 alert.setHeaderText( "Model send message:" );
                 alert.setContentText( e.getMessage() );
-
                 alert.showAndWait();
             }
         }
@@ -68,12 +68,10 @@ public class EditRoutesOverviewController{
      */
     @FXML
     public void handleCancelAction( ActionEvent actionEvent ){
-
         closeWindow( actionEvent );
     }
 
     private void closeWindow( Event event ){
-
         Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
         stage.close();
     }
@@ -81,16 +79,15 @@ public class EditRoutesOverviewController{
 
     @FXML
     private void initialize(){
-
         departureTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
             Matcher matcher = pattern.matcher( departureTextField.getText() );
             if( !matcher.matches() ){
                 departureTextField.setStyle( "-fx-text-inner-color: red;" );
-                departureTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
+                departureTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
             }else{
                 departureTextField.setStyle( "-fx-text-inner-color: black;" );
-                departureTextField.setTooltip(null);
+                departureTextField.setTooltip( null );
             }
             checkTimeTextFields();
         } );
@@ -100,10 +97,10 @@ public class EditRoutesOverviewController{
             Matcher matcher = pattern.matcher( destinationTextField.getText() );
             if( !matcher.matches() ){
                 destinationTextField.setStyle( "-fx-text-inner-color: red;" );
-                destinationTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
+                destinationTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
             }else{
                 destinationTextField.setStyle( "-fx-text-inner-color: black;" );
-                destinationTextField.setTooltip(null);
+                destinationTextField.setTooltip( null );
             }
             checkTimeTextFields();
         } );
@@ -112,9 +109,7 @@ public class EditRoutesOverviewController{
     }
 
     private void checkTimeTextFields(){
-
         Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
-
         if( pattern.matcher( departureTextField.getText() ).matches() &&
             pattern.matcher( destinationTextField.getText() ).matches() ){
             editEditRouteOverview.setDisable( false );

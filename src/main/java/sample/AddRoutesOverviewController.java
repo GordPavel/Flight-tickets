@@ -28,49 +28,39 @@ public class AddRoutesOverviewController{
     @FXML TextField destinationTextField;
     @FXML Button    addAddRouteOverview;
 
-
     /**
      @param actionEvent Add Button. Add a new route to the DataModel
      */
 
     @FXML
     private void handleAddAction( ActionEvent actionEvent ){
-
         if( departureTextField.getText().equals( "" ) || destinationTextField.getText().equals( "" ) ){
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Empty fields " );
             alert.setHeaderText( "No parameters" );
             alert.setContentText( "Please enter all parameters for adding a new route." );
-
             alert.showAndWait();
-
         }else{
-
             try{
                 Controller.model.addRoute( new Route( departureTextField.getText() , destinationTextField.getText() ) );
                 controller.updateRoutes();
-                //controller.getRoutes().forEach( System.out::println );
+                Main.changed = true;
                 closeWindow( actionEvent );
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model`s message" );
                 alert.setHeaderText( "Model send message:" );
                 alert.setContentText( e.getMessage() );
-
                 alert.showAndWait();
             }
         }
-
-
     }
 
     /**
-     @param event Clear Button. Clear all data in the window for adding a new route
      */
 
     @FXML
-    private void clearData( ActionEvent event ){
+    private void clearData(){
         departureTextField.clear();
         destinationTextField.clear();
     }
@@ -99,10 +89,10 @@ public class AddRoutesOverviewController{
             Matcher matcher = pattern.matcher( departureTextField.getText() );
             if( !matcher.matches() ){
                 departureTextField.setStyle( "-fx-text-inner-color: red;" );
-                departureTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
+                departureTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
             }else{
                 departureTextField.setStyle( "-fx-text-inner-color: black;" );
-                departureTextField.setTooltip(null);
+                departureTextField.setTooltip( null );
             }
             checkTimeTextFields();
         } );
@@ -112,10 +102,10 @@ public class AddRoutesOverviewController{
             Matcher matcher = pattern.matcher( destinationTextField.getText() );
             if( !matcher.matches() ){
                 destinationTextField.setStyle( "-fx-text-inner-color: red;" );
-                destinationTextField.setTooltip(new Tooltip("Acceptable symbols: 0-9, a-z, -, _"));
+                destinationTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
             }else{
                 destinationTextField.setStyle( "-fx-text-inner-color: black;" );
-                destinationTextField.setTooltip(null);
+                destinationTextField.setTooltip( null );
             }
             checkTimeTextFields();
         } );

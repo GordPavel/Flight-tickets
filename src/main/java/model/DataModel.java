@@ -251,9 +251,11 @@ public class DataModel{
             throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
         }
         if( routes.stream().filter( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
-                                                route.getFrom().toUpperCase() ).equals( route1.getFrom() ) &&
+                                                route.getFrom().toUpperCase() )
+                                                      .equals( route1.getFrom().toUpperCase() ) &&
                                               ( newDestinationAirport != null ? newDestinationAirport.toUpperCase() :
-                                                route.getTo().toUpperCase() ).equals( route1.getTo() ) ).count() > 0 ){
+                                                route.getTo().toUpperCase() ).equals( route1.getTo().toUpperCase() ) )
+                  .count() > 0 ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
         editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );
@@ -312,7 +314,7 @@ public class DataModel{
 
      @throws IOException If other I/O error has occurred.
      */
-    public Collection<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException{
+    public Stream<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( additionalData );
         List<Serializable>               failedData       = new ArrayList<>();
         routesAndFlights.get( true ).removeIf( route -> {
@@ -357,8 +359,7 @@ public class DataModel{
         routes.forEach( route -> route.setId( routesPrimaryKeysGenerator.next() ) );
         this.routes.addAll( routes );
         this.flights.addAll( flights );
-        return Stream.concat( Stream.concat( failedRoutes.stream() , failedFlights.stream() ) , failedData.stream() )
-                     .collect( Collectors.toList() );
+        return Stream.concat( Stream.concat( failedRoutes.stream() , failedFlights.stream() ) , failedData.stream() );
     }
 
     private Map<Boolean, List<Serializable>> deserializeData( File file ) throws IOException{

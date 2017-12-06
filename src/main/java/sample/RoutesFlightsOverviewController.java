@@ -2,7 +2,6 @@ package sample;
 
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,11 +14,12 @@ import javafx.stage.Stage;
 import model.Flight;
 import model.Route;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -41,14 +41,6 @@ public class RoutesFlightsOverviewController{
     private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
-    @FXML Button                      addRouteButton;
-    @FXML Button                      editRouteButton;
-    @FXML Button                      searchRouteButton;
-    @FXML Button                      deleteRouteButton;
-    @FXML Button                      addFlightButton;
-    @FXML Button                      editFlightButton;
-    @FXML Button                      searchFlightButton;
-    @FXML Button                      deleteFlightButton;
     @FXML TextField                   departure;
     @FXML TextField                   destination;
     @FXML TableView<Route>            routeTable;
@@ -59,14 +51,19 @@ public class RoutesFlightsOverviewController{
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
 
-    public RoutesFlightsOverviewController(){
+    private Stage thisStage;
+    private FileChooser fileChooser = new FileChooser();
+
+    RoutesFlightsOverviewController( Stage thisStage ){
+        this.thisStage = thisStage;
+        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
     }
 
     /**
      initialization of view
      */
+    @FXML
     public void initialize(){
-
         controller.updateFlights();
         controller.updateRoutes();
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
@@ -108,7 +105,6 @@ public class RoutesFlightsOverviewController{
     /**
      @param flight show detail information about chosen flight
      */
-
     private void showFlightDetails( Flight flight ){
         if( flight != null ){
             detailsTextArea.setWrapText( true );
@@ -127,6 +123,7 @@ public class RoutesFlightsOverviewController{
             try{
                 routeTable.getItems().remove( selectedRoute );
                 Controller.model.removeRoute( selectedRoute );
+                Main.changed = true;
                 controller.updateRoutes();
                 routeTable.refresh();
                 controller.updateFlights();
@@ -157,6 +154,7 @@ public class RoutesFlightsOverviewController{
             try{
                 flightTable.getItems().remove( selectedFlight );
                 Controller.model.removeFlight( selectedFlight.getNumber() );
+                Main.changed = true;
                 controller.updateFlights();
                 flightTable.refresh();
             }catch( FlightAndRouteException e ){
@@ -164,11 +162,9 @@ public class RoutesFlightsOverviewController{
                 alert.setTitle( "Model exception" );
                 alert.setHeaderText( "Model throw an exception" );
                 alert.setContentText( e.getMessage() );
-
                 alert.showAndWait();
             }
         }else{
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Flight Selected" );
@@ -177,30 +173,23 @@ public class RoutesFlightsOverviewController{
         }
     }
 
-    /**
-     @param actionEvent Add Button (for routes). Create a new window for adding a new route
-     */
     @FXML
-    public void handleAddRouteButton( ActionEvent actionEvent ){
+    public void handleAddRouteButton(){
         Parent addRouteWindow;
-        Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         try{
             addRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             Scene scene = new Scene( addRouteWindow );
             Stage popUp = new Stage();
-
             popUp.initModality( Modality.APPLICATION_MODAL );
-            popUp.initOwner( oldStage );
+            popUp.initOwner( thisStage );
 
             popUp.setTitle( ADD_ROUTE_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
 
-            oldStage.setOpacity( 0.9 );
+            thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
-            oldStage.setOpacity( 1 );
-
-
+            thisStage.setOpacity( 1 );
         }catch( IOException e ){
             e.printStackTrace();
         }
@@ -210,25 +199,18 @@ public class RoutesFlightsOverviewController{
         flightTable.refresh();
     }
 
-    /**
-     @param actionEvent Edit Button (for routes). Create a new window for editing the information about chosen route
-     */
     @FXML
-    public void handleEditRouteButton( ActionEvent actionEvent ){
+    public void handleEditRouteButton(){
         Parent editRouteWindow;
-        Stage  oldStage      = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
         Route  selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute == null ){
-
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
             alert.setHeaderText( "No Route Selected" );
             alert.setContentText( "Please select a route to edit in the table." );
-
             alert.showAndWait();
         }else{
             controller.setRouteForEdit( selectedRoute );
-
             try{
                 editRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/EditRoutesOverview.fxml" ) );
 
@@ -236,7 +218,7 @@ public class RoutesFlightsOverviewController{
                 Stage popUp = new Stage();
 
                 popUp.initModality( Modality.APPLICATION_MODAL );
-                popUp.initOwner( oldStage );
+                popUp.initOwner( thisStage );
 
                 popUp.setTitle( EDIT_ROUTE_WINDOW );
                 popUp.setScene( scene );
@@ -247,9 +229,9 @@ public class RoutesFlightsOverviewController{
                 ( ( TextField ) ( editRouteWindow.getChildrenUnmodifiable().get( 4 ) ) )
                         .setText( selectedRoute.getTo() );
 
-                oldStage.setOpacity( 0.9 );
+                thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
-                oldStage.setOpacity( 1 );
+                thisStage.setOpacity( 1 );
                 routeTable.setItems( controller.getRoutes() );
                 routeTable.refresh();
                 controller.updateFlights();
@@ -261,30 +243,24 @@ public class RoutesFlightsOverviewController{
         }
     }
 
-    /**
-     @param actionEvent Add Button (for flights). Create a new window for adding a new flight
-     */
     @FXML
-    public void handleAddFlightButton( ActionEvent actionEvent ){
-        Parent addFlightWindow;
-        Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
-
+    public void handleAddFlightButton(){
         try{
-            addFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            Parent addFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
 
             Scene scene = new Scene( addFlightWindow );
             Stage popUp = new Stage();
 
             popUp.initModality( Modality.APPLICATION_MODAL );
-            popUp.initOwner( oldStage );
+            popUp.initOwner( thisStage );
 
             popUp.setTitle( ADD_FLIGHT_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
 
-            oldStage.setOpacity( 0.9 );
+            thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
-            oldStage.setOpacity( 1 );
+            thisStage.setOpacity( 1 );
             flightTable.setItems( controller.getFlights() );
             flightTable.refresh();
         }catch( IOException e ){
@@ -292,16 +268,10 @@ public class RoutesFlightsOverviewController{
         }
     }
 
-    /**
-     @param actionEvent Edit Button (for flight). Create a new window for editing the information about chosen flight.
-     */
     @FXML
-    public void handleEditFlightButton( ActionEvent actionEvent ){
+    public void handleEditFlightButton(){
         Parent editFlightWindow;
-        Stage  oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
-
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
-
         if( selectedFlight == null ){
 
             Alert alert = new Alert( Alert.AlertType.WARNING );
@@ -312,7 +282,6 @@ public class RoutesFlightsOverviewController{
             alert.showAndWait();
         }else{
             controller.setFlightForEdit( selectedFlight );
-
             try{
                 editFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/EditFlightsOverview.fxml" ) );
 
@@ -320,7 +289,7 @@ public class RoutesFlightsOverviewController{
                 Stage popUp = new Stage();
 
                 popUp.initModality( Modality.APPLICATION_MODAL );
-                popUp.initOwner( oldStage );
+                popUp.initOwner( thisStage );
 
                 popUp.setTitle( EDIT_FLIGHT_WINDOW );
                 popUp.setScene( scene );
@@ -342,9 +311,9 @@ public class RoutesFlightsOverviewController{
                 ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
                         .setText( selectedFlight.getArriveDate().
                                 toInstant().atZone( ZoneId.systemDefault() ).toLocalTime().toString() );
-                oldStage.setOpacity( 0.9 );
+                thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
-                oldStage.setOpacity( 1 );
+                thisStage.setOpacity( 1 );
 
                 flightTable.setItems( controller.getFlights() );
                 flightTable.refresh();
@@ -354,12 +323,8 @@ public class RoutesFlightsOverviewController{
         }
     }
 
-    /**
-     @param actionEvent Edit Button (for flight). Create a new window for searching the necessary flight.
-     */
     @FXML
-    public void handleSearchFlightButton( ActionEvent actionEvent ){
-        Stage oldStage = ( Stage ) ( ( Parent ) actionEvent.getSource() ).getScene().getWindow();
+    public void handleSearchFlightButton(){
         try{
             Stage                           popUp         = new Stage();
             FXMLLoader                      loader        =
@@ -369,35 +334,34 @@ public class RoutesFlightsOverviewController{
             Scene scene = new Scene( loader.load() );
 
             popUp.initModality( Modality.NONE );
-            popUp.initOwner( oldStage.getOwner() );
-            popUp.setX( oldStage.getX() + oldStage.getWidth() );
-            popUp.setY( oldStage.getY() );
+            popUp.initOwner( thisStage.getOwner() );
+            popUp.setX( thisStage.getX() + thisStage.getWidth() );
+            popUp.setY( thisStage.getY() );
 
             popUp.setTitle( SEARCH_FLIGHT_WINDOW );
             popUp.setScene( scene );
             popUp.setResizable( false );
 
-            oldStage.setOpacity( 0.9 );
+            thisStage.setOpacity( 0.9 );
             popUp.show();
-            oldStage.setOpacity( 1 );
+            thisStage.setOpacity( 1 );
         }catch( IOException e ){
             e.printStackTrace();
         }
-
         flightTable.setItems( controller.getFlights() );
         flightTable.refresh();
     }
 
     @FXML
-    private void handleImportAction(){
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
-        File file = fileChooser.showOpenDialog( new Stage() );
-        if( file != null ){
+    private void handleOpenAction(){
+        Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 Controller.model.importFromFile( file );
                 controller.updateRoutes();
                 controller.updateFlights();
+                Main.changed = false;
+                Main.savingFile = file;
+                thisStage.setTitle( file.getName() );
             }catch( IOException | FlightAndRouteException e ){
                 e.printStackTrace();
             }
@@ -405,34 +369,42 @@ public class RoutesFlightsOverviewController{
             routeTable.refresh();
             flightTable.setItems( controller.getFlights() );
             flightTable.refresh();
+        } );
+    }
+
+    public void handleSaveAction(){
+        if( Main.savingFile == null ){
+            Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
+                Main.savingFile = file;
+                thisStage.setTitle( file.getName() );
+            } );
+        }
+        try{
+            Controller.model.exportToFile( Main.savingFile );
+            Main.changed = false;
+        }catch( IOException | FlightAndRouteException e ){
+            new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
         }
     }
 
     @FXML
-    private void handleExportAction(){
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
-        File file = fileChooser.showSaveDialog( new Stage() );
-        if( file != null ){
+    private void handleSaveAsAction(){
+        Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 Controller.model.exportToFile( file );
             }catch( IOException | FlightAndRouteException e ){
-                e.printStackTrace();
+                new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
             }
-        }
+        } );
     }
 
     @FXML
     private void handleMergeAction(){
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
-        File                    file = fileChooser.showOpenDialog( new Stage() );
-        ArrayList<Serializable> failedInMerge;
-        if( file != null ){
+        Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                failedInMerge = new ArrayList<>( Controller.model.mergeData( file ) );
-
-
+                ArrayList<Serializable> failedInMerge =
+                        Controller.model.mergeData( file ).collect( ArrayList::new , List::add , List::addAll );
+                Main.changed = true;
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
@@ -442,8 +414,8 @@ public class RoutesFlightsOverviewController{
                 ArrayList<Route>  mergeRoutes  = new ArrayList<>();
                 for( Serializable element : failedInMerge ){
                     errors.append( "-" ).append( element.toString() ).append( "\n" );
-                    if( element instanceof Flight && !Controller.model.listFlightsWithPredicate( flight -> true )
-                                                                      .anyMatch( flight -> flight.equals( element ) ) ){
+                    if( element instanceof Flight && Controller.model.listFlightsWithPredicate( flight -> true )
+                                                                     .noneMatch( flight -> flight.equals( element ) ) ){
                         mergeFlights.add( ( Flight ) element );
                     }
                     if( element instanceof Route ){
@@ -454,41 +426,25 @@ public class RoutesFlightsOverviewController{
                 controller.setMergeFlights( FXCollections.observableArrayList( mergeFlights ) );
                 controller.setMergeRoutes( FXCollections.observableArrayList( mergeRoutes ) );
                 alert.setContentText( errors.toString() );
-
                 alert.showAndWait();
+                Scene scene = new Scene( FXMLLoader.load( getClass().getResource( "/fxml/mergeOverview.fxml" ) ) );
+                Stage popUp = new Stage();
+                popUp.initModality( Modality.APPLICATION_MODAL );
+                popUp.setTitle( ADD_ROUTE_WINDOW );
+                popUp.setScene( scene );
+                popUp.setResizable( false );
 
-
-                Parent mergeWindow;
-
-                try{
-                    mergeWindow = FXMLLoader.load( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
-
-                    Scene scene = new Scene( mergeWindow );
-                    Stage popUp = new Stage();
-
-                    popUp.initModality( Modality.APPLICATION_MODAL );
-                    popUp.setTitle( ADD_ROUTE_WINDOW );
-                    popUp.setScene( scene );
-                    popUp.setResizable( false );
-
-                    popUp.showAndWait();
-
-
-                }catch( IOException e ){
-                    e.printStackTrace();
-                }
-
+                popUp.showAndWait();
                 controller.updateRoutes();
                 controller.updateFlights();
             }catch( IOException | FlightAndRouteException e ){
-                e.printStackTrace();
+                new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
             }
             routeTable.setItems( controller.getRoutes() );
             routeTable.refresh();
             flightTable.setItems( controller.getFlights() );
             flightTable.refresh();
-        }
-
+        } );
     }
 }
 
