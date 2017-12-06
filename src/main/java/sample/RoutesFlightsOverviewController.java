@@ -92,9 +92,9 @@ public class RoutesFlightsOverviewController{
             textField.setTooltip( null );
         }
         Pattern departurePattern = Pattern.compile(
-                ".*" + departure.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
+                ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
         Pattern destinationPattern = Pattern.compile(
-                ".*" + destination.getText().toUpperCase().replace( "*" , ".*" ).replace( "?" , "." ) + ".*" );
+                ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
 
         routeTable.setItems( controller.getRoutes().stream().filter(
                 route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
