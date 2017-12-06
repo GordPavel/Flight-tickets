@@ -92,12 +92,12 @@ public class SearchFlightsOverviewController{
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
-            Predicate<Route> fromPredicate =
-                    route -> Pattern.compile( ".*" + searchFromTextField.getText() + ".*" , Pattern.CASE_INSENSITIVE )
-                                    .matcher( route.getFrom() ).matches();
-            Predicate<Route> toPredicate =
-                    route -> Pattern.compile( ".*" + searchToTextField.getText() + ".*" , Pattern.CASE_INSENSITIVE )
-                                    .matcher( route.getTo() ).matches();
+            Predicate<Route> fromPredicate = route -> Pattern
+                    .compile( searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) ,
+                              Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
+            Predicate<Route> toPredicate = route -> Pattern
+                    .compile( searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) ,
+                              Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
             routesListView.getItems().setAll(
                     dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
@@ -107,10 +107,18 @@ public class SearchFlightsOverviewController{
     }
 
     private void changed( ObservableValue<? extends String> observable , String oldValue , String newValue ){
-        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() ||
-                                                      flight.getNumber().matches( numberTextField.getText() );
-        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() ||
-                                                     flight.getNumber().matches( planeIdTextField.getText() );
+        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || flight.getNumber().matches(
+                numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) );
+        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || flight.getPlaneID()
+                                                                                                   .matches(
+                                                                                                           planeIdTextField
+                                                                                                                   .getText()
+                                                                                                                   .replaceAll(
+                                                                                                                           "\\*" ,
+                                                                                                                           ".*" )
+                                                                                                                   .replaceAll(
+                                                                                                                           "\\?" ,
+                                                                                                                           "." ) );
         Predicate<Flight> routePredicate =
                 flight -> Optional.ofNullable( routesListView.getSelectionModel().getSelectedItem() )
                                   .map( route -> Objects.equals( route , flight.getRoute() ) ).orElse( true );
@@ -272,6 +280,14 @@ public class SearchFlightsOverviewController{
         planeIdTextField.clear();
         searchFromTextField.clear();
         searchToTextField.clear();
+        departureFromDatePicker.getEditor().clear();
+        departureToDatePicker.getEditor().clear();
+        departureFromTimeTextField.clear();
+        departureToTimeTextField.clear();
+        arriveFromDatePicker.getEditor().clear();
+        arriveToDatePicker.getEditor().clear();
+        arriveFromTimeTextField.clear();
+        arriveToTimeTextField.clear();
         routesListView.getSelectionModel().clearSelection();
         mainController.flightTable.getItems()
                                   .setAll( dataModel.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
