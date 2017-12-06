@@ -4,10 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.DataModel;
 import model.Flight;
@@ -18,8 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -72,6 +67,7 @@ public class SearchFlightsOverviewController{
     @FXML
     public void initialize(){
         setLayouts();
+        routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
         numberTextField.textProperty().addListener( this::changed );
         planeIdTextField.textProperty().addListener( this::changed );
         departureFromDatePicker.getEditor().textProperty().addListener( this::changed );
@@ -92,12 +88,12 @@ public class SearchFlightsOverviewController{
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
-            Predicate<Route> fromPredicate = route -> Pattern
-                    .compile( searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) ,
-                              Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
-            Predicate<Route> toPredicate = route -> Pattern
-                    .compile( searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) ,
-                              Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
+            Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
+                    "^" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                    Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
+            Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
+                    "^" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                    Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
             routesListView.getItems().setAll(
                     dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
@@ -107,21 +103,15 @@ public class SearchFlightsOverviewController{
     }
 
     private void changed( ObservableValue<? extends String> observable , String oldValue , String newValue ){
-        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || flight.getNumber().matches(
-                numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) );
-        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || flight.getPlaneID()
-                                                                                                   .matches(
-                                                                                                           planeIdTextField
-                                                                                                                   .getText()
-                                                                                                                   .replaceAll(
-                                                                                                                           "\\*" ,
-                                                                                                                           ".*" )
-                                                                                                                   .replaceAll(
-                                                                                                                           "\\?" ,
-                                                                                                                           "." ) );
-        Predicate<Flight> routePredicate =
-                flight -> Optional.ofNullable( routesListView.getSelectionModel().getSelectedItem() )
-                                  .map( route -> Objects.equals( route , flight.getRoute() ) ).orElse( true );
+        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
+                "^" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
+        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
+                "^" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
+        Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
+                                                     routesListView.getSelectionModel().getSelectedItems()
+                                                                   .contains( flight.getRoute() );
         Predicate<Flight> departureDatePredicate = flight -> {
             Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
             Pattern           timePattern   = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
