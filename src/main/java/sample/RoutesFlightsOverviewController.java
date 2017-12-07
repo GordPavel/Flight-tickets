@@ -1,5 +1,6 @@
 package sample;
 
+import com.browniebytes.javafx.control.DateTimePicker;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -300,18 +301,18 @@ public class RoutesFlightsOverviewController{
                         .setText( selectedFlight.getNumber() );
                 ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 3 ) ) )
                         .setText( selectedFlight.getPlaneID() );
-                ( ( DatePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 9 ) ) ).setValue(
-                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDate() );
-                ( ( DatePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 10 ) ) ).setValue(
-                        selectedFlight.getArriveDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDate() );
+                ( (DateTimePicker) ( editFlightWindow.getChildrenUnmodifiable().get( 9 ) ) ).dateTimeProperty().setValue(
+                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDateTime());
+                ( ( DateTimePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 10 ) ) ).dateTimeProperty().setValue(
+                        selectedFlight.getArriveDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDateTime() );
                 ( ( ChoiceBox<Route> ) ( editFlightWindow.getChildrenUnmodifiable().get( 11 ) ) )
                         .setValue( selectedFlight.getRoute() );
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setText(
-                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
-                                      .toString() );
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
-                        .setText( selectedFlight.getArriveDate().
-                                toInstant().atZone( ZoneId.systemDefault() ).toLocalTime().toString() );
+               // ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setText(
+                       // selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
+                                    //  .toString() );
+               // ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
+                      //  .setText( selectedFlight.getArriveDate().
+                          //      toInstant().atZone( ZoneId.systemDefault() ).toLocalTime().toString() );
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );

@@ -11,10 +11,15 @@ import javafx.stage.Stage;
 import model.Flight;
 import model.Route;
 
+import com.browniebytes.javafx.control.DateTimePicker;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,11 +36,11 @@ public class AddFlightsOverviewController{
     @FXML ChoiceBox<Route> box;
     @FXML TextField        number;
     @FXML TextField        planeID;
-    @FXML DatePicker       departureDate;
-    @FXML DatePicker       arrivingDate;
+    @FXML DateTimePicker   departureDate;
+    @FXML DateTimePicker   arrivingDate;
     @FXML Button           addAddFlightsOverview;
-    @FXML TextField        arrivingTime;
-    @FXML TextField        departureTime;
+    //@FXML TextField        arrivingTime;
+    //@FXML TextField        departureTime;
 
     /**
      initialization of view
@@ -44,17 +49,22 @@ public class AddFlightsOverviewController{
     private void initialize(){
 
 
-        departureDate.setValue( LocalDate.now() );
-        arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
+        departureDate.dateTimeProperty().setValue(LocalDateTime.now());
+        arrivingDate.dateTimeProperty().setValue(LocalDateTime.now().plusDays( 1 ));
+        //departureDate.setValue( LocalDate.now() );
+        //arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
 
-        departureDate.getEditor().setDisable( true );
-        arrivingDate.getEditor().setDisable( true );
+        //departureDate.setDisable(true);
+        //arrivingDate.setDisable(true);
+        //departureDate.getEditor().setDisable( true );
+       // arrivingDate.getEditor().setDisable( true );
 
-        arrivingTime.setText( "00:00" );
-        departureTime.setText( "00:00" );
+       // arrivingTime.setText( "00:00" );
+        //departureTime.setText( "00:00" );
 
-        arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+
+        /*arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
             Matcher matcher = pattern.matcher( arrivingTime.getText() );
             if( !matcher.matches() ){
@@ -65,9 +75,9 @@ public class AddFlightsOverviewController{
                 arrivingTime.setTooltip( null );
             }
             checkTimeTextFields();
-        } );
+        } );*/
 
-        departureTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        /*departureTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
             Matcher matcher = pattern.matcher( departureTime.getText() );
             if( !matcher.matches() ){
@@ -78,7 +88,7 @@ public class AddFlightsOverviewController{
                 departureTime.setTooltip( null );
             }
             checkTimeTextFields();
-        } );
+        } );*/
 
         number.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
@@ -90,7 +100,7 @@ public class AddFlightsOverviewController{
                 number.setStyle( "-fx-text-inner-color: black;" );
                 number.setTooltip( null );
             }
-            checkTimeTextFields();
+            //checkTimeTextFields();
         } );
 
         planeID.textProperty().addListener( ( observable , oldValue , newValue ) -> {
@@ -103,7 +113,7 @@ public class AddFlightsOverviewController{
                 planeID.setStyle( "-fx-text-inner-color: black;" );
                 planeID.setTooltip( null );
             }
-            checkTimeTextFields();
+            //checkTimeTextFields();
         } );
 
     }
@@ -116,22 +126,43 @@ public class AddFlightsOverviewController{
 
         DateFormat format = new SimpleDateFormat( "dd.MM.yyyy hh:mm" );
 
+        LocalDateTime localArrivDate = arrivingDate.dateTimeProperty().getValue();
+       // LocalTime arriveTime = arrivingDate.dateTimeProperty().getValue().toLocalTime();
+
+        LocalDateTime localDepartDate = departureDate.dateTimeProperty().getValue();
+        //LocalTime departTime = departureDate.dateTimeProperty().getValue().toLocalTime();
+
+
         Date arriveDate = new Date();
         Date departDate = new Date();
 
-        try{
-            arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
+        arriveDate = Date.from(localArrivDate.atZone(ZoneId.systemDefault()).toInstant());
+        departDate = Date.from(localDepartDate.atZone(ZoneId.systemDefault()).toInstant());
+
+        //departureDate.dateTimeProperty().getValue().toLocalDate();
+        //arrivingDate.dateTimeProperty().getValue().toLocalDate();
+
+
+        /*try{
+            arriveDate = format.parse( localArrivDate. + " " + arriveTime arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
         }catch( ParseException e ){
 
         }
 
         try{
-            departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getText() );
+            departDate = format.parse( localDepartDate + " " + departTime departureDate.getEditor().getText() + " " + departureTime.getText() );
         }catch( ParseException e ){
 
-        }
+        }*/
 
-        if( arriveDate.getTime() <= departDate.getTime() ){
+
+        System.out.println(arriveDate);
+        System.out.println(departDate);
+        System.out.println(arrivingDate.dateTimeProperty().getValue().toLocalDate().toString());
+        System.out.println(arrivingDate.dateTimeProperty().getValue().toLocalTime().toString());
+        System.out.println(departureDate.dateTimeProperty().getValue().toLocalDate().toString());
+        System.out.println(departureDate.dateTimeProperty().getValue().toLocalTime().toString());
+        if(/*arriveDate.getTime() <= departDate.getTime()*/  arrivingDate.dateTimeProperty().getValue().isBefore(departureDate.dateTimeProperty().getValue())){
 
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Incorrect data about date" );
@@ -181,10 +212,10 @@ public class AddFlightsOverviewController{
 
         number.clear();
         planeID.clear();
-        departureDate.setValue( LocalDate.now() );
-        arrivingDate.setValue( LocalDate.now() );
-        arrivingTime.setText( "00:00" );
-        departureTime.setText( "00:00" );
+        departureDate.dateTimeProperty().setValue( LocalDateTime.now() );
+        arrivingDate.dateTimeProperty().setValue( LocalDateTime.now().plusDays( 1 ) );
+        //arrivingTime.setText( "00:00" );
+        //departureTime.setText( "00:00" );
     }
 
     /**
@@ -201,7 +232,7 @@ public class AddFlightsOverviewController{
     }
 
 
-    private void checkTimeTextFields(){
+   /* private void checkTimeTextFields(){
 
         Pattern pattern     = Pattern.compile( "[0-9\\-_\\w]*" );
         Pattern timePattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
@@ -213,6 +244,6 @@ public class AddFlightsOverviewController{
         }else{
             addAddFlightsOverview.setDisable( true );
         }
-    }
+    }*/
 
 }
