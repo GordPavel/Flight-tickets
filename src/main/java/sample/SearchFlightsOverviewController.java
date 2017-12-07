@@ -89,25 +89,26 @@ public class SearchFlightsOverviewController{
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                    "^" + ".*"+ searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*"+ "$" ,
                     Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
             Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                    "^" + ".*"+ searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*"+ "$" ,
                     Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
             routesListView.getItems().setAll(
                     dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
-        thisStage.setOnCloseRequest( event -> mainController.flightTable.setItems( controller.getFlights() ) );
+        thisStage.setOnCloseRequest( event -> {mainController.flightTable.setItems( controller.getFlights() );
+                                                controller.setFlightSearchActiv(false);});
     }
 
     private void changed( ObservableValue<? extends String> observable , String oldValue , String newValue ){
         Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
-                "^" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                "^" + ".*"+numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." )+ ".*" + "$" ,
                 Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
         Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
-                "^" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + "$" ,
+                "^"+ ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." )+ ".*" + "$" ,
                 Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
         Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
                                                      routesListView.getSelectionModel().getSelectedItems()
@@ -223,6 +224,8 @@ public class SearchFlightsOverviewController{
                                .and( arriveDatePredicate ).and( flightTime ) ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         mainController.flightTable.refresh();
+        routesListView.setItems(controller.getRoutes());
+        routesListView.refresh();
     }
 
     //        Don't touch this layout settings! too hard to make correctly!
