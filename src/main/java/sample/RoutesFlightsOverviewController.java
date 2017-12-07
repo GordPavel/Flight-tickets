@@ -326,31 +326,34 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     public void handleSearchFlightButton(){
-        try{
-            Stage                           popUp         = new Stage();
-            FXMLLoader                      loader        =
-                    new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
-            SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
-            loader.setController( searchFlights );
-            Scene scene = new Scene( loader.load() );
+        if (!controller.isFlightSearchActiv()) {
+            controller.setFlightSearchActiv(true);
+            try {
+                Stage popUp = new Stage();
+                FXMLLoader loader =
+                        new FXMLLoader(getClass().getResource("/fxml/SearchFlightsOverview.fxml"));
+                SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController(this, popUp);
+                loader.setController(searchFlights);
+                Scene scene = new Scene(loader.load());
 
-            popUp.initModality( Modality.NONE );
-            popUp.initOwner( thisStage.getOwner() );
-            popUp.setX( thisStage.getX() + thisStage.getWidth() );
-            popUp.setY( thisStage.getY() );
+                popUp.initModality(Modality.NONE);
+                popUp.initOwner(thisStage.getOwner());
+                popUp.setX(thisStage.getX() + thisStage.getWidth());
+                popUp.setY(thisStage.getY());
 
-            popUp.setTitle( SEARCH_FLIGHT_WINDOW );
-            popUp.setScene( scene );
-            popUp.setResizable( false );
+                popUp.setTitle(SEARCH_FLIGHT_WINDOW);
+                popUp.setScene(scene);
+                popUp.setResizable(false);
 
-            thisStage.setOpacity( 0.9 );
-            popUp.show();
-            thisStage.setOpacity( 1 );
-        }catch( IOException e ){
-            e.printStackTrace();
+                thisStage.setOpacity(0.9);
+                popUp.show();
+                thisStage.setOpacity(1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            flightTable.setItems(controller.getFlights());
+            flightTable.refresh();
         }
-        flightTable.setItems( controller.getFlights() );
-        flightTable.refresh();
     }
 
     @FXML
@@ -453,6 +456,20 @@ public class RoutesFlightsOverviewController{
             flightTable.setItems( controller.getFlights() );
             flightTable.refresh();
         } );
+    }
+
+    @FXML
+    private void handleAboutAction(){
+        Alert alert = new Alert( Alert.AlertType.INFORMATION );
+        alert.setTitle( "About" );
+        alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +
+                "You can use it to add, edit, delete routes and flights in data base and to search for them." );
+        alert.setContentText( " - Don`t forget to fill all fields, when you add/edit route or flight;\n" +
+                " - Use only a-z, 0-9, - and _ in names/numbers;\n" +
+                " - Use * and ? in search field instead of many or one unknown symbol;\n" +
+                " - If you add/edit/delete some route/flight, update search parameters to update tables with routes and flights." );
+
+        alert.showAndWait();
     }
 }
 

@@ -29,6 +29,7 @@ public class Controller {
 
     static DataModel    model        = DataModel.getInstance();
     static SearchEngine searchEngine = new SearchEngine( model );
+    static boolean flightSearchActiv = false;
     private       ObservableList<Route>  routes;
     private       ObservableList<Flight> flights;
     public static Route                  routeForEdit;
@@ -109,6 +110,14 @@ public class Controller {
     public void setFlightForEdit( Flight flightForEdit ){
 
         Controller.flightForEdit = flightForEdit;
+    }
+
+    public void setFlightSearchActiv(boolean flightSearchActiv) {
+        Controller.flightSearchActiv = flightSearchActiv;
+    }
+
+    public boolean isFlightSearchActiv() {
+        return flightSearchActiv;
     }
 }
 
