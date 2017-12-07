@@ -5,6 +5,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import model.Flight;
 
 public class MergeOverviewController{
@@ -27,6 +28,7 @@ public class MergeOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
         flightTable.refresh();
+
     }
 
 
@@ -53,12 +55,23 @@ public class MergeOverviewController{
                                      flightTable.getSelectionModel().getSelectedItem().getArriveDate() );
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
+        if (flightTable.getItems().isEmpty())
+        {
+            Stage stage = (Stage) flightTable.getScene().getWindow();
+            stage.close();
+        }
+
     }
 
     @FXML
     public void handleAcceptOld(){
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
+        if (flightTable.getItems().isEmpty())
+        {
+            Stage stage = (Stage) flightTable.getScene().getWindow();
+            stage.close();
+        }
     }
 
     @FXML
@@ -69,6 +82,11 @@ public class MergeOverviewController{
         }
         flightTable.setItems( null );
         flightTable.refresh();
+        if (flightTable.getItems().isEmpty())
+        {
+            Stage stage = (Stage) flightTable.getScene().getWindow();
+            stage.close();
+        }
 
     }
 
@@ -76,5 +94,10 @@ public class MergeOverviewController{
     public void handleAcceptAllOld(){
         flightTable.setItems( null );
         flightTable.refresh();
+        if (flightTable.getItems().isEmpty())
+        {
+            Stage stage = (Stage) flightTable.getScene().getWindow();
+            stage.close();
+        }
     }
 }

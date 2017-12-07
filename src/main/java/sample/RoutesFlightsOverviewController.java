@@ -425,16 +425,23 @@ public class RoutesFlightsOverviewController{
 
                 controller.setMergeFlights( FXCollections.observableArrayList( mergeFlights ) );
                 controller.setMergeRoutes( FXCollections.observableArrayList( mergeRoutes ) );
-                alert.setContentText( errors.toString() );
-                alert.showAndWait();
-                Scene scene = new Scene( FXMLLoader.load( getClass().getResource( "/fxml/mergeOverview.fxml" ) ) );
-                Stage popUp = new Stage();
-                popUp.initModality( Modality.APPLICATION_MODAL );
-                popUp.setTitle( ADD_ROUTE_WINDOW );
-                popUp.setScene( scene );
-                popUp.setResizable( false );
 
-                popUp.showAndWait();
+                if (!failedInMerge.isEmpty()) {
+                    alert.setContentText(errors.toString());
+                    alert.showAndWait();
+                }
+
+                if (!mergeFlights.isEmpty()) {
+                    Scene scene = new Scene( FXMLLoader.load( getClass().getResource( "/fxml/mergeOverview.fxml" ) ) );
+                    Stage popUp = new Stage();
+                    popUp.initModality( Modality.APPLICATION_MODAL );
+                    popUp.setTitle( ADD_ROUTE_WINDOW );
+                    popUp.setScene( scene );
+                    popUp.setResizable( false );
+
+                    popUp.showAndWait();
+                }
+
                 controller.updateRoutes();
                 controller.updateFlights();
             }catch( IOException | FlightAndRouteException e ){
