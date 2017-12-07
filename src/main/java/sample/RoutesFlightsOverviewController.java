@@ -90,16 +90,17 @@ public class RoutesFlightsOverviewController{
         }else{
             textField.setStyle( "-fx-text-inner-color: black;" );
             textField.setTooltip( null );
+            Pattern departurePattern = Pattern.compile(
+                    ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
+            Pattern destinationPattern = Pattern.compile(
+                    ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
+            routeTable.setItems( controller.getRoutes().stream().filter(
+                    route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
+                            destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
+                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         }
-        Pattern departurePattern = Pattern.compile(
-                ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
-        Pattern destinationPattern = Pattern.compile(
-                ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" );
 
-        routeTable.setItems( controller.getRoutes().stream().filter(
-                route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
-                         destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
-                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+
     }
 
     /**
