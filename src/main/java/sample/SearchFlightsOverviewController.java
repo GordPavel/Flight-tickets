@@ -13,7 +13,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Observable;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,7 @@ public class SearchFlightsOverviewController{
     private DataModel  dataModel  = DataModel.getInstance();
     private RoutesFlightsOverviewController mainController;
     private Stage                           thisStage;
+    private boolean                 correctSymbols;
 
     public SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
@@ -60,10 +63,13 @@ public class SearchFlightsOverviewController{
 
     @FXML
     public void initialize(){
+        correctSymbols = true;
         setLayouts();
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
         numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(numberTextField) );
         planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(planeIdTextField) );
         departureFromDatePicker.getEditor().textProperty()
                                .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureFromDatePicker.getEditor().setDisable( true );
@@ -92,6 +98,8 @@ public class SearchFlightsOverviewController{
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
+        searchFromTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(searchFromTextField) );
+        searchToTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(searchToTextField) );
         thisStage.setOnCloseRequest( event -> {
             mainController.flightTable.setItems( controller.getFlights() );
             controller.setFlightSearchActive( false );
@@ -131,13 +139,36 @@ public class SearchFlightsOverviewController{
                                                stringToMillis( toTime ) >= flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
-        mainController.flightTable.setItems( dataModel.listFlightsWithPredicate(
-                numberPredicate.and( planePredicate ).and( routePredicate ).and( departureDatePredicate )
-                               .and( arriveDatePredicate ).and( flightTime ) ).collect(
-                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
-        mainController.flightTable.refresh();
-        routesListView.setItems( controller.getRoutes() );
-        routesListView.refresh();
+        if (correctSymbols) {
+            mainController.flightTable.setItems(dataModel.listFlightsWithPredicate(
+                    numberPredicate.and(planePredicate).and(routePredicate).and(departureDatePredicate)
+                            .and(arriveDatePredicate).and(flightTime)).collect(
+                    Collectors.collectingAndThen(toList(), FXCollections::observableArrayList)));
+            mainController.flightTable.refresh();
+            routesListView.setItems(controller.getRoutes());
+            routesListView.refresh();
+        }
+    }
+
+    private void formatcheck(TextField field){
+        Pattern textPattern = Pattern.compile("[\\w\\d\\?\\*\\-_]*");
+        Matcher matcher = textPattern.matcher( field.getText() );
+        if( !matcher.matches() ){
+            field.setStyle( "-fx-text-inner-color: red;" );
+            field.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, *, ?" ) );
+            correctSymbols=false;
+        }else{
+            field.setStyle( "-fx-text-inner-color: black;" );
+            field.setTooltip( null );
+        }
+        if (textPattern.matcher(numberTextField.getText()).matches()&&
+                textPattern.matcher(planeIdTextField.getText()).matches()&&
+                textPattern.matcher(searchFromTextField.getText()).matches()&&
+                textPattern.matcher(searchToTextField.getText()).matches())
+        {
+            correctSymbols=true;
+        }
+
     }
 
     private long stringToMillis( String fromTime ){
