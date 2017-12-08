@@ -39,7 +39,7 @@
     <DatePicker fx:id="arriveFromDatePicker" layoutX="145.0" layoutY="244.0" prefHeight="25.0" prefWidth="113.0"
                 promptText="from date"/>
     <TextField fx:id="flightTimeFromTextField" layoutX="143.0" layoutY="333.0" prefHeight="25.0" prefWidth="60.0"
-               promptText="from"/>
+               promptText="00:00"/>
     <Label layoutX="23.0" layoutY="389.0" text="Route:">
         <font>
             <Font name="System Italic" size="12.0"/>
@@ -55,17 +55,9 @@
         </font>
     </Label>
     <TextField fx:id="flightTimeToTextField" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="60.0"
-               promptText="to"/>
+               promptText="00:00"/>
     <Button focusTraversable="false" layoutX="17.0" layoutY="528.0" mnemonicParsing="false"
             onAction="#handleClearAction" prefHeight="25.0" prefWidth="75.0" text="Clear"/>
-    <TextField fx:id="departureFromTimeTextField" alignment="CENTER" layoutX="263.0" layoutY="163.0" prefHeight="25.0"
-               prefWidth="86.0" promptText="00:00"/>
-    <TextField fx:id="departureToTimeTextField" alignment="CENTER" layoutX="258.0" layoutY="202.0" prefHeight="25.0"
-               prefWidth="86.0" promptText="00:00"/>
-    <TextField fx:id="arriveFromTimeTextField" alignment="CENTER" layoutX="277.0" layoutY="244.0" prefHeight="25.0"
-               prefWidth="86.0" promptText="00:00"/>
-    <TextField fx:id="arriveToTimeTextField" alignment="CENTER" layoutX="273.0" layoutY="285.0" prefHeight="25.0"
-               prefWidth="86.0" promptText="00:00"/>
     <ListView fx:id="routesListView" layoutX="163.0" layoutY="382.0" prefHeight="200.0" prefWidth="200.0"/>
     <TextField fx:id="searchFromTextField" layoutX="14.0" layoutY="416.0" prefHeight="27.0" prefWidth="137.0"
                promptText="search from"/>

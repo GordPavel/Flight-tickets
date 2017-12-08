@@ -211,7 +211,7 @@ class DataModelTest{
     }
 
     @Test
-    void serializationAndDeserialization() throws IOException, ClassNotFoundException{
+    void serializationAndDeserialization() throws IOException{
         List<Serializable> data = Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
                                                  dataModel.listRoutesWithPredicate( route -> true ) )
                                         .collect( Collectors.toList() );
@@ -255,10 +255,7 @@ class DataModelTest{
             ArrayList<Object> list = Stream.concat( dataModel.listRoutesWithPredicate( route -> true ) ,
                                                     dataModel.listFlightsWithPredicate( flight -> true ) )
                                            .collect( ArrayList::new , List::add , List::addAll );
-//            assertTrue( list.containsAll( newData ) ,
-//                        "All new data in base" );
-            newData.stream().filter( serializable -> !list.contains( serializable ) ).forEach( System.out::println );
-            int a = 0;
+            assertTrue( list.containsAll( newData ) , "All new data in base" );
         }finally{
             Files.deleteIfExists( file.toPath() );
         }

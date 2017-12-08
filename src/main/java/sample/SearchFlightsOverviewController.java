@@ -12,8 +12,6 @@ import model.Route;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.function.Predicate;
@@ -47,13 +45,9 @@ public class SearchFlightsOverviewController{
 
     @FXML DatePicker departureFromDatePicker;
     @FXML DatePicker departureToDatePicker;
-    @FXML TextField  departureFromTimeTextField;
-    @FXML TextField  departureToTimeTextField;
 
     @FXML DatePicker arriveFromDatePicker;
     @FXML DatePicker arriveToDatePicker;
-    @FXML TextField  arriveFromTimeTextField;
-    @FXML TextField  arriveToTimeTextField;
 
     private Controller controller = Controller.getInstance();
     private DataModel  dataModel  = DataModel.getInstance();
@@ -75,14 +69,10 @@ public class SearchFlightsOverviewController{
         departureFromDatePicker.getEditor().setDisable( true );
         departureToDatePicker.getEditor().textProperty().addListener( this::changed );
         departureToDatePicker.getEditor().setDisable( true );
-        departureFromTimeTextField.textProperty().addListener( this::changed );
-        departureToTimeTextField.textProperty().addListener( this::changed );
         arriveFromDatePicker.getEditor().textProperty().addListener( this::changed );
         arriveFromDatePicker.getEditor().setDisable( true );
         arriveToDatePicker.getEditor().textProperty().addListener( this::changed );
         arriveToDatePicker.getEditor().setDisable( true );
-        arriveFromTimeTextField.textProperty().addListener( this::changed );
-        arriveToTimeTextField.textProperty().addListener( this::changed );
         flightTimeFromTextField.textProperty().addListener( this::changed );
         flightTimeToTextField.textProperty().addListener( this::changed );
         routesListView.setOnMouseClicked( event -> changed( null , null , null ) );
@@ -90,101 +80,53 @@ public class SearchFlightsOverviewController{
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + ".*"+ searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*"+ "$" ,
-                    Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
+                    "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
+                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
             Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + ".*"+ searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*"+ "$" ,
-                    Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
+                    "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
+                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
             routesListView.getItems().setAll(
                     dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
-        thisStage.setOnCloseRequest( event -> {mainController.flightTable.setItems( controller.getFlights() );
-                                                controller.setFlightSearchActiv(false);});
+        thisStage.setOnCloseRequest( event -> {
+            mainController.flightTable.setItems( controller.getFlights() );
+            controller.setFlightSearchActiv( false );
+        } );
     }
 
     private void changed( ObservableValue<? extends String> observable , String oldValue , String newValue ){
         Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
-                "^" + ".*"+numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." )+ ".*" + "$" ,
-                Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
+                "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
+                "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
         Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
-                "^"+ ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." )+ ".*" + "$" ,
-                Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
+                "^" + ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
+                "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
         Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
                                                      routesListView.getSelectionModel().getSelectedItems()
                                                                    .contains( flight.getRoute() );
-        Predicate<Flight> departureDatePredicate = flight -> {
-            Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
-            Pattern           timePattern   = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
-            SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
-            SimpleDateFormat  timeFormat    = new SimpleDateFormat( "HH:mm" );
-            Predicate<Date> start =
-                    getStartDatePredicate( datePattern , timePattern , dateFormatter , dateFormat , timeFormatter ,
-                                           timeFormat );
-            Predicate<Date> end = date -> true;
-            return start.test( flight.getDepartureDate() ) && end.test( flight.getDepartureDate() );
-        };
-        Predicate<Flight> arriveDatePredicate = flight -> {
-            Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
-            Pattern           timePattern   = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
-            SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
-            SimpleDateFormat  timeFormat    = new SimpleDateFormat( "HH:mm" );
-            Predicate<Date> startDate = date -> {
-                String str = arriveFromDatePicker.getEditor().getText();
-                return str.isEmpty() || !datePattern.matcher( str ).matches() || !LocalDate.parse( str , dateFormatter )
-                                                                                           .isAfter( LocalDate
-                                                                                                             .parse( dateFormat
-                                                                                                                             .format(
-                                                                                                                                     date ) ,
-                                                                                                                     dateFormatter ) );
-            };
-            Predicate<Date> endDate = date -> {
-                String str = arriveToDatePicker.getEditor().getText();
-                return str.isEmpty() || !datePattern.matcher( str ).matches() || !LocalDate.parse( str , dateFormatter )
-                                                                                           .isBefore( LocalDate
-                                                                                                              .parse( dateFormat
-                                                                                                                              .format(
-                                                                                                                                      date ) ,
-                                                                                                                      dateFormatter ) );
-            };
-            Predicate<Date> startTime = date -> {
-                String str = arriveFromTimeTextField.getText();
-                return str.isEmpty() || !timePattern.matcher( str ).matches() || !LocalTime.parse( str , timeFormatter )
-                                                                                           .isAfter( LocalTime
-                                                                                                             .parse( timeFormat
-                                                                                                                             .format(
-                                                                                                                                     date ) ,
-                                                                                                                     timeFormatter ) );
-            };
-            Predicate<Date> endTime = date -> {
-                String str = arriveToTimeTextField.getText();
-                return str.isEmpty() || !timePattern.matcher( str ).matches() || !LocalTime.parse( str , timeFormatter )
-                                                                                           .isBefore( LocalTime
-                                                                                                              .parse( timeFormat
-                                                                                                                              .format(
-                                                                                                                                      date ) ,
-                                                                                                                      timeFormatter ) );
-            };
-            return startDate.test( flight.getArriveDate() ) && endDate.test( flight.getArriveDate() ) &&
-                   startTime.test( flight.getArriveDate() ) && endTime.test( flight.getArriveDate() );
-        };
+        Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
+        SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
+        Predicate<Flight> departureDatePredicate = flight ->
+                getDatePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                  dateFormat , true ).test( flight.getDepartureDate() ) &&
+                getDatePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                  dateFormat , false ).test( flight.getDepartureDate() );
+        Predicate<Flight> arriveDatePredicate = flight ->
+                getDatePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                  dateFormat , true ).test( flight.getDepartureDate() ) &&
+                getDatePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter , dateFormat ,
+                                  false ).test( flight.getDepartureDate() );
         Predicate<Flight> flightTime = flight -> {
             Pattern timePattern = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
             String  fromTime    = flightTimeFromTextField.getText();
             String  toTime      = flightTimeToTextField.getText();
             Predicate<Long> startTime = aLong -> fromTime.isEmpty() || !timePattern.matcher( fromTime ).matches() ||
-                                                 ( Long.parseLong( fromTime.split( ":" )[ 0 ] ) * 60 +
-                                                   Long.parseLong( fromTime.split( ":" )[ 1 ] ) ) * 60 * 1000 <=
-                                                 flight.getTravelTime();
+                                                 stringToMillis( fromTime ) <= flight.getTravelTime();
             Predicate<Long> endTime = aLong -> toTime.isEmpty() || !timePattern.matcher( toTime ).matches() ||
-                                               ( Long.parseLong( toTime.split( ":" )[ 0 ] ) * 60 +
-                                                 Long.parseLong( toTime.split( ":" )[ 1 ] ) ) * 60 * 1000 >=
-                                               flight.getTravelTime();
+                                               stringToMillis( toTime ) >= flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         mainController.flightTable.setItems( dataModel.listFlightsWithPredicate(
@@ -192,31 +134,29 @@ public class SearchFlightsOverviewController{
                                .and( arriveDatePredicate ).and( flightTime ) ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         mainController.flightTable.refresh();
-        routesListView.setItems(controller.getRoutes());
+        routesListView.setItems( controller.getRoutes() );
         routesListView.refresh();
     }
 
-    private Predicate<Date> getStartDatePredicate( Pattern datePattern , Pattern timePattern ,
-                                                   DateTimeFormatter dateFormatter , SimpleDateFormat dateFormat ,
-                                                   DateTimeFormatter timeFormatter , SimpleDateFormat timeFormat ){
-        Predicate<Date> start;
-        if( datePattern.matcher( departureFromDatePicker.getEditor().getText() ).matches() &&
-            timePattern.matcher( departureFromTimeTextField.getText() ).matches() ){
-            start = date -> !LocalDateTime
-                    .of( LocalDate.parse( departureFromDatePicker.getEditor().getText() , dateFormatter ) ,
-                         LocalTime.parse( departureFromTimeTextField.getText() , timeFormatter ) ).isAfter(
-                            LocalDateTime.of( LocalDate.parse( dateFormat.format( date ) , dateFormatter ) ,
-                                              LocalTime.parse( timeFormat.format( date ) , timeFormatter ) ) );
-        }else if( datePattern.matcher( departureFromDatePicker.getEditor().getText() ).matches() ){
-            start = date -> !LocalDate.parse( departureFromDatePicker.getEditor().getText() , dateFormatter )
-                                      .isAfter( LocalDate.parse( dateFormat.format( date ) , dateFormatter ) );
-        }else if( timePattern.matcher( departureFromTimeTextField.getText() ).matches() ){
-            start = date -> !LocalTime.parse( departureFromTimeTextField.getText() , timeFormatter )
-                                      .isAfter( LocalTime.parse( timeFormat.format( date ) , timeFormatter ) );
+    private long stringToMillis( String fromTime ){
+        return ( Long.parseLong( fromTime.split( ":" )[ 0 ] ) * 60 + Long.parseLong( fromTime.split( ":" )[ 1 ] ) ) *
+               60 * 1000;
+    }
+
+    private Predicate<Date> getDatePredicate( String inputDate , Pattern datePattern , DateTimeFormatter dateFormatter ,
+                                              SimpleDateFormat dateFormat , Boolean before ){
+        Predicate<Date> datePredicate;
+        if( datePattern.matcher( inputDate ).matches() ){
+            datePredicate = date -> {
+                LocalDate inputLocalDate  = LocalDate.parse( inputDate , dateFormatter );
+                LocalDate flightLocalDate = LocalDate.parse( dateFormat.format( date ) , dateFormatter );
+                return before ? !inputLocalDate.isAfter( flightLocalDate ) :
+                       !inputLocalDate.isBefore( flightLocalDate );
+            };
         }else{
-            start = date -> true;
+            datePredicate = date -> true;
         }
-        return start;
+        return datePredicate;
     }
 
     //        Don't touch this layout settings! too hard to make correctly!
@@ -229,29 +169,21 @@ public class SearchFlightsOverviewController{
 
         departureFromDatePicker.setLayoutX( routesListView.getLayoutX() );
         departureFromDatePicker.setLayoutY( departureDateLabel.getLayoutY() );
-        departureFromTimeTextField
-                .setLayoutX( departureFromDatePicker.getLayoutX() + departureFromDatePicker.getWidth() + 150 );
-        departureFromTimeTextField.setLayoutY( departureFromDatePicker.getLayoutY() );
 
         departureToDatePicker.setLayoutX( departureFromDatePicker.getLayoutX() );
         departureToDatePicker
                 .setLayoutY( departureFromDatePicker.getLayoutY() + departureFromDatePicker.getHeight() + 30 );
-        departureToTimeTextField.setLayoutX( departureFromTimeTextField.getLayoutX() );
-        departureToTimeTextField.setLayoutY( departureToDatePicker.getLayoutY() );
 
         arriveFromDatePicker.setLayoutX( departureFromDatePicker.getLayoutX() );
         arriveFromDatePicker.setLayoutY( arriveDateLabel.getLayoutY() );
-        arriveFromTimeTextField.setLayoutX( departureFromTimeTextField.getLayoutX() );
-        arriveFromTimeTextField.setLayoutY( arriveFromDatePicker.getLayoutY() );
 
         arriveToDatePicker.setLayoutX( arriveFromDatePicker.getLayoutX() );
         arriveToDatePicker.setLayoutY( arriveFromDatePicker.getLayoutY() + arriveFromDatePicker.getHeight() + 30 );
-        arriveToTimeTextField.setLayoutX( arriveFromTimeTextField.getLayoutX() );
-        arriveToTimeTextField.setLayoutY( arriveToDatePicker.getLayoutY() );
 
         flightTimeFromTextField.setLayoutX( routesListView.getLayoutX() );
         flightTimeFromTextField.setLayoutY( flightTimeLabel.getLayoutY() );
-        flightTimeToTextField.setLayoutX( departureFromTimeTextField.getLayoutX() );
+        flightTimeToTextField
+                .setLayoutX( flightTimeFromTextField.getLayoutX() + flightTimeFromTextField.getWidth() + 100 );
         flightTimeToTextField.setLayoutY( flightTimeLabel.getLayoutY() );
     }
 
@@ -266,12 +198,8 @@ public class SearchFlightsOverviewController{
         searchToTextField.clear();
         departureFromDatePicker.getEditor().clear();
         departureToDatePicker.getEditor().clear();
-        departureFromTimeTextField.clear();
-        departureToTimeTextField.clear();
         arriveFromDatePicker.getEditor().clear();
         arriveToDatePicker.getEditor().clear();
-        arriveFromTimeTextField.clear();
-        arriveToTimeTextField.clear();
         routesListView.getSelectionModel().clearSelection();
         mainController.flightTable.getItems()
                                   .setAll( dataModel.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
