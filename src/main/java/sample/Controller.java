@@ -7,7 +7,6 @@ import model.Flight;
 import model.Route;
 import searchengine.SearchEngine;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -36,12 +35,6 @@ public class Controller {
     public static Flight                 flightForEdit;
     private       ObservableList<Flight> mergeFlights;
     private       ObservableList<Route> mergeRoutes;
-
-    /*public Controller() {
-
-        this.routes = FXCollections.observableArrayList((Collection<? extends Route>) model.listRoutesWithPredicate(route -> true).collect(Collectors.toCollection(ArrayList::new)));
-        this.flights = FXCollections.observableArrayList((Collection<? extends Flight>) model.listFlightsWithPredicate(flight -> true).collect(Collectors.toCollection(ArrayList::new)));
-    }*/
 
 
     public ObservableList<Route> getRoutes(){

@@ -12,6 +12,7 @@ import model.Route;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -120,44 +121,11 @@ public class SearchFlightsOverviewController{
             SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
             SimpleDateFormat  timeFormat    = new SimpleDateFormat( "HH:mm" );
-            Predicate<Date> startDate = date -> {
-                String str = departureFromDatePicker.getEditor().getText();
-                return str.isEmpty() || !datePattern.matcher( str ).matches() || !LocalDate.parse( str , dateFormatter )
-                                                                                           .isAfter( LocalDate
-                                                                                                             .parse( dateFormat
-                                                                                                                             .format(
-                                                                                                                                     date ) ,
-                                                                                                                     dateFormatter ) );
-            };
-            Predicate<Date> endDate = date -> {
-                String str = departureToDatePicker.getEditor().getText();
-                return str.isEmpty() || !datePattern.matcher( str ).matches() || !LocalDate.parse( str , dateFormatter )
-                                                                                           .isBefore( LocalDate
-                                                                                                              .parse( dateFormat
-                                                                                                                              .format(
-                                                                                                                                      date ) ,
-                                                                                                                      dateFormatter ) );
-            };
-            Predicate<Date> startTime = date -> {
-                String str = departureFromTimeTextField.getText();
-                return str.isEmpty() || !timePattern.matcher( str ).matches() || !LocalTime.parse( str , timeFormatter )
-                                                                                           .isAfter( LocalTime
-                                                                                                             .parse( timeFormat
-                                                                                                                             .format(
-                                                                                                                                     date ) ,
-                                                                                                                     timeFormatter ) );
-            };
-            Predicate<Date> endTime = date -> {
-                String str = departureToTimeTextField.getText();
-                return str.isEmpty() || !timePattern.matcher( str ).matches() || !LocalTime.parse( str , timeFormatter )
-                                                                                           .isBefore( LocalTime
-                                                                                                              .parse( timeFormat
-                                                                                                                              .format(
-                                                                                                                                      date ) ,
-                                                                                                                      timeFormatter ) );
-            };
-            return startDate.test( flight.getDepartureDate() ) && endDate.test( flight.getDepartureDate() ) &&
-                   startTime.test( flight.getDepartureDate() ) && endTime.test( flight.getDepartureDate() );
+            Predicate<Date> start =
+                    getStartDatePredicate( datePattern , timePattern , dateFormatter , dateFormat , timeFormatter ,
+                                           timeFormat );
+            Predicate<Date> end = date -> true;
+            return start.test( flight.getDepartureDate() ) && end.test( flight.getDepartureDate() );
         };
         Predicate<Flight> arriveDatePredicate = flight -> {
             Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
@@ -226,6 +194,29 @@ public class SearchFlightsOverviewController{
         mainController.flightTable.refresh();
         routesListView.setItems(controller.getRoutes());
         routesListView.refresh();
+    }
+
+    private Predicate<Date> getStartDatePredicate( Pattern datePattern , Pattern timePattern ,
+                                                   DateTimeFormatter dateFormatter , SimpleDateFormat dateFormat ,
+                                                   DateTimeFormatter timeFormatter , SimpleDateFormat timeFormat ){
+        Predicate<Date> start;
+        if( datePattern.matcher( departureFromDatePicker.getEditor().getText() ).matches() &&
+            timePattern.matcher( departureFromTimeTextField.getText() ).matches() ){
+            start = date -> !LocalDateTime
+                    .of( LocalDate.parse( departureFromDatePicker.getEditor().getText() , dateFormatter ) ,
+                         LocalTime.parse( departureFromTimeTextField.getText() , timeFormatter ) ).isAfter(
+                            LocalDateTime.of( LocalDate.parse( dateFormat.format( date ) , dateFormatter ) ,
+                                              LocalTime.parse( timeFormat.format( date ) , timeFormatter ) ) );
+        }else if( datePattern.matcher( departureFromDatePicker.getEditor().getText() ).matches() ){
+            start = date -> !LocalDate.parse( departureFromDatePicker.getEditor().getText() , dateFormatter )
+                                      .isAfter( LocalDate.parse( dateFormat.format( date ) , dateFormatter ) );
+        }else if( timePattern.matcher( departureFromTimeTextField.getText() ).matches() ){
+            start = date -> !LocalTime.parse( departureFromTimeTextField.getText() , timeFormatter )
+                                      .isAfter( LocalTime.parse( timeFormat.format( date ) , timeFormatter ) );
+        }else{
+            start = date -> true;
+        }
+        return start;
     }
 
     //        Don't touch this layout settings! too hard to make correctly!
