@@ -2,14 +2,17 @@ package sample;
 
 
 import exceptions.FlightAndRouteException;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import model.DataModel;
 import model.Flight;
 import model.Route;
+import np.com.ngopal.control.AutoFillTextBox;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -18,6 +21,9 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  Controller for adding flight view
@@ -28,22 +34,22 @@ public class AddFlightsOverviewController{
 
     private Controller controller = Controller.getInstance();
 
-    @FXML ChoiceBox<Route> box;
-    @FXML TextField        number;
-    @FXML TextField        planeID;
-    @FXML DatePicker       departureDate;
-    @FXML DatePicker       arrivingDate;
-    @FXML Button           addAddFlightsOverview;
-    @FXML TextField        arrivingTime;
-    @FXML TextField        departureTime;
+    @FXML ChoiceBox<Route>        box;
+    @FXML TextField               number;
+    @FXML AutoFillTextBox<String> planeID;
+    @FXML DatePicker              departureDate;
+    @FXML DatePicker              arrivingDate;
+    @FXML Button                  addAddFlightsOverview;
+    @FXML TextField               arrivingTime;
+    @FXML TextField               departureTime;
+
+    private DataModel dataModel = DataModel.getInstance();
 
     /**
      initialization of view
      */
     @FXML
     private void initialize(){
-
-
         departureDate.setValue( LocalDate.now() );
         arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
@@ -93,9 +99,11 @@ public class AddFlightsOverviewController{
             checkTimeTextFields();
         } );
 
-        planeID.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        planeID.setData( dataModel.listAllPlanesWithPredicate( plane -> true ).collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+        planeID.getTextbox().textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
-            Matcher matcher = pattern.matcher( planeID.getCharacters() );
+            Matcher matcher = pattern.matcher( planeID.getTextbox().getCharacters() );
             if( !matcher.matches() ){
                 planeID.setStyle( "-fx-text-inner-color: red;" );
                 planeID.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
@@ -173,14 +181,10 @@ public class AddFlightsOverviewController{
         }
     }
 
-    /**
-     @param event Clear Button. Clear all fields in the window
-     */
     @FXML
-    private void clearData( ActionEvent event ){
-
+    private void clearData(){
         number.clear();
-        planeID.clear();
+        planeID.getTextbox().clear();
         departureDate.setValue( LocalDate.now() );
         arrivingDate.setValue( LocalDate.now() );
         arrivingTime.setText( "00:00" );

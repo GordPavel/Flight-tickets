@@ -94,7 +94,7 @@ public class SearchFlightsOverviewController{
         searchToTextField.textProperty().addListener( routeSearchListener );
         thisStage.setOnCloseRequest( event -> {
             mainController.flightTable.setItems( controller.getFlights() );
-            controller.setFlightSearchActiv( false );
+            controller.setFlightSearchActive( false );
         } );
     }
 

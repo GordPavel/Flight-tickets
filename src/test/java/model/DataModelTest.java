@@ -200,6 +200,9 @@ class DataModelTest{
                                                    Date.from( LocalDateTime.of( 2009 + 15 , 12 , 15 , 23 , 30 )
                                                                            .atZone( ZoneId.of( "Europe/Samara" ) )
                                                                            .toInstant() ) );
+        Flight editedFLight1 = dataModel.listFlightsWithPredicate( flight -> true ).findAny().get();
+        assertTrue( dataModel.editFlight( editedFLight1 , null , "plane10" , null , null ) ,
+                    "I can edit flight's plane" );
         assertThrows( FaRIllegalEditedData.class ,
                       () -> dataModel.editFlight( notFromDatabaseFlight , null , null , null , null ) ,
                       "Must take previous version from database" );

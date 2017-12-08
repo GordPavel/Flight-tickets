@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
+<?import np.com.ngopal.control.AutoFillTextBox?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0"
             prefWidth="596.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sample.AddFlightsOverviewController">
@@ -17,10 +18,10 @@
         </font>
     </Label>
     <TextField fx:id="number" layoutX="170.0" layoutY="130.0"/>
-    <TextField fx:id="planeID" layoutX="170.0" layoutY="190.0"/>
+    <AutoFillTextBox fx:id="planeID" layoutX="170.0" layoutY="190.0"/>
     <Button fx:id="addAddFlightsOverview" focusTraversable="false" layoutX="50.0" layoutY="390.0"
             mnemonicParsing="false" onAction="#handleAddAction" prefHeight="25.0" prefWidth="75.0" text="Add"/>
-    <Button fx:id="cancelAddFlightsButton" layoutX="440.0" layoutY="390.0" mnemonicParsing="false"
+    <Button layoutX="440.0" layoutY="390.0" mnemonicParsing="false"
             onAction="#handleCancelAction" prefHeight="25.0" prefWidth="75.0" text="Cancel"/>
     <Button focusTraversable="false" layoutX="440.0" layoutY="130.0" mnemonicParsing="false" onAction="#clearData"
             prefHeight="25.0" prefWidth="75.0" text="Clear"/>

@@ -1,18 +1,23 @@
 package sample;
 
 import exceptions.FlightAndRouteException;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
+import model.DataModel;
+import np.com.ngopal.control.AutoFillTextBox;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  Controller for editing a route view
@@ -21,9 +26,11 @@ import java.util.regex.Pattern;
 
 public class EditRoutesOverviewController{
     private Controller controller = Controller.getInstance();
-    @FXML TextField departureTextField;
-    @FXML TextField destinationTextField;
-    @FXML Button    editEditRouteOverview;
+    @FXML AutoFillTextBox<String> departureTextField;
+    @FXML AutoFillTextBox<String> destinationTextField;
+    @FXML Button                  editEditRouteOverview;
+
+    private DataModel dataModel = DataModel.getInstance();
 
     /**
      @param actionEvent Accept Button. Edit necessary data about chosen route
@@ -59,8 +66,8 @@ public class EditRoutesOverviewController{
 
     @FXML
     private void clearData(){
-        departureTextField.clear();
-        destinationTextField.clear();
+        departureTextField.getTextbox().clear();
+        destinationTextField.getTextbox().clear();
     }
 
     /**
@@ -79,7 +86,9 @@ public class EditRoutesOverviewController{
 
     @FXML
     private void initialize(){
-        departureTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        departureTextField.setData( dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+        departureTextField.getTextbox().textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
             Matcher matcher = pattern.matcher( departureTextField.getText() );
             if( !matcher.matches() ){
@@ -92,7 +101,9 @@ public class EditRoutesOverviewController{
             checkTimeTextFields();
         } );
 
-        destinationTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        destinationTextField.setData( dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+        destinationTextField.getTextbox().textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
             Matcher matcher = pattern.matcher( destinationTextField.getText() );
             if( !matcher.matches() ){
