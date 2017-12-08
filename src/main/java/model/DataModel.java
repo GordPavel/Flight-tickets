@@ -250,12 +250,12 @@ public class DataModel{
         if( route.getId() == null ){
             throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
         }
-        if( routes.stream().filter( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
-                                                route.getFrom().toUpperCase() )
-                                                      .equals( route1.getFrom().toUpperCase() ) &&
-                                              ( newDestinationAirport != null ? newDestinationAirport.toUpperCase() :
-                                                route.getTo().toUpperCase() ).equals( route1.getTo().toUpperCase() ) )
-                  .count() > 0 ){
+        if( routes.stream().anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
+                                                  route.getFrom().toUpperCase() )
+                                                        .equals( route1.getFrom().toUpperCase() ) &&
+                                                ( newDestinationAirport != null ? newDestinationAirport.toUpperCase() :
+                                                  route.getTo().toUpperCase() )
+                                                        .equals( route1.getTo().toUpperCase() ) ) ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
         editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );

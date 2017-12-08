@@ -121,13 +121,13 @@ public class AddFlightsOverviewController{
 
         try{
             arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
-        }catch( ParseException e ){
+        }catch( ParseException ignored ){
 
         }
 
         try{
             departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getText() );
-        }catch( ParseException e ){
+        }catch( ParseException ignored ){
 
         }
 

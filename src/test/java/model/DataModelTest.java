@@ -268,7 +268,6 @@ class DataModelTest{
         dataModel.exportToFile( file );
     }
 
-    @Test
     @RepeatedTest( 10 )
     void concurrency() throws InterruptedException, ExecutionException{
         int    addingRoutes = 10;

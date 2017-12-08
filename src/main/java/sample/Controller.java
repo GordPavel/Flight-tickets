@@ -5,7 +5,6 @@ import javafx.collections.ObservableList;
 import model.DataModel;
 import model.Flight;
 import model.Route;
-import searchengine.SearchEngine;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  Support class for controllers
  */
-public class Controller {
+public class Controller{
 
     Controller(){}
 
@@ -26,15 +25,14 @@ public class Controller {
         return Controller.InstanceHolder.instance;
     }
 
-    static DataModel    model        = DataModel.getInstance();
-    static SearchEngine searchEngine = new SearchEngine( model );
-    static boolean flightSearchActiv = false;
+    static DataModel model              = DataModel.getInstance();
+    static boolean   flightSearchActive = false;
     private       ObservableList<Route>  routes;
     private       ObservableList<Flight> flights;
     public static Route                  routeForEdit;
     public static Flight                 flightForEdit;
     private       ObservableList<Flight> mergeFlights;
-    private       ObservableList<Route> mergeRoutes;
+    private       ObservableList<Route>  mergeRoutes;
 
 
     public ObservableList<Route> getRoutes(){
@@ -57,17 +55,17 @@ public class Controller {
         this.flights = flights;
     }
 
-    public void setMergeFlights(ObservableList<Flight> mergeFlights) {
+    public void setMergeFlights( ObservableList<Flight> mergeFlights ){
         this.mergeFlights = mergeFlights;
     }
 
-    public ObservableList<Flight> getMergeFlights() {
+    public ObservableList<Flight> getMergeFlights(){
         return mergeFlights;
     }
 
-    public void setMergeRoutes(ObservableList<Route> mergeRoutes) {this.mergeRoutes=mergeRoutes;}
+    public void setMergeRoutes( ObservableList<Route> mergeRoutes ){this.mergeRoutes = mergeRoutes;}
 
-    public ObservableList<Route> getMergeRoutes() {
+    public ObservableList<Route> getMergeRoutes(){
         return mergeRoutes;
     }
 
@@ -105,12 +103,12 @@ public class Controller {
         Controller.flightForEdit = flightForEdit;
     }
 
-    public void setFlightSearchActiv(boolean flightSearchActiv) {
-        Controller.flightSearchActiv = flightSearchActiv;
+    public void setFlightSearchActive( boolean flightSearchActive ){
+        Controller.flightSearchActive = flightSearchActive;
     }
 
-    public boolean isFlightSearchActiv() {
-        return flightSearchActiv;
+    public boolean isFlightSearchActive(){
+        return flightSearchActive;
     }
 }
 

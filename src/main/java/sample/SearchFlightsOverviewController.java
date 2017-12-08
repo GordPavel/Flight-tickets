@@ -1,7 +1,6 @@
 package sample;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -63,19 +62,22 @@ public class SearchFlightsOverviewController{
     public void initialize(){
         setLayouts();
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
-        numberTextField.textProperty().addListener( this::changed );
-        planeIdTextField.textProperty().addListener( this::changed );
-        departureFromDatePicker.getEditor().textProperty().addListener( this::changed );
+        numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        departureFromDatePicker.getEditor().textProperty()
+                               .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureFromDatePicker.getEditor().setDisable( true );
-        departureToDatePicker.getEditor().textProperty().addListener( this::changed );
+        departureToDatePicker.getEditor().textProperty()
+                             .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureToDatePicker.getEditor().setDisable( true );
-        arriveFromDatePicker.getEditor().textProperty().addListener( this::changed );
+        arriveFromDatePicker.getEditor().textProperty()
+                            .addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveFromDatePicker.getEditor().setDisable( true );
-        arriveToDatePicker.getEditor().textProperty().addListener( this::changed );
+        arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveToDatePicker.getEditor().setDisable( true );
-        flightTimeFromTextField.textProperty().addListener( this::changed );
-        flightTimeToTextField.textProperty().addListener( this::changed );
-        routesListView.setOnMouseClicked( event -> changed( null , null , null ) );
+        flightTimeFromTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeToTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        routesListView.setOnMouseClicked( event -> changed() );
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
@@ -96,7 +98,7 @@ public class SearchFlightsOverviewController{
         } );
     }
 
-    private void changed( ObservableValue<? extends String> observable , String oldValue , String newValue ){
+    private void changed(){
         Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
                 "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
                 "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();

@@ -75,12 +75,10 @@ public class RoutesFlightsOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
-        departure.textProperty().addListener( ( observable , oldValue , newValue ) -> {
-            searchListeners( newValue , departure );
-        } );
-        destination.textProperty().addListener( ( observable , oldValue , newValue ) -> {
-            searchListeners( newValue , destination );
-        } );
+        departure.textProperty()
+                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , departure ) );
+        destination.textProperty()
+                   .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
     }
 
     private void searchListeners( String newValue , TextField textField ){
@@ -118,7 +116,7 @@ public class RoutesFlightsOverviewController{
     /**
      */
     @FXML
-    public void handleDeleteRouteButton() throws ClassNotFoundException{
+    public void handleDeleteRouteButton(){
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute != null ){
             try{
@@ -149,7 +147,7 @@ public class RoutesFlightsOverviewController{
     /**
      */
     @FXML
-    public void handleDeleteFlightButton() throws ClassNotFoundException{
+    public void handleDeleteFlightButton(){
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         if( selectedFlight != null ){
             try{

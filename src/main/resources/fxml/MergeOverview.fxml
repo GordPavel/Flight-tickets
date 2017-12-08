@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.MergeOverviewController">
-    <children>
-              <TableView fx:id="flightTable" layoutX="27.0" layoutY="50.0" prefHeight="354.0" prefWidth="130.0">
-                  <columns>
-                      <TableColumn fx:id="numberColumn" prefWidth="130.99998474121094" text="Object" />
-                  </columns>
-              </TableView>
-              <Button fx:id="acceptAllNew" focusTraversable="false" layoutX="218.0" layoutY="322.0" mnemonicParsing="false" onAction="#handleAcceptAllNew" prefHeight="25.0" prefWidth="120.0" text="Accept All New" />
-              <Button fx:id="acceptThisNew" focusTraversable="false" layoutX="218.0" layoutY="266.0" mnemonicParsing="false" onAction="#handleAcceptNew" prefHeight="25.0" prefWidth="120.0" text="Accept New" />
-              <Button fx:id="acceptAllOld" focusTraversable="false" layoutX="429.0" layoutY="322.0" mnemonicParsing="false" onAction="#handleAcceptAllOld" prefHeight="25.0" prefWidth="120.0" text="Accept All Old" />
-              <Button fx:id="acceptThisOld" focusTraversable="false" layoutX="429.0" layoutY="266.0" mnemonicParsing="false" onAction="#handleAcceptOld" prefHeight="25.0" prefWidth="120.0" text="Accept Old" />
-              <TextArea fx:id="newTextArea" editable="false" layoutX="218.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0" />
-              <TextArea fx:id="oldTextArea" editable="false" layoutX="429.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0" />
-    </children>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
+            prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sample.MergeOverviewController">
+    <TableView fx:id="flightTable" layoutX="27.0" layoutY="50.0" prefHeight="354.0" prefWidth="130.0">
+        <columns>
+            <TableColumn fx:id="numberColumn" prefWidth="130.99998474121094" text="Object"/>
+        </columns>
+    </TableView>
+    <Button fx:id="acceptAllNew" focusTraversable="false" layoutX="218.0" layoutY="322.0" mnemonicParsing="false"
+            onAction="#handleAcceptAllNew" prefHeight="25.0" prefWidth="120.0" text="Accept All New"/>
+    <Button fx:id="acceptThisNew" focusTraversable="false" layoutX="218.0" layoutY="266.0" mnemonicParsing="false"
+            onAction="#handleAcceptNew" prefHeight="25.0" prefWidth="120.0" text="Accept New"/>
+    <Button fx:id="acceptAllOld" focusTraversable="false" layoutX="429.0" layoutY="322.0" mnemonicParsing="false"
+            onAction="#handleAcceptAllOld" prefHeight="25.0" prefWidth="120.0" text="Accept All Old"/>
+    <Button fx:id="acceptThisOld" focusTraversable="false" layoutX="429.0" layoutY="266.0" mnemonicParsing="false"
+            onAction="#handleAcceptOld" prefHeight="25.0" prefWidth="120.0" text="Accept Old"/>
+    <TextArea fx:id="newTextArea" editable="false" layoutX="218.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0"/>
+    <TextArea fx:id="oldTextArea" editable="false" layoutX="429.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0"/>
 </AnchorPane>
