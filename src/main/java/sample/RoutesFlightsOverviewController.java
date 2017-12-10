@@ -91,7 +91,7 @@ public class RoutesFlightsOverviewController{
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
     private void searchListeners( String newValue , AutoFillTextBox<String> textField ){
-        if( !newValue.matches( "[\\w\\d[^\\s .,!+=]]*" ) ){
+        if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
             textField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, ?, *" ) );
         }else{

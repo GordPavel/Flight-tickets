@@ -181,6 +181,10 @@ public class AddFlightsOverviewController{
         }
     }
 
+
+    /**
+     Clear Button. Clear all fields in GUI
+     */
     @FXML
     private void clearData(){
         number.clear();
@@ -204,7 +208,9 @@ public class AddFlightsOverviewController{
         stage.close();
     }
 
-
+    /**
+     Check for enable/disable add button. Switch it off, if user use unacceptable symbols
+     */
     private void checkTimeTextFields(){
 
         Pattern pattern     = Pattern.compile( "[0-9\\-_\\w]*" );

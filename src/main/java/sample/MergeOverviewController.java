@@ -22,6 +22,9 @@ public class MergeOverviewController{
 
     private Controller controller = Controller.getInstance();
 
+    /**
+     initialization of view
+     */
     public void initialize(){
         numberColumn.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         flightTable.setItems( controller.getMergeFlights() );
@@ -31,7 +34,9 @@ public class MergeOverviewController{
 
     }
 
-
+    /**
+     Show details of selected flight and it`s previous version
+     */
     private void showFlightDetails( Flight flight ){
         if( flight != null ){
             newTextArea.setWrapText( true );
@@ -46,6 +51,10 @@ public class MergeOverviewController{
         }
     }
 
+
+    /**
+     * Accept New button. Selected flight from model changes for new one
+     */
     @FXML
     public void handleAcceptNew(){
         Controller.model.editFlight( flightTable.getSelectionModel().getSelectedItem() ,
@@ -63,6 +72,9 @@ public class MergeOverviewController{
 
     }
 
+    /**
+     * Accept New button. Selected flight from model don`t changes for new one
+     */
     @FXML
     public void handleAcceptOld(){
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
@@ -74,6 +86,10 @@ public class MergeOverviewController{
         }
     }
 
+
+    /**
+     * Accept New button. All flights from model changes for new one
+     */
     @FXML
     public void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
@@ -90,6 +106,9 @@ public class MergeOverviewController{
 
     }
 
+    /**
+     * Accept New button. None flight from model changes for new one
+     */
     @FXML
     public void handleAcceptAllOld(){
         flightTable.setItems( null );

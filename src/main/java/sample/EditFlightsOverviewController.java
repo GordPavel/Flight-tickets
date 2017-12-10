@@ -114,6 +114,7 @@ public class EditFlightsOverviewController{
 
 
     /**
+     Clear Button. Clear all fields in GUI
      */
     @FXML
     private void clearData(){
@@ -176,6 +177,9 @@ public class EditFlightsOverviewController{
         stage.close();
     }
 
+    /**
+     Check for enable/disable edit button. Switch it off, if user use unacceptable symbols
+     */
     private void checkTimeTextFields(){
         Pattern pattern     = Pattern.compile( "[0-9\\-_\\w]*" );
         Pattern timePattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );

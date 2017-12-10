@@ -64,6 +64,7 @@ public class AddRoutesOverviewController{
     }
 
     /**
+     Clear Button. Clear all fields in GUI
      */
 
     @FXML
@@ -88,6 +89,10 @@ public class AddRoutesOverviewController{
         stage.close();
     }
 
+
+    /**
+     initialization of view
+     */
     @FXML
     private void initialize(){
         departureTextField.setData( dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
@@ -120,9 +125,11 @@ public class AddRoutesOverviewController{
             checkTimeTextFields();
         } );
 
-
     }
 
+    /**
+     Check for enable/disable add button. Switch it off, if user use unacceptable symbols
+     */
     private void checkTimeTextFields(){
         Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
         if( pattern.matcher( departureTextField.getText() ).matches() &&

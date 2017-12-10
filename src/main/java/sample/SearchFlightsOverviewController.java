@@ -61,6 +61,9 @@ public class SearchFlightsOverviewController{
         this.thisStage = thisStage;
     }
 
+    /**
+     initialization of view
+     */
     @FXML
     public void initialize(){
         correctSymbols = true;
@@ -106,6 +109,10 @@ public class SearchFlightsOverviewController{
         } );
     }
 
+
+    /**
+     * Flight search method, used in listeners
+     */
     private void changed(){
         Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
                 "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
@@ -150,6 +157,12 @@ public class SearchFlightsOverviewController{
         }
     }
 
+
+    /**
+     *
+     * @param field - textfield to check for acceptable symbols
+     *              method used to not allow user to use unacceptable symbols for search
+     */
     private void formatcheck(TextField field){
         Pattern textPattern = Pattern.compile("[\\w\\d\\?\\*\\-_]*");
         Matcher matcher = textPattern.matcher( field.getText() );
