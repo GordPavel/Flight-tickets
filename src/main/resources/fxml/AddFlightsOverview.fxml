@@ -17,7 +17,9 @@
             <Font name="System Italic" size="12.0"/>
         </font>
     </Label>
-    <TextField fx:id="number" layoutX="170.0" layoutY="130.0"/>
+    <TextField fx:id="number" layoutX="170.0" layoutY="130.0" text="000000000000000000" prefWidth="200"/>
+    <Label fx:id="errorNumberLabel" layoutX="174" layoutY="145" prefHeight="20"
+           style="-fx-text-fill: red;" text="^"/>
     <AutoFillTextBox fx:id="planeID" layoutX="170.0" layoutY="190.0"/>
     <Button fx:id="addAddFlightsOverview" focusTraversable="false" layoutX="50.0" layoutY="390.0"
             mnemonicParsing="false" onAction="#handleAddAction" prefHeight="25.0" prefWidth="75.0" text="Add"/>

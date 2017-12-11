@@ -8,12 +8,14 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.DataModel;
 import model.Flight;
 import model.Route;
 import np.com.ngopal.control.AutoFillTextBox;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,6 +38,7 @@ public class AddFlightsOverviewController{
 
     @FXML ChoiceBox<Route>        box;
     @FXML TextField               number;
+    @FXML Label                   errorNumberLabel;
     @FXML AutoFillTextBox<String> planeID;
     @FXML DatePicker              departureDate;
     @FXML DatePicker              arrivingDate;
@@ -49,7 +52,7 @@ public class AddFlightsOverviewController{
      initialization of view
      */
     @FXML
-    private void initialize(){
+    private void initialize() throws IOException{
         departureDate.setValue( LocalDate.now() );
         arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
@@ -113,7 +116,27 @@ public class AddFlightsOverviewController{
             }
             checkTimeTextFields();
         } );
+        number.setFont( Font.loadFont( getClass().getResource( "/PT_Mono.ttf" ).openStream() , 15 ) );
+        setErrorSymbol( number.getLayoutX() + 8 , errorNumberLabel );
+        number.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+            Matcher matcher = Pattern.compile( "(\\s+)" ).matcher( newValue );
+            if( matcher.find() ){
+                errorNumberLabel.setVisible( true );
+                errorNumberLabel.setLayoutX(
+                        number.getLayoutX() + 8 + matcher.start() * ( errorNumberLabel.getFont().getSize() / 1.45 ) );
+            }else{
+                errorNumberLabel.setVisible( false );
+            }
+        } );
+    }
 
+    private void setErrorSymbol( Double position , Label errorLabel ){
+        if( position == -1.0 ){
+            errorLabel.setVisible( false );
+        }else{
+            errorLabel.setVisible( true );
+            errorLabel.setLayoutX( position );
+        }
     }
 
     /**
@@ -121,7 +144,6 @@ public class AddFlightsOverviewController{
      */
     @FXML
     private void handleAddAction( ActionEvent actionEvent ){
-
         DateFormat format = new SimpleDateFormat( "dd.MM.yyyy hh:mm" );
 
         Date arriveDate = new Date();
@@ -224,5 +246,4 @@ public class AddFlightsOverviewController{
             addAddFlightsOverview.setDisable( true );
         }
     }
-
 }
