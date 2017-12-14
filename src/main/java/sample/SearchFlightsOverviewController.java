@@ -1,5 +1,7 @@
 package sample;
 
+import com.jfoenix.controls.JFXDatePicker;
+import com.jfoenix.controls.JFXTimePicker;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -11,6 +13,7 @@ import model.Route;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Observable;
@@ -41,20 +44,20 @@ public class SearchFlightsOverviewController{
      */
     @FXML TextField       numberTextField;
     @FXML TextField       planeIdTextField;
-    @FXML TextField       flightTimeFromTextField;
-    @FXML TextField       flightTimeToTextField;
+    @FXML JFXTimePicker   flightTimeFromTextField;
+    @FXML JFXTimePicker   flightTimeToTextField;
 
-    @FXML DatePicker departureFromDatePicker;
-    @FXML DatePicker departureToDatePicker;
+    @FXML JFXDatePicker   departureFromDatePicker;
+    @FXML JFXDatePicker   departureToDatePicker;
 
-    @FXML DatePicker arriveFromDatePicker;
-    @FXML DatePicker arriveToDatePicker;
+    @FXML JFXDatePicker   arriveFromDatePicker;
+    @FXML JFXDatePicker   arriveToDatePicker;
 
     private Controller controller = Controller.getInstance();
     private DataModel  dataModel  = DataModel.getInstance();
     private RoutesFlightsOverviewController mainController;
     private Stage                           thisStage;
-    private boolean                 correctSymbols;
+    private boolean                         correctSymbols;
 
     public SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
@@ -84,8 +87,10 @@ public class SearchFlightsOverviewController{
         arriveFromDatePicker.getEditor().setDisable( true );
         arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveToDatePicker.getEditor().setDisable( true );
-        flightTimeFromTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
-        flightTimeToTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeFromTextField.setValue(LocalTime.MIDNIGHT);
+        flightTimeToTextField.setValue(LocalTime.MIDNIGHT);
+        flightTimeFromTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeToTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
@@ -138,8 +143,8 @@ public class SearchFlightsOverviewController{
                                   false ).test( flight.getDepartureDate() );
         Predicate<Flight> flightTime = flight -> {
             Pattern timePattern = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
-            String  fromTime    = flightTimeFromTextField.getText();
-            String  toTime      = flightTimeToTextField.getText();
+            String  fromTime    = flightTimeFromTextField.getEditor().getText();
+            String  toTime      = flightTimeToTextField.getEditor().getText();
             Predicate<Long> startTime = aLong -> fromTime.isEmpty() || !timePattern.matcher( fromTime ).matches() ||
                                                  stringToMillis( fromTime ) <= flight.getTravelTime();
             Predicate<Long> endTime = aLong -> toTime.isEmpty() || !timePattern.matcher( toTime ).matches() ||
@@ -227,10 +232,10 @@ public class SearchFlightsOverviewController{
         arriveToDatePicker.setLayoutY( arriveFromDatePicker.getLayoutY() + arriveFromDatePicker.getHeight() + 30 );
 
         flightTimeFromTextField.setLayoutX( routesListView.getLayoutX() );
-        flightTimeFromTextField.setLayoutY( flightTimeLabel.getLayoutY() );
+        flightTimeFromTextField.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
         flightTimeToTextField
-                .setLayoutX( flightTimeFromTextField.getLayoutX() + flightTimeFromTextField.getWidth() + 100 );
-        flightTimeToTextField.setLayoutY( flightTimeLabel.getLayoutY() );
+                .setLayoutX( flightTimeFromTextField.getLayoutX() + flightTimeFromTextField.getWidth() + 120 );
+        flightTimeToTextField.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
     }
 
     /**

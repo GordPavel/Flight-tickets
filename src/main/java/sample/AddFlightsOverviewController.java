@@ -1,6 +1,9 @@
 package sample;
 
 
+import com.jfoenix.controls.JFXDatePicker;
+import com.jfoenix.controls.JFXTimePicker;
+import com.sun.deploy.net.proxy.pac.PACFunctions;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -8,6 +11,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.DataModel;
@@ -20,6 +24,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,11 +45,14 @@ public class AddFlightsOverviewController{
     @FXML TextField               number;
     @FXML Label                   errorNumberLabel;
     @FXML AutoFillTextBox<String> planeID;
-    @FXML DatePicker              departureDate;
-    @FXML DatePicker              arrivingDate;
+    @FXML JFXDatePicker           departureDate;
+    @FXML JFXDatePicker           arrivingDate;
     @FXML Button                  addAddFlightsOverview;
-    @FXML TextField               arrivingTime;
-    @FXML TextField               departureTime;
+    //@FXML TextField               arrivingTime;
+    @FXML JFXTimePicker           departuretime;
+    @FXML JFXTimePicker           arrivingtime;
+
+    //@FXML TextField               departureTime;
 
     private DataModel dataModel = DataModel.getInstance();
 
@@ -57,13 +65,20 @@ public class AddFlightsOverviewController{
         arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
 
+        departuretime.setIs24HourView(true);
+        departuretime.setValue(LocalTime.MIDNIGHT);
+
+        arrivingtime.setIs24HourView(true);
+        arrivingtime.setValue(LocalTime.MIDNIGHT);
+
+
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
 
-        arrivingTime.setText( "00:00" );
-        departureTime.setText( "00:00" );
+        //arrivingTime.setText( "00:00" );
+        //departureTime.setText( "00:00" );
 
-        arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        /*arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
             Matcher matcher = pattern.matcher( arrivingTime.getText() );
             if( !matcher.matches() ){
@@ -87,7 +102,7 @@ public class AddFlightsOverviewController{
                 departureTime.setTooltip( null );
             }
             checkTimeTextFields();
-        } );
+        } );*/
 
         number.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
@@ -150,13 +165,13 @@ public class AddFlightsOverviewController{
         Date departDate = new Date();
 
         try{
-            arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
+            arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingtime.getEditor().getText() );
         }catch( ParseException ignored ){
 
         }
 
         try{
-            departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getText() );
+            departDate = format.parse( departureDate.getEditor().getText() + " " + departuretime.getEditor().getText() );
         }catch( ParseException ignored ){
 
         }
@@ -212,9 +227,9 @@ public class AddFlightsOverviewController{
         number.clear();
         planeID.getTextbox().clear();
         departureDate.setValue( LocalDate.now() );
-        arrivingDate.setValue( LocalDate.now() );
-        arrivingTime.setText( "00:00" );
-        departureTime.setText( "00:00" );
+        arrivingDate.setValue( LocalDate.now().plusDays( 1 ));
+        arrivingtime.setValue( LocalTime.MIDNIGHT );
+        departuretime.setValue( LocalTime.MIDNIGHT  );
     }
 
     /**
@@ -239,8 +254,8 @@ public class AddFlightsOverviewController{
         Pattern timePattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
 
         if( pattern.matcher( number.getText() ).matches() && pattern.matcher( planeID.getText() ).matches() &&
-            timePattern.matcher( departureTime.getText() ).matches() &&
-            timePattern.matcher( arrivingTime.getText() ).matches() ){
+            timePattern.matcher( departuretime.getEditor().getText() ).matches() &&
+            timePattern.matcher( arrivingtime.getEditor().getText() ).matches() ){
             addAddFlightsOverview.setDisable( false );
         }else{
             addAddFlightsOverview.setDisable( true );

@@ -1,6 +1,10 @@
 package sample;
 
 
+
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDatePicker;
+import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -8,6 +12,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import model.DataModel;
 import model.Route;
@@ -36,11 +41,11 @@ public class EditFlightsOverviewController{
     @FXML ChoiceBox<Route>        box;
     @FXML TextField               number;
     @FXML AutoFillTextBox<String> planeID;
-    @FXML DatePicker              departureDate;
-    @FXML DatePicker              arrivingDate;
-    @FXML Button                  editEditFlightsOverview;
-    @FXML TextField               arrivingTime;
-    @FXML TextField               departureTime;
+    @FXML JFXDatePicker           departureDate;
+    @FXML JFXDatePicker           arrivingDate;
+    @FXML JFXButton               editEditFlightsOverview;
+    @FXML JFXTimePicker           arrivingTime;
+    @FXML JFXTimePicker           departureTime;
 
     private DataModel dataModel = DataModel.getInstance();
 
@@ -56,7 +61,10 @@ public class EditFlightsOverviewController{
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
 
-        arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
+        arrivingTime.setDefaultColor(Paint.valueOf("grey"));
+        departureTime.setDefaultColor(Paint.valueOf("grey"));
+
+        /*arrivingTime.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
             Matcher matcher = pattern.matcher( arrivingTime.getText() );
             if( !matcher.matches() ){
@@ -81,7 +89,7 @@ public class EditFlightsOverviewController{
             }
             checkTimeTextFields();
         } );
-
+*/
 
         number.textProperty().addListener( ( observable , oldValue , newValue ) -> {
             Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
@@ -133,11 +141,11 @@ public class EditFlightsOverviewController{
         Date       arriveDate = new Date();
         Date       departDate = new Date();
         try{
-            arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getText() );
+            arriveDate = format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getEditor().getText() );
         }catch( ParseException ignored ){
         }
         try{
-            departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getText() );
+            departDate = format.parse( departureDate.getEditor().getText() + " " + departureTime.getEditor().getText() );
         }catch( ParseException ignored ){
         }
         if( arriveDate.getTime() <= departDate.getTime() ){
@@ -185,8 +193,8 @@ public class EditFlightsOverviewController{
         Pattern timePattern = Pattern.compile( "[0-1][0-9][:][0-5][0-9]|[2][0-3][:][0-5][0-9]" );
 
         if( pattern.matcher( number.getText() ).matches() && pattern.matcher( planeID.getText() ).matches() &&
-            timePattern.matcher( departureTime.getText() ).matches() &&
-            timePattern.matcher( arrivingTime.getText() ).matches() ){
+            timePattern.matcher( departureTime.getEditor().getText() ).matches() &&
+            timePattern.matcher( arrivingTime.getEditor().getText() ).matches() ){
             editEditFlightsOverview.setDisable( false );
         }else{
             editEditFlightsOverview.setDisable( true );

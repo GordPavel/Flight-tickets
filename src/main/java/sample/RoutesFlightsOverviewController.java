@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -331,12 +332,12 @@ public class RoutesFlightsOverviewController{
                         selectedFlight.getArriveDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDate() );
                 ( ( ChoiceBox<Route> ) ( editFlightWindow.getChildrenUnmodifiable().get( 11 ) ) )
                         .setValue( selectedFlight.getRoute() );
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setText(
+                ( (JFXTimePicker) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setValue(
                         selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
-                                      .toString() );
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
-                        .setText( selectedFlight.getArriveDate().
-                                toInstant().atZone( ZoneId.systemDefault() ).toLocalTime().toString() );
+                                       );
+                ( ( JFXTimePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
+                        .setValue( selectedFlight.getArriveDate().
+                                toInstant().atZone( ZoneId.systemDefault() ).toLocalTime() );
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );

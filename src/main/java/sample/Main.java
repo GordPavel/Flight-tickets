@@ -25,7 +25,7 @@ public class Main extends Application{
                 new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
         RoutesFlightsOverviewController controller = new RoutesFlightsOverviewController( primaryStage );
         loader.setController( controller );
-        primaryStage.setTitle( "Routes and flights" );
+        primaryStage.setTitle( "Information system about flights and routes" );
         Scene scene = new Scene( loader.load() , 700 , 500 );
         scene.getStylesheets().add( getClass().getResource( "/fxml/auto-fill.css" ).toExternalForm() );
         primaryStage.setScene( scene );
@@ -70,7 +70,6 @@ public class Main extends Application{
             }
         } );
         primaryStage.setResizable( false );
-        setUserAgentStylesheet( STYLESHEET_CASPIAN );
         primaryStage.show();
     }
 

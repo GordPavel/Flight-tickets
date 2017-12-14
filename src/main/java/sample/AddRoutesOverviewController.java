@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXButton;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -31,7 +32,7 @@ public class AddRoutesOverviewController{
 
     @FXML AutoFillTextBox<String> departureTextField;
     @FXML AutoFillTextBox<String> destinationTextField;
-    @FXML Button                  addAddRouteOverview;
+    @FXML JFXButton               addAddRouteOverview;
 
     private DataModel dataModel = DataModel.getInstance();
 

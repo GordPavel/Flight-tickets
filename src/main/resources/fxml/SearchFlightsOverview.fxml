@@ -1,66 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.*?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0"
-            prefWidth="435.0" style="caspian" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
-    <Label fx:id="numberLabel" layoutX="30.0" layoutY="69.0" prefHeight="10.0" prefWidth="60.0" text="Number:">
+<?import javafx.scene.text.Font?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTimePicker?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0" prefWidth="435.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <Label fx:id="numberLabel" layoutX="30.0" layoutY="69.0" prefHeight="10.0" prefWidth="60.0" text="Number:" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <Label fx:id="planeIdLabel" layoutX="30.0" layoutY="119.0" prefHeight="17.0" prefWidth="67.0" text="Plane ID :">
+    <Label fx:id="planeIdLabel" layoutX="30.0" layoutY="119.0" prefHeight="17.0" prefWidth="67.0" text="Plane ID :" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <TextField fx:id="numberTextField" layoutX="137.0" layoutY="62.0"/>
-    <TextField fx:id="planeIdTextField" layoutX="139.0" layoutY="114.0"/>
-    <Label fx:id="arriveDateLabel" layoutX="30.0" layoutY="249.0" prefHeight="17.0" prefWidth="75.0"
-           text="ArrivingDate">
+    <TextField fx:id="numberTextField" layoutX="137.0" layoutY="62.0" />
+    <TextField fx:id="planeIdTextField" layoutX="139.0" layoutY="114.0" />
+    <Label fx:id="arriveDateLabel" layoutX="30.0" layoutY="249.0" prefHeight="17.0" prefWidth="75.0" text="ArrivingDate" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <Label fx:id="departureDateLabel" layoutX="30.0" layoutY="169.0" text="Departure Date">
+    <Label fx:id="departureDateLabel" layoutX="30.0" layoutY="169.0" text="Departure Date" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <Label layoutX="28.0" layoutY="14.0" prefHeight="27.0" prefWidth="393.0"
-           text="Enter one or more parameters of searching:">
+    <Label layoutX="28.0" layoutY="14.0" prefHeight="27.0" prefWidth="393.0" text="Enter one or more parameters of searching:" textFill="#282c86">
         <font>
-            <Font name="System Bold Italic" size="18.0"/>
+            <Font name="System Bold Italic" size="18.0" />
         </font>
     </Label>
-    <DatePicker fx:id="departureFromDatePicker" layoutX="134.0" layoutY="163.0" prefHeight="25.0" prefWidth="113.0"
-                promptText="from date"/>
-    <DatePicker fx:id="arriveFromDatePicker" layoutX="145.0" layoutY="244.0" prefHeight="25.0" prefWidth="113.0"
-                promptText="from date"/>
-    <TextField fx:id="flightTimeFromTextField" layoutX="143.0" layoutY="333.0" prefHeight="25.0" prefWidth="60.0"
-               promptText="00:00"/>
-    <Label layoutX="23.0" layoutY="389.0" text="Route:">
+    <JFXDatePicker fx:id="departureFromDatePicker" defaultColor="darkslateblue" layoutX="134.0" layoutY="163.0" prefHeight="25.0" prefWidth="113.0" promptText="from date" />
+    <JFXDatePicker fx:id="arriveFromDatePicker" defaultColor="darkslateblue" layoutX="145.0" layoutY="244.0" prefHeight="25.0" prefWidth="113.0" promptText="from date" />
+    <JFXTimePicker fx:id="flightTimeFromTextField" layoutX="143.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
+    <Label layoutX="23.0" layoutY="389.0" text="Route:" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <DatePicker fx:id="departureToDatePicker" layoutX="131.0" layoutY="203.0" prefHeight="25.0" prefWidth="113.0"
-                promptText="to date"/>
-    <DatePicker fx:id="arriveToDatePicker" layoutX="144.0" layoutY="285.0" prefHeight="25.0" prefWidth="113.0"
-                promptText="to date"/>
-    <Label fx:id="flightTimeLabel" layoutX="24.0" layoutY="340.0" text="Flight time">
+    <JFXDatePicker fx:id="departureToDatePicker" defaultColor="darkslateblue" layoutX="131.0" layoutY="203.0" prefHeight="25.0" prefWidth="113.0" promptText="to date" />
+    <JFXDatePicker fx:id="arriveToDatePicker" defaultColor="darkslateblue" layoutX="144.0" layoutY="285.0" prefHeight="25.0" prefWidth="113.0" promptText="to date" />
+    <Label fx:id="flightTimeLabel" layoutX="24.0" layoutY="340.0" text="Flight time" textFill="#282c86" underline="true">
         <font>
-            <Font name="System Italic" size="12.0"/>
+            <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <TextField fx:id="flightTimeToTextField" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="60.0"
-               promptText="00:00"/>
-    <Button focusTraversable="false" layoutX="17.0" layoutY="528.0" mnemonicParsing="false"
-            onAction="#handleClearAction" prefHeight="25.0" prefWidth="75.0" text="Clear"/>
-    <ListView fx:id="routesListView" layoutX="163.0" layoutY="382.0" prefHeight="200.0" prefWidth="200.0"/>
-    <TextField fx:id="searchFromTextField" layoutX="14.0" layoutY="416.0" prefHeight="27.0" prefWidth="137.0"
-               promptText="search from"/>
-    <TextField fx:id="searchToTextField" layoutX="16.0" layoutY="468.0" prefHeight="27.0" prefWidth="137.0"
-               promptText="search to"/>
+    <JFXTimePicker fx:id="flightTimeToTextField" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
+    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="20.0" layoutY="535.0" mnemonicParsing="false" onAction="#handleClearAction"  prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #354a86;"  textFill="WHITE" text="Clear" />
+    <ListView fx:id="routesListView" layoutX="163.0" layoutY="382.0" prefHeight="200.0" prefWidth="200.0" />
+    <TextField fx:id="searchFromTextField" layoutX="14.0" layoutY="416.0" prefHeight="27.0" prefWidth="137.0" promptText="search from" />
+    <TextField fx:id="searchToTextField" layoutX="16.0" layoutY="468.0" prefHeight="27.0" prefWidth="137.0" promptText="search to" />
 </AnchorPane>
