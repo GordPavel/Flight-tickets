@@ -14,7 +14,6 @@ import javafx.stage.Stage;
 import model.DataModel;
 import model.Flight;
 import model.Route;
-import np.com.ngopal.control.AutoFillTextBox;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,8 +41,8 @@ public class RoutesFlightsOverviewController{
     private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
-    @FXML AutoFillTextBox<String>     departure;
-    @FXML AutoFillTextBox<String>     destination;
+    @FXML TextField                   departure;
+    @FXML TextField                   destination;
     @FXML TableView<Route>            routeTable;
     @FXML TableColumn<Route, String>  departureColumn;
     @FXML TableColumn<Route, String>  destinationColumn;
@@ -76,11 +75,9 @@ public class RoutesFlightsOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
-        departure.setData( airports );
-        departure.getTextbox().textProperty()
+        departure.textProperty()
                  .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , departure ) );
-        destination.setData( airports );
-        destination.getTextbox().textProperty()
+        destination.textProperty()
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
     }
 
@@ -88,7 +85,7 @@ public class RoutesFlightsOverviewController{
     private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
-    private void searchListeners( String newValue , AutoFillTextBox<String> textField ){
+    private void searchListeners( String newValue , TextField textField ){
         if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
             textField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, ?, *" ) );

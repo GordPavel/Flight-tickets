@@ -4,7 +4,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import np.com.ngopal.control.AutoFillTextBox?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
             prefWidth="700.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.71"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -20,9 +19,9 @@
                         <TableColumn fx:id="destinationColumn" prefWidth="170.0" text="Destination"/>
                     </columns>
                 </TableView>
-                <AutoFillTextBox fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0"/>
-                <AutoFillTextBox fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0"
-                                 prefWidth="154.0"/>
+                <TextField fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0"/>
+                <TextField fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0"
+                           prefWidth="154.0"/>
                 <Label layoutX="50.0" layoutY="24.0" prefHeight="17.0" prefWidth="78.0" text="Departure:">
                     <font>
                         <Font name="System Italic" size="12.0"/>

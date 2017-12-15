@@ -25,8 +25,8 @@ public class Controller{
         return Controller.InstanceHolder.instance;
     }
 
-    static DataModel model              = DataModel.getInstance();
-    static boolean   flightSearchActive = false;
+    static         DataModel model              = DataModel.getInstance();
+    private static boolean   flightSearchActive = false;
     private       ObservableList<Route>  routes;
     private       ObservableList<Flight> flights;
     public static Route                  routeForEdit;
