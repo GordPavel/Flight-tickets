@@ -1,12 +1,10 @@
 package sample;
 
-import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,7 +18,6 @@ import np.com.ngopal.control.AutoFillTextBox;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -188,17 +185,16 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     public void handleAddRouteButton(){
-        Parent addRouteWindow;
         try{
-            addRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null );
+            loader.setController( controller );
             Stage popUp = new Stage();
-            Scene scene = new Scene( addRouteWindow );
-            scene.getStylesheets().add( getClass().getResource( "/fxml/auto-fill.css" ).toExternalForm() );
             popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( thisStage );
 
             popUp.setTitle( ADD_ROUTE_WINDOW );
-            popUp.setScene( scene );
+            popUp.setScene( new Scene( loader.load() ) );
             popUp.setResizable( false );
 
             thisStage.setOpacity( 0.9 );
@@ -216,8 +212,7 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     public void handleEditRouteButton(){
-        Parent editRouteWindow;
-        Route  selectedRoute = routeTable.getSelectionModel().getSelectedItem();
+        Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute == null ){
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "No Selection" );
@@ -227,37 +222,26 @@ public class RoutesFlightsOverviewController{
         }else{
             controller.setRouteForEdit( selectedRoute );
             try{
-                editRouteWindow = FXMLLoader.load( getClass().getResource( "/fxml/EditRoutesOverview.fxml" ) );
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+                AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( selectedRoute );
+                loader.setController( controller );
 
                 Stage popUp = new Stage();
-                Scene scene = new Scene( editRouteWindow );
-                scene.getStylesheets().add( getClass().getResource( "/fxml/auto-fill.css" ).toExternalForm() );
-
                 popUp.initModality( Modality.APPLICATION_MODAL );
                 popUp.initOwner( thisStage );
 
                 popUp.setTitle( EDIT_ROUTE_WINDOW );
-                popUp.setScene( scene );
+                popUp.setScene( new Scene( loader.load() ) );
                 popUp.setResizable( false );
-
-                ( ( AutoFillTextBox<String> ) ( editRouteWindow.getChildrenUnmodifiable().get( 0 ) ) ).getTextbox()
-                                                                                                      .setText(
-                                                                                                              selectedRoute
-                                                                                                                      .getFrom() );
-                ( ( AutoFillTextBox<String> ) ( editRouteWindow.getChildrenUnmodifiable().get( 4 ) ) ).getTextbox()
-                                                                                                      .setText(
-                                                                                                              selectedRoute
-                                                                                                                      .getTo() );
-
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
                 airports.setAll(
                         dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
-                routeTable.setItems( controller.getRoutes() );
+                routeTable.setItems( this.controller.getRoutes() );
                 routeTable.refresh();
-                controller.updateFlights();
-                flightTable.setItems( controller.getFlights() );
+                this.controller.updateFlights();
+                flightTable.setItems( this.controller.getFlights() );
                 flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
@@ -268,24 +252,23 @@ public class RoutesFlightsOverviewController{
     @FXML
     public void handleAddFlightButton(){
         try{
-            Parent addFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-
+            FXMLLoader                          loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null );
+            loader.setController( controller );
             Stage popUp = new Stage();
-            Scene scene = new Scene( addFlightWindow );
-            scene.getStylesheets().add( getClass().getResource( "/fxml/auto-fill.css" ).toExternalForm() );
-
 
             popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( thisStage );
 
             popUp.setTitle( ADD_FLIGHT_WINDOW );
-            popUp.setScene( scene );
+            popUp.setScene( new Scene( loader.load() ) );
             popUp.setResizable( false );
 
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
-            flightTable.setItems( controller.getFlights() );
+            flightTable.setItems( this.controller.getFlights() );
             flightTable.refresh();
         }catch( IOException e ){
             e.printStackTrace();
@@ -294,7 +277,6 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     public void handleEditFlightButton(){
-        Parent editFlightWindow;
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
         if( selectedFlight == null ){
 
@@ -307,42 +289,22 @@ public class RoutesFlightsOverviewController{
         }else{
             controller.setFlightForEdit( selectedFlight );
             try{
-                editFlightWindow = FXMLLoader.load( getClass().getResource( "/fxml/EditFlightsOverview.fxml" ) );
-
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+                AddAndEditFlightsOverviewController controller =
+                        new AddAndEditFlightsOverviewController( selectedFlight );
+                loader.setController( controller );
                 Stage popUp = new Stage();
-                Scene scene = new Scene( editFlightWindow );
-                scene.getStylesheets().add( getClass().getResource( "/fxml/auto-fill.css" ).toExternalForm() );
-
                 popUp.initModality( Modality.APPLICATION_MODAL );
                 popUp.initOwner( thisStage );
 
                 popUp.setTitle( EDIT_FLIGHT_WINDOW );
-                popUp.setScene( scene );
+                popUp.setScene( new Scene( loader.load() ) );
                 popUp.setResizable( false );
-
-                ( ( TextField ) ( editFlightWindow.getChildrenUnmodifiable().get( 2 ) ) )
-                        .setText( selectedFlight.getNumber() );
-                ( ( AutoFillTextBox<String> ) ( editFlightWindow.getChildrenUnmodifiable().get( 3 ) ) ).getTextbox()
-                                                                                                       .setText(
-                                                                                                               selectedFlight
-                                                                                                                       .getPlaneID() );
-                ( ( DatePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 9 ) ) ).setValue(
-                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDate() );
-                ( ( DatePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 10 ) ) ).setValue(
-                        selectedFlight.getArriveDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalDate() );
-                ( ( ChoiceBox<Route> ) ( editFlightWindow.getChildrenUnmodifiable().get( 11 ) ) )
-                        .setValue( selectedFlight.getRoute() );
-                ( (JFXTimePicker) ( editFlightWindow.getChildrenUnmodifiable().get( 14 ) ) ).setValue(
-                        selectedFlight.getDepartureDate().toInstant().atZone( ZoneId.systemDefault() ).toLocalTime()
-                                       );
-                ( ( JFXTimePicker ) ( editFlightWindow.getChildrenUnmodifiable().get( 15 ) ) )
-                        .setValue( selectedFlight.getArriveDate().
-                                toInstant().atZone( ZoneId.systemDefault() ).toLocalTime() );
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
 
-                flightTable.setItems( controller.getFlights() );
+                flightTable.setItems( this.controller.getFlights() );
                 flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
@@ -498,7 +460,6 @@ public class RoutesFlightsOverviewController{
                               " - Use only a-z, 0-9, - and _ in names/numbers;\n" +
                               " - Use * and ? in search field instead of many or one unknown symbol;\n" +
                               " - If you add/edit/delete some route/flight, update search parameters to update tables with routes and flights." );
-
         alert.showAndWait();
     }
 }

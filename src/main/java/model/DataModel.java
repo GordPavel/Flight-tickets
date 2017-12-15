@@ -239,17 +239,20 @@ public class DataModel{
      @return true , if it has correct data and doesn't duplicate someone another, false instead.
 
      @throws FaRIllegalEditedData if database doesn't contain previous version of route
-     @throws FaRSameNameException it duplicates someone
-     another
+     @throws FaRSameNameException it duplicates someone another or same airports
      */
     public Boolean editRoute( Route route , String newDepartureAirport , String newDestinationAirport ){
+        if( ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
+                .equals( newDestinationAirport != null ? newDestinationAirport : route.getTo() ) ){
+            throw new FaRSameNameException( "Same airports" );
+        }
+        if( route.getId() == null ){
+            throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
+        }
         Route editingRoute =
                 routes.stream().filter( route1 -> Objects.equals( route1.getId() , route.getId() ) ).findFirst()
                       .orElseThrow(
                               () -> new FaRIllegalEditedData( "Database doesn't contain previous version of route" ) );
-        if( route.getId() == null ){
-            throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
-        }
         if( routes.stream().anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
                                                   route.getFrom().toUpperCase() )
                                                         .equals( route1.getFrom().toUpperCase() ) &&

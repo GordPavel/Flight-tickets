@@ -1,72 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXTabPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import np.com.ngopal.control.AutoFillTextBox?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
+            prefWidth="700.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.71"
+            xmlns:fx="http://javafx.com/fxml/1">
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.71" xmlns:fx="http://javafx.com/fxml/1">
-
-        <JFXTabPane layoutY="25.0" prefHeight="376.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="-1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-            <Tab text="Routes">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="750.0">
-                    <TableView fx:id="routeTable" layoutX="50.0" layoutY="93.0" prefHeight="315.0" prefWidth="340.0">
-                        <columns>
-                            <TableColumn fx:id="departureColumn" prefWidth="170.0" text="Departure" />
-                            <TableColumn fx:id="destinationColumn" prefWidth="170.0" text="Destination" />
-                        </columns>
-                    </TableView>
-                    <AutoFillTextBox fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0" />
-                    <AutoFillTextBox fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0" prefWidth="154.0" />
-                    <Label layoutX="50.0" layoutY="24.0" prefHeight="17.0" prefWidth="78.0" text="Departure:">
-                        <font>
-                            <Font name="System Italic" size="12.0" />
-                        </font>
-                    </Label>
-                    <Label layoutX="240.0" layoutY="24.0" text="Destination:">
-                        <font>
-                            <Font name="System Italic" size="12.0" />
-                        </font>
-                    </Label>
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" onAction="#handleAddRouteButton" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Add" textFill="WHITE" />
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="310.0" mnemonicParsing="false" onAction="#handleEditRouteButton" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Edit" textFill="WHITE" />
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="370.0" mnemonicParsing="false" onAction="#handleDeleteRouteButton" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Delete" textFill="WHITE" />
-                </AnchorPane>
-            </Tab>
-            <Tab text="Flights">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                    <TableView fx:id="flightTable" layoutX="24.0" layoutY="24.0" prefHeight="380.0" prefWidth="380.0">
-                        <columns>
-                            <TableColumn fx:id="number" prefWidth="141.0" text="Number" />
-                            <TableColumn fx:id="routeColumnFlight" prefWidth="238.0" text="Route" />
-                        </columns>
-                    </TableView>
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="260.0" mnemonicParsing="false" onAction="#handleAddFlightButton" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Add" textFill="WHITE" />
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="310.0" mnemonicParsing="false" onAction="#handleEditFlightButton" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Edit" textFill="WHITE" />
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="360.0" mnemonicParsing="false" onAction="#handleDeleteFlightButton" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Delete" textFill="WHITE" />
-                    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="195.0" mnemonicParsing="false" onAction="#handleSearchFlightButton" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Search" textFill="WHITE" />
-                    <TextArea fx:id="detailsTextArea" editable="false" layoutX="444.0" layoutY="24.0" prefHeight="148.0" prefWidth="224.0" />
-                </AnchorPane>
-            </Tab>
-        </JFXTabPane>
-        <MenuBar prefHeight="25.0" prefWidth="700.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <Menu mnemonicParsing="false" text="File">
-                <MenuItem mnemonicParsing="false" onAction="#handleOpenAction" text="Open" />
-                <MenuItem mnemonicParsing="false" onAction="#handleSaveAction" text="Save" />
-                <MenuItem mnemonicParsing="false" onAction="#handleSaveAsAction" text="Save as.." />
-                <MenuItem mnemonicParsing="false" onAction="#handleMergeAction" text="Merge" />
-            </Menu>
-            <Menu mnemonicParsing="false" text="Help">
-                <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About" />
-            </Menu>
-        </MenuBar>
+    <JFXTabPane layoutY="25.0" prefHeight="376.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE"
+                AnchorPane.bottomAnchor="-1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                AnchorPane.topAnchor="25.0">
+        <Tab text="Routes">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="750.0">
+                <TableView fx:id="routeTable" layoutX="50.0" layoutY="93.0" prefHeight="315.0" prefWidth="340.0">
+                    <columns>
+                        <TableColumn fx:id="departureColumn" prefWidth="170.0" text="Departure"/>
+                        <TableColumn fx:id="destinationColumn" prefWidth="170.0" text="Destination"/>
+                    </columns>
+                </TableView>
+                <AutoFillTextBox fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0"/>
+                <AutoFillTextBox fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0"
+                                 prefWidth="154.0"/>
+                <Label layoutX="50.0" layoutY="24.0" prefHeight="17.0" prefWidth="78.0" text="Departure:">
+                    <font>
+                        <Font name="System Italic" size="12.0"/>
+                    </font>
+                </Label>
+                <Label layoutX="240.0" layoutY="24.0" text="Destination:">
+                    <font>
+                        <Font name="System Italic" size="12.0"/>
+                    </font>
+                </Label>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="250.0"
+                           mnemonicParsing="false" onAction="#handleAddRouteButton" prefHeight="36.0" prefWidth="75.0"
+                           ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Add" textFill="WHITE"/>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="310.0"
+                           mnemonicParsing="false" onAction="#handleEditRouteButton" prefHeight="36.0" prefWidth="75.0"
+                           ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Edit" textFill="WHITE"/>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="370.0"
+                           mnemonicParsing="false" onAction="#handleDeleteRouteButton" prefHeight="36.0"
+                           prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Delete"
+                           textFill="WHITE"/>
+            </AnchorPane>
+        </Tab>
+        <Tab text="Flights">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                <TableView fx:id="flightTable" layoutX="24.0" layoutY="24.0" prefHeight="380.0" prefWidth="380.0">
+                    <columns>
+                        <TableColumn fx:id="number" prefWidth="141.0" text="Number"/>
+                        <TableColumn fx:id="routeColumnFlight" prefWidth="238.0" text="Route"/>
+                    </columns>
+                </TableView>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="260.0"
+                           mnemonicParsing="false" onAction="#handleAddFlightButton" prefHeight="35.0" prefWidth="75.0"
+                           ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Add" textFill="WHITE"/>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="310.0"
+                           mnemonicParsing="false" onAction="#handleEditFlightButton" prefHeight="35.0" prefWidth="75.0"
+                           ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Edit" textFill="WHITE"/>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="360.0"
+                           mnemonicParsing="false" onAction="#handleDeleteFlightButton" prefHeight="35.0"
+                           prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Delete"
+                           textFill="WHITE"/>
+                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="195.0"
+                           mnemonicParsing="false" onAction="#handleSearchFlightButton" prefHeight="25.0"
+                           prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" text="Search"
+                           textFill="WHITE"/>
+                <TextArea fx:id="detailsTextArea" editable="false" layoutX="444.0" layoutY="24.0" prefHeight="148.0"
+                          prefWidth="224.0"/>
+            </AnchorPane>
+        </Tab>
+    </JFXTabPane>
+    <MenuBar prefHeight="25.0" prefWidth="700.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+             AnchorPane.topAnchor="0.0">
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" onAction="#handleOpenAction" text="Open"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleSaveAction" text="Save"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleSaveAsAction" text="Save as.."/>
+            <MenuItem mnemonicParsing="false" onAction="#handleMergeAction" text="Merge"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About"/>
+        </Menu>
+    </MenuBar>
 </AnchorPane>
