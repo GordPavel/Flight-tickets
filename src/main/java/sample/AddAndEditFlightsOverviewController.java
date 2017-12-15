@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import model.Flight;
 import model.Route;
 
@@ -61,10 +62,25 @@ public class AddAndEditFlightsOverviewController{
         arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
 
+        StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
+
+            @Override
+            public String toString( LocalTime object ){
+                return timeFormatter.format( object );
+            }
+
+            @Override
+            public LocalTime fromString( String string ){
+                return LocalTime.parse( string , timeFormatter );
+            }
+        };
         departureTime.setIs24HourView( true );
+        departureTime.setConverter( localTimeStringConverter );
         departureTime.setValue( LocalTime.MIDNIGHT );
 
         arrivingTime.setIs24HourView( true );
+        arrivingTime.setConverter( localTimeStringConverter );
         arrivingTime.setValue( LocalTime.MIDNIGHT );
 
 
@@ -187,6 +203,7 @@ public class AddAndEditFlightsOverviewController{
                     }
                 }
             } );
+            number.setEditable( false );
             addAndEditFlightButton.setText( "Edit" );
             mainLabel.setText( "Enter new data." );
         }
@@ -194,7 +211,7 @@ public class AddAndEditFlightsOverviewController{
 
     private void setEditingFlightData(){
         number.textProperty().setValue( editingFLight.getNumber() );
-        planeID.textProperty().setValue( editingFLight.getNumber() );
+        planeID.textProperty().setValue( editingFLight.getPlaneID() );
         box.getSelectionModel().select( editingFLight.getRoute() );
         SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );

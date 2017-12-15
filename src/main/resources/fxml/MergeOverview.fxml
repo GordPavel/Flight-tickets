@@ -1,24 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
             prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sample.MergeOverviewController">
-    <TableView fx:id="flightTable" layoutX="27.0" layoutY="50.0" prefHeight="354.0" prefWidth="130.0">
+    <TableView fx:id="flightTable" layoutX="27.0" layoutY="50.0" prefHeight="354.0" prefWidth="130.0"
+               style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
         <columns>
             <TableColumn fx:id="numberColumn" prefWidth="130.99998474121094" text="Object"/>
         </columns>
     </TableView>
-    <JFXButton fx:id="acceptAllNew"  buttonType="RAISED" focusTraversable="false" layoutX="235.0" layoutY="360.0" mnemonicParsing="false"
-            onAction="#handleAcceptAllNew" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" textFill="WHITE" text="Accept All New"/>
-    <JFXButton fx:id="acceptThisNew" buttonType="RAISED" focusTraversable="false" layoutX="235.0" layoutY="300.0" mnemonicParsing="false"
-               onAction="#handleAcceptNew" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" textFill="WHITE" text="Accept New"/>
-    <JFXButton fx:id="acceptAllOld"  buttonType="RAISED" focusTraversable="false" layoutX="445.0" layoutY="360.0" mnemonicParsing="false"
-            onAction="#handleAcceptAllOld" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" textFill="WHITE" text="Accept All Old"/>
-    <JFXButton fx:id="acceptThisOld"  buttonType="RAISED" focusTraversable="false" layoutX="445.0" layoutY="300.0" mnemonicParsing="false"
-            onAction="#handleAcceptOld" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba;" textFill="WHITE" text="Accept Old"/>
+    <JFXButton fx:id="acceptAllNew" buttonType="RAISED" focusTraversable="false" layoutX="235.0" layoutY="360.0"
+               mnemonicParsing="false"
+               onAction="#handleAcceptAllNew" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee"
+               style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" textFill="WHITE"
+               text="Accept All New"/>
+    <JFXButton fx:id="acceptThisNew" buttonType="RAISED" focusTraversable="false" layoutX="235.0" layoutY="300.0"
+               mnemonicParsing="false"
+               onAction="#handleAcceptNew" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee"
+               style="-fx-background-color: #11a9ba;-fx-font-family: 'PT Mono'; -fx-font-size : 12.0" textFill="WHITE"
+               text="Accept New"/>
+    <JFXButton fx:id="acceptAllOld" buttonType="RAISED" focusTraversable="false" layoutX="445.0" layoutY="360.0"
+               mnemonicParsing="false"
+               onAction="#handleAcceptAllOld" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee"
+               style="-fx-background-color: #11a9ba;-fx-font-family: 'PT Mono'; -fx-font-size : 12.0" textFill="WHITE"
+               text="Accept All Old"/>
+    <JFXButton fx:id="acceptThisOld" buttonType="RAISED" focusTraversable="false" layoutX="445.0" layoutY="300.0"
+               mnemonicParsing="false"
+               onAction="#handleAcceptOld" prefHeight="35.0" prefWidth="120.0" ripplerFill="#dfe3ee"
+               style="-fx-background-color: #11a9ba;-fx-font-family: 'PT Mono'; -fx-font-size : 12.0" textFill="WHITE"
+               text="Accept Old"/>
     <TextArea fx:id="newTextArea" editable="false" layoutX="218.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0"/>
     <TextArea fx:id="oldTextArea" editable="false" layoutX="429.0" layoutY="49.0" prefHeight="180.0" prefWidth="150.0"/>
 </AnchorPane>
