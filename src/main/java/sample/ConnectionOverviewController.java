@@ -29,6 +29,10 @@ public class ConnectionOverviewController {
     @FXML
     TextField portTextField;
 
+
+    /**
+     * initializing of view
+     */
     @FXML
     public void initialize(){
         ipTextField.setText("127.0.0.1");
@@ -38,7 +42,12 @@ public class ConnectionOverviewController {
 
     }
 
-
+    /**
+     * Connect button action handler. Establish connection to server, put socket to ClientMain.clientSocket and open login window,
+     * if connection successfully established. IP address and port - from TextFields on view.
+     * Button disabled, if IP or Port TextField has incorrect information
+     * @param actionEvent
+     */
     @FXML
     public void handleConnectAction(ActionEvent actionEvent ){
 
@@ -51,17 +60,24 @@ public class ConnectionOverviewController {
 
     }
 
-
+    /**
+     * Cancel button action handler. Closes window, when button pushed
+     * @param actionEvent
+     */
     @FXML
     public void handleCancelAction( ActionEvent actionEvent ){
         closeWindow( actionEvent );
     }
+
 
     private void closeWindow( Event event ){
         Stage stage = ( Stage ) ( (Parent) event.getSource() ).getScene().getWindow();
         stage.close();
     }
 
+    /**
+     * Checking fields. If content is not IP address and port - blocking connection button
+     */
     private void fieldCheck(){
         Pattern ipPattern = Pattern.compile("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
                 "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
