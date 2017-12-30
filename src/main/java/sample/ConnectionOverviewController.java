@@ -3,7 +3,9 @@ package sample;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -57,6 +59,29 @@ public class ConnectionOverviewController {
         } catch (IOException ioex){
                     System.out.println("Connection failed");
         }
+
+        /**
+         * TODO: after connection
+         * Put this part of code in try
+         */
+        try {
+            Stage loginStage = new Stage();
+            FXMLLoader loader =
+                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+            LoginOverviewController controller = new LoginOverviewController(loginStage);
+            loader.setController(controller);
+            loginStage.setTitle("Login");
+            Scene scene = new Scene(loader.load());
+            loginStage.setScene(scene);
+            loginStage.setResizable(false);
+            loginStage.show();
+            closeWindow( actionEvent );
+        } catch (IOException e)
+        {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+
 
     }
 

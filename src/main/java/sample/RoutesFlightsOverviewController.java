@@ -51,6 +51,7 @@ public class RoutesFlightsOverviewController{
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
 
+
     private Stage thisStage;
     private FileChooser fileChooser = new FileChooser();
 
@@ -59,11 +60,17 @@ public class RoutesFlightsOverviewController{
         fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
     }
 
+    RoutesFlightsOverviewController(  ){
+    }
+
+
+
     /**
      initialization of view
      */
     @FXML
     public void initialize(){
+
         controller.updateFlights();
         controller.updateRoutes();
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
