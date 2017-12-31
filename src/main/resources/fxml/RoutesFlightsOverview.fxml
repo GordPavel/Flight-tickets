@@ -82,12 +82,18 @@
                 </accelerator>
             </MenuItem>
         </Menu>
-        <Menu mnemonicParsing="false" text="Help">
+        <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
             <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About">
                 <accelerator>
                     <KeyCodeCombination alt="UP" code="I" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
         </Menu>
+      <Menu fx:id="userMenu" mnemonicParsing="false" text="User">
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#handleLogOutAction" text="Log out" />
+            <MenuItem mnemonicParsing="false" text="Change DB" />
+        </items>
+      </Menu>
     </MenuBar>
 </AnchorPane>

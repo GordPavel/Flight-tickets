@@ -33,6 +33,15 @@ public class Controller{
     public static Flight                 flightForEdit;
     private       ObservableList<Flight> mergeFlights;
     private       ObservableList<Route>  mergeRoutes;
+    private       Thread                 thread;
+
+    public void setThread(Thread thread) {
+        this.thread = thread;
+    }
+
+    public void startThread(){
+        thread.start();
+    }
 
 
     public ObservableList<Route> getRoutes(){

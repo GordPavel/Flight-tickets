@@ -3,8 +3,10 @@ package sample;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -50,7 +52,9 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     @FXML TableColumn<Flight, String> number;
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
+    @FXML MenuBar                     menuBar;
     @FXML Menu                        fileMenu;
+    @FXML Menu                        helpMenu;
     @FXML Button                      addRouteButton;
     @FXML Button                      editRouteButton;
     @FXML Button                      deleteRouteButton;
@@ -61,8 +65,10 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
 
     private Stage thisStage;
 
+
     RoutesFlightsReadOnlyOverviewController(Stage thisStage ){
         this.thisStage = thisStage;
+
     }
 
     RoutesFlightsReadOnlyOverviewController(  ){
@@ -103,7 +109,8 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         destination.textProperty()
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
 
-
+        Controller.getInstance().setThread(new ReadOnlyThread());
+        Controller.getInstance().startThread();
     }
 
     private DataModel              dataModel = DataModel.getInstance();
@@ -128,7 +135,6 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
                              destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
                     Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         }
-
 
     }
 
@@ -185,6 +191,55 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         alert.showAndWait();
     }
 
+    @FXML
+    private void handleChangeDBAction(){
+
+        dataModel.clear();
+
+        /**
+         * TODO: selecting new DB
+         *
+         * put here code to open window, that will allow you to download new DB.
+         */
+    }
+
+    @FXML
+    private void handleLogOutAction(Event event ){
+
+        dataModel.clear();
+
+        /**
+         * TODO: server logout
+         *
+         * somehow let server know, that you change your login
+         */
+
+        try {
+            Stage loginStage = new Stage();
+            FXMLLoader loader =
+                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+            LoginOverviewController logInController = new LoginOverviewController(loginStage);
+            loader.setController(logInController);
+            loginStage.setTitle("Login");
+            Scene scene = new Scene(loader.load());
+            loginStage.setScene(scene);
+            loginStage.setResizable(false);
+            loginStage.show();
+            thisStage.close();
+        } catch (IOException e)
+        {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+
+
+    }
+
+    private void closeWindow( Event event ){
+        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
+
+        stage.close();
+    }
 
 
 }
