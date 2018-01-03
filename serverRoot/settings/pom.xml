@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>settings</artifactId>
+    <version>1.1.0</version>
+
+    <parent>
+        <groupId>ru.netCracker</groupId>
+        <artifactId>serverRoot</artifactId>
+        <version>1.1.0</version>
+    </parent>
+
+    <properties>
+        <jaxb.version>2.3.0</jaxb.version>
+        <cliche.version>110413</cliche.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ru.netCracker</groupId>
+            <artifactId>serverRoot</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.googlecode.clichemaven/cliche -->
+        <dependency>
+            <groupId>com.googlecode.clichemaven</groupId>
+            <artifactId>cliche</artifactId>
+            <version>${cliche.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
