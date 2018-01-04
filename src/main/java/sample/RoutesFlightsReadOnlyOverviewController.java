@@ -37,10 +37,6 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
 
     private Controller controller = Controller.getInstance();
 
-    private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
-    private static final String ADD_ROUTE_WINDOW     = "Add a route";
-    private static final String EDIT_FLIGHT_WINDOW   = "Edit a flight";
-    private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
     @FXML TextField                   departure;
@@ -61,6 +57,9 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     @FXML Button                      addFlightButton;
     @FXML Button                      editFlightButton;
     @FXML Button                      deleteFlightButton;
+    @FXML Button                      updateFlightButton;
+    @FXML Button                      searchFlightButton;
+    @FXML Button                      updateRouteButton;
 
 
     private Stage thisStage;
@@ -89,6 +88,9 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         addFlightButton.setVisible(false);
         editFlightButton.setVisible(false);
         deleteFlightButton.setVisible(false);
+        updateFlightButton.setVisible(false);
+        updateRouteButton.setVisible(false);
+
         routeTable.setPrefWidth(600);
         departureColumn.setPrefWidth(300);
         destinationColumn.setPrefWidth(300);
@@ -109,13 +111,13 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         destination.textProperty()
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
 
+        thisStage.setOnCloseRequest(event -> {controller.stopThread();});
+
         Controller.getInstance().setThread(new ReadOnlyThread());
         Controller.getInstance().startThread();
     }
 
     private DataModel              dataModel = DataModel.getInstance();
-    private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
-            Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
     private void searchListeners( String newValue , TextField textField ){
         if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
@@ -195,6 +197,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     private void handleChangeDBAction(){
 
         dataModel.clear();
+        controller.stopThread();
 
         /**
          * TODO: selecting new DB
@@ -207,6 +210,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     private void handleLogOutAction(Event event ){
 
         dataModel.clear();
+        controller.stopThread();
 
         /**
          * TODO: server logout
@@ -235,9 +239,10 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
 
     }
 
-    private void closeWindow( Event event ){
-        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
 
+    public void closeWindow( Event event ){
+
+        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
         stage.close();
     }
 

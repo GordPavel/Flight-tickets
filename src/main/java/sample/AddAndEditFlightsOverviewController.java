@@ -75,6 +75,7 @@ public class AddAndEditFlightsOverviewController{
                 return LocalTime.parse( string , timeFormatter );
             }
         };
+
         departureTime.setIs24HourView( true );
         departureTime.setConverter( localTimeStringConverter );
         departureTime.setValue( LocalTime.MIDNIGHT );

@@ -92,7 +92,6 @@ public class LoginOverviewController {
             primaryStage.setScene( scene );
             primaryStage.setResizable( false );
             primaryStage.show();
-
             closeWindow( actionEvent );
         } catch (IOException e)
         {

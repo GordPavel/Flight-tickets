@@ -215,6 +215,18 @@ public class RoutesFlightsOverviewController{
     }
 
     @FXML
+    public void handleUpdateFlightButton(){
+
+    }
+
+    @FXML
+    public void handleUpdateRouteButton(){
+
+    }
+
+
+
+    @FXML
     public void handleEditRouteButton(){
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
         if( selectedRoute == null ){

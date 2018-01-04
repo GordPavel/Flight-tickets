@@ -10,11 +10,11 @@ import java.net.Socket;
  * create new parent tread, that will leave until stop command... Also, change in Controller "Thread thread" to new parrent
  *
  */
-public class ReadOnlyThread extends Thread {
+public class ReadOnlyThread extends FaRThread {
 
     Socket clientSocket;
     public int test=0;
-    private boolean stop;
+    private boolean stop=false;
 
     public void setStop() {
         this.stop = true;
