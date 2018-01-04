@@ -19,15 +19,11 @@ import java.util.stream.Stream;
  @author pavelgordeev */
 public class DataModel{
 
-    private File base;
+    DataModel(){
+    }
 
     private CopyOnWriteArrayList<Flight> flights = new CopyOnWriteArrayList<>();
     private CopyOnWriteArrayList<Route>  routes  = new CopyOnWriteArrayList<>();
-
-    public DataModel( File base ) throws IOException{
-        this.base = base;
-        importFromFile( base );
-    }
 
     /**
      List all unique airport, that stores in routes
@@ -76,7 +72,7 @@ public class DataModel{
      <p>
      duplicates number
      */
-    public void addFlight( Flight flight ) throws FlightAndRouteException, IOException{
+    public void addFlight( Flight flight ) throws FlightAndRouteException{
         if( !( legalSymbolsChecker.matcher( flight.getNumber() ).matches() &&
                legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
@@ -99,7 +95,6 @@ public class DataModel{
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         flights.addIfAbsent( flight );
-        saveToFile( base );
     }
 
 
@@ -108,10 +103,12 @@ public class DataModel{
 
      @param number number of flight to be removed
      */
-    public void removeFlight( String number ) throws IOException{
+    public void removeFlight( String number ){
+        if( flights.stream().noneMatch( flight -> flight.getNumber().equals( number ) ) ){
+            throw new FaRNotRelatedData( "Database doesn't contain flight " + number );
+        }
         flights.removeIf( flight -> Pattern.compile( number , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() )
                                            .matches() );
-        saveToFile( base );
     }
 
     /**
@@ -129,7 +126,7 @@ public class DataModel{
      @throws FaRSameNameException     it duplicates in ( planeID && route && arrive date && departure date ).
      */
     public void editFlight( Flight flight , Route newRoute , String newPlaneId , Date newDepartureDate ,
-                            Date newArriveDate ) throws FlightAndRouteException, IOException{
+                            Date newArriveDate ) throws FlightAndRouteException{
         if( !legalSymbolsChecker.matcher( newPlaneId != null ? newPlaneId : flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
@@ -162,7 +159,6 @@ public class DataModel{
         editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
         editingFlight.setDepartureDate( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() );
         editingFlight.setArriveDate( newArriveDate != null ? newArriveDate : flight.getArriveDate() );
-        saveToFile( base );
     }
 
 
@@ -184,7 +180,7 @@ public class DataModel{
      @throws IllegalArgumentException       if departure and destination airports are similar
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
-    public void addRoute( Route route ) throws IOException{
+    public void addRoute( Route route ){
         if( route.getFrom().toUpperCase().equals( route.getTo().toUpperCase() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
@@ -199,7 +195,6 @@ public class DataModel{
         }
         route.setId( routesPrimaryKeysGenerator.next() );
         routes.addIfAbsent( route );
-        saveToFile( base );
     }
 
     private Iterator<Integer> routesPrimaryKeysGenerator = IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
@@ -209,10 +204,13 @@ public class DataModel{
 
      @param route to remove
      */
-    public void removeRoute( Route route ) throws IOException{
+    public void removeRoute( Route route ){
+        if( !routes.contains( route ) ){
+            throw new FaRNotRelatedData(
+                    String.format( "Database doesn't contain route %s->%s" , route.getFrom() , route.getTo() ) );
+        }
         flights.removeIf( flight -> Objects.equals( flight.getRoute().getId() , route.getId() ) );
         routes.remove( route );
-        saveToFile( base );
     }
 
     /**
@@ -225,7 +223,7 @@ public class DataModel{
      @throws FaRIllegalEditedData if database doesn't contain previous version of route
      @throws FaRSameNameException it duplicates someone another or same airports
      */
-    public void editRoute( Route route , String newDepartureAirport , String newDestinationAirport ) throws IOException{
+    public void editRoute( Route route , String newDepartureAirport , String newDestinationAirport ){
         if( ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
                 .equals( newDestinationAirport != null ? newDestinationAirport : route.getTo() ) ){
             throw new FaRSameNameException( "Same airports" );
@@ -247,7 +245,6 @@ public class DataModel{
         }
         editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );
         editingRoute.setTo( newDestinationAirport != null ? newDestinationAirport : route.getTo() );
-        saveToFile( base );
     }
 
     /**

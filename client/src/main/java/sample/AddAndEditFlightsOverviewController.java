@@ -189,6 +189,7 @@ public class AddAndEditFlightsOverviewController{
                     try{
                         Controller.model
                                 .editFlight( Controller.flightForEdit , box.getSelectionModel().getSelectedItem() ,
+
                                              planeID.getText() , departDate , arriveDate );
                         controller.updateFlights();
                         Main.changed = true;

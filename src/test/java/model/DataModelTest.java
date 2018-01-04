@@ -26,7 +26,7 @@ class DataModelTest{
 
     @BeforeEach
     void setUp(){
-        dataModel = DataModel.getInstance();
+        dataModel = new DataModel();
         List<Route> routes = Stream.of( new Route( "port1" , "port2" ) , new Route( "port1" , "port3" ) ,
                                         new Route( "port2" , "port3" ) , new Route( "port3" , "port1" ) ,
                                         new Route( "port3" , "port2" ) , new Route( "port2" , "port1" ) )
@@ -59,7 +59,7 @@ class DataModelTest{
     @Test
     void addRoute(){
         Route addition = new Route( "port1" , "port4" );
-        assertTrue( dataModel.addRoute( addition ) , "Route added" );
+        dataModel.addRoute( addition );
         assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
@@ -74,19 +74,19 @@ class DataModelTest{
     @Test
     void removeRoute(){
         Route route = dataModel.listRoutesWithPredicate( route1 -> true ).findFirst().get();
-        assertTrue( dataModel.removeRoute( route ) , "Route removed" );
+        dataModel.removeRoute( route );
         assertFalse( dataModel.listFlightsWithPredicate( flight -> flight.getRoute().equals( route ) ).findAny()
                               .isPresent() , "No flights with this route" );
         assertFalse( dataModel.listRoutesWithPredicate( route1 -> route1.equals( route ) ).findAny().isPresent() ,
                      "This route doesn't exist in database" );
-        assertFalse( dataModel.removeRoute( route ) , "Can't remove this route more times" );
+        assertThrows( FaRNotRelatedData.class , () -> dataModel.removeRoute( route ) ,
+                      "Can't remove this route more times" );
     }
 
     @Test
     void editRoute(){
         Route route = dataModel.listRoutesWithPredicate( route1 -> true ).skip( 2 ).limit( 1 ).findFirst().get();
-        assertTrue( dataModel.editRoute( route , "port4" , null ) ,
-                    "Change route( port2 -> port3 ) to route( port4 -> port3 )" );
+        dataModel.editRoute( route , "port4" , null );
         assertIterableEquals( Arrays.asList( "port1" , "port2" , "port3" , "port4" ) ,
                               dataModel.listAllAirportsWithPredicate( s -> true ).collect( Collectors.toList() ) ,
                               "Database has new airport" );
@@ -153,7 +153,7 @@ class DataModelTest{
         Flight newFlight =
                 new Flight( "11" , dataModel.listRoutesWithPredicate( route -> true ).limit( 1 ).findFirst().get() ,
                             "plane" , arrive , departure );
-        assertTrue( dataModel.addFlight( newFlight ) , "Flight was added" );
+        dataModel.addFlight( newFlight );
         assertTrue( dataModel.listFlightsWithPredicate( flight -> flight.equals( newFlight ) ).findAny().isPresent() ,
                     "Flight is already in database" );
         assertThrows( FaRSameNameException.class , () -> dataModel.addFlight( newFlight ) ,
@@ -167,25 +167,18 @@ class DataModelTest{
     void removeFlight(){
         String flightNumber =
                 dataModel.listFlightsWithPredicate( flight -> true ).map( Flight::getNumber ).findAny().get();
-        assertTrue( dataModel.removeFlight( flightNumber ) , "FLight was removed" );
+        dataModel.removeFlight( flightNumber );
         assertFalse( dataModel.listFlightsWithPredicate( flight -> flight.getNumber().equals( flightNumber ) ).findAny()
                               .isPresent() , "There is no flight with this number" );
-        Date arrive = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 21 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
-        Date departure = Date.from(
-                LocalDateTime.of( 2019 , 12 , 15 , 22 , 0 ).atZone( ZoneId.of( "Europe/Samara" ) ).toInstant() );
-        Flight newFlight =
-                new Flight( flightNumber , dataModel.listRoutesWithPredicate( route -> true ).findAny().get() ,
-                            "plane" , arrive , departure );
-        assertTrue( dataModel.addFlight( newFlight ) , "Can add new flight with this number" );
+        assertThrows( FaRNotRelatedData.class , () -> dataModel.removeFlight( flightNumber ) ,
+                      "Can't remove this flight more times" );
     }
 
     @Test
     void editFlight(){
         Flight editedFLight = dataModel.listFlightsWithPredicate( flight -> true ).findAny().get();
-        assertTrue( dataModel.editFlight( editedFLight , null , null , null , Date.from(
-                Instant.ofEpochMilli( editedFLight.getArriveDate().getTime() + 1000 * 60 * 60 * 2 ) ) ) ,
-                    "Changed departure time to 1 hour later" );
+        dataModel.editFlight( editedFLight , null , null , null , Date.from(
+                Instant.ofEpochMilli( editedFLight.getArriveDate().getTime() + 1000 * 60 * 60 * 2 ) ) );
         assertThrows( FaRDateMismatchException.class , () -> dataModel.editFlight( editedFLight , null , null , null ,
                                                                                    Date.from( Instant.ofEpochMilli(
                                                                                            editedFLight
@@ -201,8 +194,7 @@ class DataModelTest{
                                                                            .atZone( ZoneId.of( "Europe/Samara" ) )
                                                                            .toInstant() ) );
         Flight editedFLight1 = dataModel.listFlightsWithPredicate( flight -> true ).findAny().get();
-        assertTrue( dataModel.editFlight( editedFLight1 , null , "plane10" , null , null ) ,
-                    "I can edit flight's plane" );
+        dataModel.editFlight( editedFLight1 , null , "plane10" , null , null );
         assertThrows( FaRIllegalEditedData.class ,
                       () -> dataModel.editFlight( notFromDatabaseFlight , null , null , null , null ) ,
                       "Must take previous version from database" );
@@ -220,7 +212,7 @@ class DataModelTest{
                                         .collect( Collectors.toList() );
         File file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
         try{
-            dataModel.exportToFile( file );
+            dataModel.saveToFile( file );
             dataModel.importFromFile( file );
             assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ) ,
                                        dataModel.listRoutesWithPredicate( route -> true ) ).parallel()
@@ -248,7 +240,7 @@ class DataModelTest{
         Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherModel::addFlight );
         file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
         try{
-            anotherModel.exportToFile( file );
+            anotherModel.saveToFile( file );
             List<Serializable> copyData =
                     Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
             assertTrue( dataModel.mergeData( file ).anyMatch( copyData::contains ) ,
@@ -268,7 +260,7 @@ class DataModelTest{
     @Disabled
     void generateDataFile() throws IOException{
         File file = new File( Files.createFile( Paths.get( "test.far" ) ).toUri() );
-        dataModel.exportToFile( file );
+        dataModel.saveToFile( file );
     }
 
     @RepeatedTest( 10 )

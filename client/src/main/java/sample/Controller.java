@@ -3,6 +3,7 @@ package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.DataModel;
+import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 
@@ -25,7 +26,7 @@ public class Controller{
         return Controller.InstanceHolder.instance;
     }
 
-    static         DataModel model              = DataModel.getInstance();
+    static         DataModel model              = DataModelInstanceSaver.getInstance();
     private static boolean   flightSearchActive = false;
     private       ObservableList<Route>  routes;
     private       ObservableList<Flight> flights;

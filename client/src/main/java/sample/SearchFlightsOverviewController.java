@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.DataModel;
+import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 
@@ -16,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Observable;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,14 +47,14 @@ public class SearchFlightsOverviewController{
     @FXML JFXTimePicker   flightTimeFromTextField;
     @FXML JFXTimePicker   flightTimeToTextField;
 
-    @FXML JFXDatePicker   departureFromDatePicker;
-    @FXML JFXDatePicker   departureToDatePicker;
+    @FXML JFXDatePicker departureFromDatePicker;
+    @FXML JFXDatePicker departureToDatePicker;
 
-    @FXML JFXDatePicker   arriveFromDatePicker;
-    @FXML JFXDatePicker   arriveToDatePicker;
+    @FXML JFXDatePicker arriveFromDatePicker;
+    @FXML JFXDatePicker arriveToDatePicker;
 
     private Controller controller = Controller.getInstance();
-    private DataModel  dataModel  = DataModel.getInstance();
+    private DataModel  dataModel  = DataModelInstanceSaver.getInstance();
     private RoutesFlightsOverviewController mainController;
     private Stage                           thisStage;
     private boolean                         correctSymbols;
@@ -73,9 +73,11 @@ public class SearchFlightsOverviewController{
         setLayouts();
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
         numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
-        numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(numberTextField) );
+        numberTextField.textProperty()
+                       .addListener( ( observable , oldValue , newValue ) -> formatcheck( numberTextField ) );
         planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
-        planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(planeIdTextField) );
+        planeIdTextField.textProperty()
+                        .addListener( ( observable , oldValue , newValue ) -> formatcheck( planeIdTextField ) );
         departureFromDatePicker.getEditor().textProperty()
                                .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureFromDatePicker.getEditor().setDisable( true );
@@ -87,10 +89,12 @@ public class SearchFlightsOverviewController{
         arriveFromDatePicker.getEditor().setDisable( true );
         arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveToDatePicker.getEditor().setDisable( true );
-        flightTimeFromTextField.setValue(LocalTime.MIDNIGHT);
-        flightTimeToTextField.setValue(LocalTime.MIDNIGHT);
-        flightTimeFromTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
-        flightTimeToTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeFromTextField.setValue( LocalTime.MIDNIGHT );
+        flightTimeToTextField.setValue( LocalTime.MIDNIGHT );
+        flightTimeFromTextField.getEditor().textProperty()
+                               .addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeToTextField.getEditor().textProperty()
+                             .addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
@@ -106,8 +110,10 @@ public class SearchFlightsOverviewController{
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
-        searchFromTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(searchFromTextField) );
-        searchToTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> formatcheck(searchToTextField) );
+        searchFromTextField.textProperty()
+                           .addListener( ( observable , oldValue , newValue ) -> formatcheck( searchFromTextField ) );
+        searchToTextField.textProperty()
+                         .addListener( ( observable , oldValue , newValue ) -> formatcheck( searchToTextField ) );
         thisStage.setOnCloseRequest( event -> {
             mainController.flightTable.setItems( controller.getFlights() );
             controller.setFlightSearchActive( false );
@@ -116,7 +122,7 @@ public class SearchFlightsOverviewController{
 
 
     /**
-     * Flight search method, used in listeners
+     Flight search method, used in listeners
      */
     private void changed(){
         Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
@@ -151,40 +157,38 @@ public class SearchFlightsOverviewController{
                                                stringToMillis( toTime ) >= flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
-        if (correctSymbols) {
-            mainController.flightTable.setItems(dataModel.listFlightsWithPredicate(
-                    numberPredicate.and(planePredicate).and(routePredicate).and(departureDatePredicate)
-                            .and(arriveDatePredicate).and(flightTime)).collect(
-                    Collectors.collectingAndThen(toList(), FXCollections::observableArrayList)));
+        if( correctSymbols ){
+            mainController.flightTable.setItems( dataModel.listFlightsWithPredicate(
+                    numberPredicate.and( planePredicate ).and( routePredicate ).and( departureDatePredicate )
+                                   .and( arriveDatePredicate ).and( flightTime ) ).collect(
+                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
             mainController.flightTable.refresh();
-            routesListView.setItems(controller.getRoutes());
+            routesListView.setItems( controller.getRoutes() );
             routesListView.refresh();
         }
     }
 
 
     /**
-     *
-     * @param field - textfield to check for acceptable symbols
-     *              method used to not allow user to use unacceptable symbols for search
+     @param field - textfield to check for acceptable symbols
+     method used to not allow user to use unacceptable symbols for search
      */
-    private void formatcheck(TextField field){
-        Pattern textPattern = Pattern.compile("[\\w\\d\\?\\*\\-_]*");
-        Matcher matcher = textPattern.matcher( field.getText() );
+    private void formatcheck( TextField field ){
+        Pattern textPattern = Pattern.compile( "[\\w\\d\\?\\*\\-_]*" );
+        Matcher matcher     = textPattern.matcher( field.getText() );
         if( !matcher.matches() ){
             field.setStyle( "-fx-text-inner-color: red;" );
             field.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, *, ?" ) );
-            correctSymbols=false;
+            correctSymbols = false;
         }else{
             field.setStyle( "-fx-text-inner-color: black;" );
             field.setTooltip( null );
         }
-        if (textPattern.matcher(numberTextField.getText()).matches()&&
-                textPattern.matcher(planeIdTextField.getText()).matches()&&
-                textPattern.matcher(searchFromTextField.getText()).matches()&&
-                textPattern.matcher(searchToTextField.getText()).matches())
-        {
-            correctSymbols=true;
+        if( textPattern.matcher( numberTextField.getText() ).matches() &&
+            textPattern.matcher( planeIdTextField.getText() ).matches() &&
+            textPattern.matcher( searchFromTextField.getText() ).matches() &&
+            textPattern.matcher( searchToTextField.getText() ).matches() ){
+            correctSymbols = true;
         }
 
     }

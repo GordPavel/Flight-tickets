@@ -8,7 +8,7 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import model.DataModel;
+import model.DataModelInstanceSaver;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class Main extends Application{
                                 }
                             }
                             try{
-                                DataModel.getInstance().exportToFile( savingFile );
+                                DataModelInstanceSaver.getInstance().saveToFile( savingFile );
                             }catch( IOException e ){
                                 e.printStackTrace();
                             }

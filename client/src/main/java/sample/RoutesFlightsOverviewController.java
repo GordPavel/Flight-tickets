@@ -12,6 +12,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModel;
+import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 
@@ -81,7 +82,7 @@ public class RoutesFlightsOverviewController{
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
     }
 
-    private DataModel              dataModel = DataModel.getInstance();
+    private DataModel              dataModel = DataModelInstanceSaver.getInstance();
     private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
@@ -371,7 +372,7 @@ public class RoutesFlightsOverviewController{
             } );
         }
         try{
-            Controller.model.exportToFile( Main.savingFile );
+            Controller.model.saveToFile( Main.savingFile );
             Main.changed = false;
         }catch( IOException | FlightAndRouteException e ){
             new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
@@ -382,7 +383,7 @@ public class RoutesFlightsOverviewController{
     private void handleSaveAsAction(){
         Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                Controller.model.exportToFile( file );
+                Controller.model.saveToFile( file );
             }catch( IOException | FlightAndRouteException e ){
                 new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
             }
