@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 
 /**
  Entity to store data about route between two airports.
@@ -10,7 +11,7 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
 
-    public Route( String from , String to ){
+    public Route( ZoneId from , ZoneId to ){
         this.from = from;
         this.to = to;
     }
@@ -29,52 +30,57 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     /**
      Stores unique id of arrival airport.
      */
-    private String from;
+    private ZoneId from;
 
-    public String getFrom(){
+    public ZoneId getFrom(){
         return from;
     }
 
-    void setFrom( String from ){
+    void setFrom( ZoneId from ){
         this.from = from;
     }
 
     /**
      Stores unique id of departure airport
      */
-    private String to;
+    private ZoneId to;
 
-    public String getTo(){
+    public ZoneId getTo(){
         return to;
     }
 
-    void setTo( String to ){
+    void setTo( ZoneId to ){
         this.to = to;
     }
 
     @Override
     public int compareTo( Route o ){
-        int from = this.from.compareToIgnoreCase( o.from );
-        return from != 0 ? from : this.to.compareToIgnoreCase( o.to );
+        int from = this.from.toString().compareToIgnoreCase( o.from.toString() );
+        return from != 0 ? from : this.to.toString().compareToIgnoreCase( o.to.toString() );
     }
 
     @Override
     public int hashCode(){
-        return from.toUpperCase().hashCode() ^ to.toUpperCase().hashCode();
+        return from.hashCode() ^ ( to.hashCode() + 31 );
     }
 
+    @SuppressWarnings( "EqualsWhichDoesntCheckParameterClass" )
     @Override
     public boolean equals( Object obj ){
+        return pointsEquals( obj ) && this.id.equals( ( ( Route ) obj ).id );
+    }
+
+    boolean pointsEquals( Object obj ){
         if( !( obj instanceof Route ) ) return false;
         Route route = ( Route ) obj;
-        return this.from.toUpperCase().equals( route.from.toUpperCase() ) && this.to.toUpperCase().equals( route.to.toUpperCase() );
+        return this.from.equals( route.from ) && this.to.equals( route.to );
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException{
         Route clone = ( Route ) super.clone();
-        clone.from = from + "";
-        clone.to = to + "";
+        clone.from = ZoneId.of( from.getId() );
+        clone.to = ZoneId.of( to.getId() );
         return clone;
     }
 
@@ -82,5 +88,4 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     public String toString(){
         return String.format( "%s -> %s" , from , to );
     }
-
 }

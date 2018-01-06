@@ -1,12 +1,9 @@
 package model;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
 /**
  Entity to store data about each flight.
@@ -16,7 +13,8 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , Date departureDate , Date arriveDate ){
+    public Flight( String number , Route route , String planeID , ZonedDateTime departureDate ,
+                   ZonedDateTime arriveDate ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
@@ -46,21 +44,6 @@ public class Flight implements Serializable, Cloneable{
         return route;
     }
 
-    //    For javafx Table View
-    public String getRouteString(){
-        return getRoute().getFrom() + "->" + getRoute().getTo();
-    }
-
-    private SimpleDateFormat format = new SimpleDateFormat( "dd.MM.yyyy HH:mm" );
-
-    public String getDepartureDateString(){
-        return format.format( departureDate );
-    }
-
-    public String getArriveDateString(){
-        return format.format( arriveDate );
-    }
-
     void setRoute( Route route ){
         this.route = route;
     }
@@ -81,26 +64,26 @@ public class Flight implements Serializable, Cloneable{
     /**
      Stores date and time, when plane have to take off
      */
-    private Date departureDate;
+    private ZonedDateTime departureDate;
 
-    public Date getDepartureDate(){
+    public ZonedDateTime getDepartureDate(){
         return departureDate;
     }
 
-    void setDepartureDate( Date date ){
+    void setDepartureDate( ZonedDateTime date ){
         this.departureDate = date;
     }
 
     /**
      Stores date and time, when plane have to launch
      */
-    private Date arriveDate;
+    private ZonedDateTime arriveDate;
 
-    public Date getArriveDate(){
+    public ZonedDateTime getArriveDate(){
         return arriveDate;
     }
 
-    void setArriveDate( Date date ){
+    void setArriveDate( ZonedDateTime date ){
         this.arriveDate = date;
     }
 
@@ -108,7 +91,7 @@ public class Flight implements Serializable, Cloneable{
      @return countable field, difference between departureDate and arriveDate in milliseconds
      */
     public Long getTravelTime(){
-        return Duration.between( departureDate.toInstant() , arriveDate.toInstant() ).abs().toMillis();
+        return Math.abs( ChronoUnit.MILLIS.between( departureDate.toLocalDateTime() , arriveDate.toLocalDateTime() ) );
     }
 
     @Override
@@ -122,8 +105,16 @@ public class Flight implements Serializable, Cloneable{
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
-               planeID.equals( flight.planeID ) && arriveDate.equals( flight.arriveDate ) &&
-               departureDate.equals( flight.departureDate );
+               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate ) &&
+               arriveDate.equals( flight.arriveDate );
+    }
+
+    boolean pointsEquals( Object obj ){
+        if( !( obj instanceof Flight ) ) return false;
+        Flight flight = ( Flight ) obj;
+        return this.number.equals( flight.number ) && this.route.pointsEquals( flight.route ) &&
+               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate ) &&
+               arriveDate.equals( flight.arriveDate );
     }
 
     @Override
@@ -132,8 +123,8 @@ public class Flight implements Serializable, Cloneable{
         clone.number = this.number;
         clone.route = ( Route ) this.route.clone();
         clone.planeID = this.planeID;
-        clone.arriveDate = ( Date ) this.arriveDate.clone();
-        clone.departureDate = ( Date ) this.departureDate.clone();
+        clone.arriveDate = this.arriveDate;
+        clone.departureDate = this.departureDate;
         return clone;
     }
 
@@ -148,26 +139,17 @@ public class Flight implements Serializable, Cloneable{
     @Override
     public String toString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
-        LocalDateTime departureLocalDate =
-                LocalDateTime.ofInstant( departureDate.toInstant() , zoneIdFromAirPortId( route.getTo() ) );
-        LocalDateTime arrivalLocalDate =
-                LocalDateTime.ofInstant( arriveDate.toInstant() , zoneIdFromAirPortId( route.getFrom() ) );
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
-                "plane" , number , departureLocalDate.format( formatter ) , route.getFrom() ,
-                arrivalLocalDate.format( formatter ) , route.getTo() , millisToHoursAndMinutes( getTravelTime() ) ,
-                planeID );
+                "plane" , number , departureDate.format( formatter ) , route.getFrom() ,
+                arriveDate.format( formatter ) , route.getTo() , millisToHoursAndMinutes( getTravelTime() ) , planeID );
     }
 
-    private String millisToHoursAndMinutes( Long startMilli ){
+    public String millisToHoursAndMinutes( Long startMilli ){
         startMilli /= 1000; // sum of second
         long sumMinute = startMilli / 60; // sum of minute
         long minute    = sumMinute % 60; // minute
         long hour      = sumMinute / 60; // hour
         return String.format( "%d:%02d" , hour , minute );
-    }
-
-    private ZoneId zoneIdFromAirPortId( String airportId ){
-        return ZoneId.of( "Europe/Samara" );
     }
 }

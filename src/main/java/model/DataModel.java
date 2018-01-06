@@ -3,6 +3,8 @@ package model;
 import exceptions.*;
 
 import java.io.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -32,10 +34,10 @@ public class DataModel{
 
      @return specified names of airports
      */
-    public Stream<String> listAllAirportsWithPredicate( Predicate<String> predicate ){
-        Stream<String> from = routes.stream().map( Route::getFrom );
-        Stream<String> to   = routes.stream().map( Route::getTo );
-        return Stream.concat( from , to ).distinct().sorted().filter( predicate );
+    public Stream<ZoneId> listAllAirportsWithPredicate( Predicate<ZoneId> predicate ){
+        Stream<ZoneId> from = routes.stream().map( Route::getFrom );
+        Stream<ZoneId> to   = routes.stream().map( Route::getTo );
+        return Stream.concat( from , to ).distinct().filter( predicate );
     }
 
     /**
@@ -77,7 +79,7 @@ public class DataModel{
                legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
-        if( !flight.getDepartureDate().before( flight.getArriveDate() ) ){
+        if( !flight.getDepartureDate().toLocalDateTime().isBefore( flight.getArriveDate().toLocalDateTime() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( flights.stream().anyMatch(
@@ -125,13 +127,13 @@ public class DataModel{
      @throws FaRNotRelatedData        it has route, that doesn't exist in database
      @throws FaRSameNameException     it duplicates in ( planeID && route && arrive date && departure date ).
      */
-    public void editFlight( Flight flight , Route newRoute , String newPlaneId , Date newDepartureDate ,
-                            Date newArriveDate ) throws FlightAndRouteException{
+    public void editFlight( Flight flight , Route newRoute , String newPlaneId , ZonedDateTime newDepartureDate ,
+                            ZonedDateTime newArriveDate ) throws FlightAndRouteException{
         if( !legalSymbolsChecker.matcher( newPlaneId != null ? newPlaneId : flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
-        if( !( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() )
-                .before( newArriveDate != null ? newArriveDate : flight.getArriveDate() ) ){
+        if( !( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ).toLocalDateTime().isBefore(
+                ( newArriveDate != null ? newArriveDate : flight.getArriveDate() ).toLocalDateTime() ) ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( routes.stream().noneMatch( route -> Objects
@@ -157,7 +159,7 @@ public class DataModel{
                         () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
         editingFlight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
         editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
-        editingFlight.setDepartureDate( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() );
+        editingFlight.setDepartureDate( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) );
         editingFlight.setArriveDate( newArriveDate != null ? newArriveDate : flight.getArriveDate() );
     }
 
@@ -181,16 +183,11 @@ public class DataModel{
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
     public void addRoute( Route route ){
-        if( route.getFrom().toUpperCase().equals( route.getTo().toUpperCase() ) ){
+        if( route.getFrom().equals( route.getTo() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
-        if( !( legalSymbolsChecker.matcher( route.getFrom() ).matches() &&
-               legalSymbolsChecker.matcher( route.getTo() ).matches() ) ){
-            throw new FaRUnacceptableSymbolException( "Illegal symbols" );
-        }
-        if( routes.stream().anyMatch( route1 -> route.getTo().toUpperCase().equals( route1.getTo().toUpperCase() ) &&
-                                                route.getFrom().toUpperCase()
-                                                     .equals( route1.getFrom().toUpperCase() ) ) ){
+        if( routes.stream().anyMatch(
+                route1 -> route.getFrom().equals( route1.getFrom() ) && route.getTo().equals( route1.getTo() ) ) ){
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
         route.setId( routesPrimaryKeysGenerator.next() );
@@ -223,7 +220,7 @@ public class DataModel{
      @throws FaRIllegalEditedData if database doesn't contain previous version of route
      @throws FaRSameNameException it duplicates someone another or same airports
      */
-    public void editRoute( Route route , String newDepartureAirport , String newDestinationAirport ){
+    public void editRoute( Route route , ZoneId newDepartureAirport , ZoneId newDestinationAirport ){
         if( ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
                 .equals( newDestinationAirport != null ? newDestinationAirport : route.getTo() ) ){
             throw new FaRSameNameException( "Same airports" );
@@ -235,12 +232,10 @@ public class DataModel{
                 routes.stream().filter( route1 -> Objects.equals( route1.getId() , route.getId() ) ).findFirst()
                       .orElseThrow(
                               () -> new FaRIllegalEditedData( "Database doesn't contain previous version of route" ) );
-        if( routes.stream().anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport.toUpperCase() :
-                                                  route.getFrom().toUpperCase() )
-                                                        .equals( route1.getFrom().toUpperCase() ) &&
-                                                ( newDestinationAirport != null ? newDestinationAirport.toUpperCase() :
-                                                  route.getTo().toUpperCase() )
-                                                        .equals( route1.getTo().toUpperCase() ) ) ){
+        if( routes.stream().anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
+                                                        .equals( route1.getFrom() ) &&
+                                                ( newDestinationAirport != null ? newDestinationAirport :
+                                                  route.getTo() ).equals( route1.getTo() ) ) ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
         editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );
@@ -320,25 +315,26 @@ public class DataModel{
         Set<Route>  routeSet  = new HashSet<>( this.routes );
         Set<Flight> flightSet = new HashSet<>( this.flights );
         routes.forEach( route -> {
-            if( !routeSet.add( route ) ){
+            if( routeSet.stream().anyMatch(
+                    route1 -> route.getFrom().equals( route1.getFrom() ) && route.getTo().equals( route1.getTo() ) ) ){
                 failedRoutes.add( route );
+            }else{
+                routeSet.add( route );
             }
         } );
         routes.removeAll( failedRoutes );
-        flights.forEach( flight -> {
-            if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
-                                                               .matcher( flight1.getNumber() ).matches() ) ){
-                failedFlights.add( flight );
-                return;
-            }
-            if( !routeSet.contains( flight.getRoute() ) ){
-                failedFlights.add( flight );
-                return;
-            }
-            if( !flightSet.add( flight ) ){
-                failedFlights.add( flight );
-            }
-        } );
+        flights.stream()
+               .filter( flight -> routeSet.contains( flight.getRoute() ) )
+               .forEach( flight -> {
+                    if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
+                                                                       .matcher( flight1.getNumber() ).matches() ) ){
+                        failedFlights.add( flight );
+                        return;
+                    }
+                    if( !flightSet.add( flight ) ){
+                        failedFlights.add( flight );
+                    }
+                } );
         flights.removeAll( failedFlights );
         routes.forEach( route -> route.setId( routesPrimaryKeysGenerator.next() ) );
         this.routes.addAll( routes );
