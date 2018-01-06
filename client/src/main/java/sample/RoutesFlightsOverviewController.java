@@ -18,6 +18,7 @@ import model.Route;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,36 +77,24 @@ public class RoutesFlightsOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
-        departure.textProperty()
-                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , departure ) );
-        destination.textProperty()
-                   .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
+        departure.textProperty().addListener(
+                ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
+                                                                         destination.getText() ) );
+        destination.textProperty().addListener(
+                ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
+                                                                         destination.getText() ) );
     }
 
     private DataModel              dataModel = DataModelInstanceSaver.getInstance();
-    private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
+    private ObservableList<ZoneId> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
-    private void searchListeners( String newValue , TextField textField ){
-        if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
-            textField.setStyle( "-fx-text-inner-color: red;" );
-            textField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, ?, *" ) );
-        }else{
-            textField.setStyle( "-fx-text-inner-color: black;" );
-            textField.setTooltip( null );
-            Pattern departurePattern = Pattern.compile(
-                    ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" );
-            Pattern destinationPattern = Pattern.compile(
-                    ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" );
-            routeTable.setItems( controller.getRoutes().stream().filter(
-                    route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
-                             destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
-        }
-
-
+    private void searchListeners( String departure , String destination ){
+        routeTable.setItems( controller.getRoutes().filtered( route -> Pattern.compile(
+                ".*" + departure.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() && Pattern.compile(
+                ".*" + destination.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches() ) );
     }
 
     /**
@@ -185,9 +174,9 @@ public class RoutesFlightsOverviewController{
     public void handleAddRouteButton(){
         try{
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-            AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null );
-            loader.setController( controller );
             Stage popUp = new Stage();
+            AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
+            loader.setController( controller );
             popUp.initModality( Modality.APPLICATION_MODAL );
             popUp.initOwner( thisStage );
 
@@ -221,10 +210,11 @@ public class RoutesFlightsOverviewController{
             controller.setRouteForEdit( selectedRoute );
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-                AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( selectedRoute );
+                Stage popUp = new Stage();
+                AddAndEditRoutesOverviewController controller =
+                        new AddAndEditRoutesOverviewController( selectedRoute , popUp );
                 loader.setController( controller );
 
-                Stage popUp = new Stage();
                 popUp.initModality( Modality.APPLICATION_MODAL );
                 popUp.initOwner( thisStage );
 
