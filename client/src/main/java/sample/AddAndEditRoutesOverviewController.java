@@ -96,16 +96,13 @@ public class AddAndEditRoutesOverviewController{
             Matcher destinationCountryMatcher = pattern.matcher( editingRoute.getTo().getId() );
             destinationCountryMatcher.find();
             departureCountryChoice.getSelectionModel().select( departureCountryMatcher.group( 1 ) );
-            departureCountryChoice.getSelectionModel().select( destinationCountryMatcher.group( 1 ) );
+            countrySelected( departureCountryMatcher.group( 1 ) , departureCityChoice );
             departureCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getFrom().getId() ) );
-            departureCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getTo().getId() ) );
-            departureCityChoice.setDisable( false );
-            destinationCityChoice.setDisable( false );
-        }else{
-            departureCityChoice.setDisable( true );
-            destinationCityChoice.setDisable( true );
-        }
 
+            destinationCountryChoice.getSelectionModel().select( destinationCountryMatcher.group( 1 ) );
+            destinationCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getTo().getId() ) );
+            countrySelected( destinationCountryMatcher.group( 1 ) , destinationCityChoice );
+        }
 
         departureCountryChoice.getSelectionModel().selectedItemProperty().addListener(
                 ( observable , oldValue , newValue ) -> countrySelected( newValue , departureCityChoice ) );
@@ -118,7 +115,8 @@ public class AddAndEditRoutesOverviewController{
         addAvailable.bind( departureCityChoice.getSelectionModel().selectedItemProperty().isNotNull()
                                               .and( destinationCityChoice.getSelectionModel().selectedItemProperty()
                                                                          .isNotNull() ) );
-        addAvailable.bindBidirectional( addAndEditRouteButton.disableProperty() );
+        addAndEditRouteButton.setDisable( !addAvailable.getValue() );
+        addAndEditRouteButton.disableProperty().bind( addAvailable.not() );
     }
 
     private void countrySelected( String newValue , ChoiceBox<ZoneId> choiceBox ){

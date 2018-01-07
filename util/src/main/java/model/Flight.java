@@ -13,13 +13,13 @@ public class Flight implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , ZonedDateTime departureDate ,
-                   ZonedDateTime arriveDate ){
+    public Flight( String number , Route route , String planeID , ZonedDateTime departureDateTime ,
+                   ZonedDateTime arriveDateTime ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
-        this.departureDate = departureDate;
-        this.arriveDate = arriveDate;
+        this.departureDateTime = departureDateTime;
+        this.arriveDateTime = arriveDateTime;
     }
 
     /**
@@ -64,40 +64,49 @@ public class Flight implements Serializable, Cloneable{
     /**
      Stores date and time, when plane have to take off
      */
-    private ZonedDateTime departureDate;
+    private ZonedDateTime departureDateTime;
 
-    public ZonedDateTime getDepartureDate(){
-        return departureDate;
+    public ZonedDateTime getDepartureDateTime(){
+        return departureDateTime;
     }
 
-    void setDepartureDate( ZonedDateTime date ){
-        this.departureDate = date;
+    void setDepartureDateTime( ZonedDateTime date ){
+        this.departureDateTime = date;
     }
 
     /**
      Stores date and time, when plane have to launch
      */
-    private ZonedDateTime arriveDate;
+    private ZonedDateTime arriveDateTime;
 
-    public ZonedDateTime getArriveDate(){
-        return arriveDate;
+    public ZonedDateTime getArriveDateTime(){
+        return arriveDateTime;
     }
 
-    void setArriveDate( ZonedDateTime date ){
-        this.arriveDate = date;
+    void setArriveDateTime( ZonedDateTime date ){
+        this.arriveDateTime = date;
     }
 
     /**
-     @return countable field, difference between departureDate and arriveDate in milliseconds
+     @return countable field, difference between departureDateTime and arriveDateTime in milliseconds
      */
     public Long getTravelTime(){
-        return Math.abs( ChronoUnit.MILLIS.between( departureDate.toLocalDateTime() , arriveDate.toLocalDateTime() ) );
+        return ChronoUnit.MILLIS.between( departureDateTime , arriveDateTime );
+    }
+
+    public String getTravelTimeInHoursAndMinutes(){
+        long startMilli = getTravelTime();
+        startMilli /= 1000; // sum of second
+        long sumMinute = startMilli / 60; // sum of minute
+        long minute    = sumMinute % 60; // minute
+        long hour      = sumMinute / 60; // hour
+        return String.format( "%d:%02d" , hour , minute );
     }
 
     @Override
     public int hashCode(){
-        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ arriveDate.hashCode() ^
-               departureDate.hashCode();
+        return number.hashCode() ^ route.hashCode() ^ planeID.hashCode() ^ arriveDateTime.hashCode() ^
+               departureDateTime.hashCode();
     }
 
     @Override
@@ -105,16 +114,16 @@ public class Flight implements Serializable, Cloneable{
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
-               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate ) &&
-               arriveDate.equals( flight.arriveDate );
+               planeID.equals( flight.planeID ) && departureDateTime.equals( flight.departureDateTime ) &&
+               arriveDateTime.equals( flight.arriveDateTime );
     }
 
     boolean pointsEquals( Object obj ){
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.pointsEquals( flight.route ) &&
-               planeID.equals( flight.planeID ) && departureDate.equals( flight.departureDate ) &&
-               arriveDate.equals( flight.arriveDate );
+               planeID.equals( flight.planeID ) && departureDateTime.equals( flight.departureDateTime ) &&
+               arriveDateTime.equals( flight.arriveDateTime );
     }
 
     @Override
@@ -123,8 +132,8 @@ public class Flight implements Serializable, Cloneable{
         clone.number = this.number;
         clone.route = ( Route ) this.route.clone();
         clone.planeID = this.planeID;
-        clone.arriveDate = this.arriveDate;
-        clone.departureDate = this.departureDate;
+        clone.arriveDateTime = this.arriveDateTime;
+        clone.departureDateTime = this.departureDateTime;
         return clone;
     }
 
@@ -141,15 +150,8 @@ public class Flight implements Serializable, Cloneable{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
-                "plane" , number , departureDate.format( formatter ) , route.getFrom() ,
-                arriveDate.format( formatter ) , route.getTo() , millisToHoursAndMinutes( getTravelTime() ) , planeID );
+                "plane" , number , departureDateTime.format( formatter ) , route.getFrom() ,
+                arriveDateTime.format( formatter ) , route.getTo() , getTravelTimeInHoursAndMinutes() , planeID );
     }
 
-    public String millisToHoursAndMinutes( Long startMilli ){
-        startMilli /= 1000; // sum of second
-        long sumMinute = startMilli / 60; // sum of minute
-        long minute    = sumMinute % 60; // minute
-        long hour      = sumMinute / 60; // hour
-        return String.format( "%d:%02d" , hour , minute );
-    }
 }

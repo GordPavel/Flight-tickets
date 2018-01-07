@@ -2596,7 +2596,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-arriveDate: DateTime",
+											"text": "-arriveDateTime: DateTime",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5,
 											"wordWrap": false
@@ -2625,7 +2625,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-departureDate: Date",
+											"text": "-departureDateTime: Date",
 =======
 											"left": 549,
 											"top": 277,
@@ -8634,7 +8634,7 @@
 									"_parent": {
 										"$ref": "AAAAAAFfr1JTuNCnozs="
 									},
-									"name": "arriveDate",
+									"name": "arriveDateTime",
 									"visibility": "private",
 =======
 									"visibility": "public",
@@ -8675,7 +8675,7 @@
 										"$ref": "AAAAAAFfun7fdPRfuxI="
 									},
 <<<<<<< HEAD
-									"name": "departureDate",
+									"name": "departureDateTime",
 									"visibility": "private",
 =======
 									"visibility": "public",

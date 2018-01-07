@@ -5,7 +5,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
-            prefWidth="520.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+            prefWidth="520.0" snapToPixel="false" xmlns="http://javafx.com/javafx/9"
+            xmlns:fx="http://javafx.com/fxml/1">
     <Label layoutX="60.0" layoutY="60.0" prefHeight="20.0" prefWidth="100.0" text="Departure:" underline="true">
         <font>
             <Font name="PT Mono Bold" size="12.0"/>
@@ -16,14 +17,8 @@
             <Font name="PT Mono Bold" size="12.0"/>
         </font>
     </Label>
-    <ChoiceBox fx:id="departureCountryChoice" layoutX="60.0" layoutY="100.0" prefWidth="160.0"/>
-    <ChoiceBox fx:id="destinationCountryChoice" layoutX="300.0" layoutY="100.0" prefWidth="160.0"/>
-    <ChoiceBox fx:id="departureCityChoice" layoutX="60.0" layoutY="180.0" prefWidth="160.0"/>
-    <ChoiceBox fx:id="destinationCityChoice" layoutX="300.0" layoutY="180.0" prefWidth="160.0"/>
-    <JFXButton fx:id="addAndEditRouteButton" buttonType="RAISED" focusTraversable="false" onAction="#handleAddAction"
-               layoutX="73.0"
-               layoutY="320.0"
-               mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
+    <JFXButton fx:id="addAndEditRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="73.0" layoutY="320.0"
+               mnemonicParsing="false" onAction="#handleAddAction" prefHeight="36.0" prefWidth="75.0"
                ripplerFill="#dfe3ee" style="-fx-background-color: #6cc491;" text="Add" textFill="WHITE">
         <font>
             <Font name="PT Mono Bold" size="12.0"/>
@@ -44,10 +39,13 @@
         </font>
     </JFXButton>
     <Label fx:id="mainLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="20.0" prefHeight="30.0"
-           prefWidth="400.0"
-           text="Please enter data for a new route." textFill="#6cc491">
+           prefWidth="400.0" text="Please enter data for a new route." textFill="#6cc491">
         <font>
             <Font name="PT Mono Bold" size="18.0"/>
         </font>
     </Label>
+    <ChoiceBox fx:id="departureCountryChoice" layoutX="60.0" layoutY="108.0" prefWidth="150.0"/>
+    <ChoiceBox fx:id="destinationCountryChoice" layoutX="310.0" layoutY="108.0" prefWidth="150.0"/>
+    <ChoiceBox fx:id="departureCityChoice" layoutX="60.0" layoutY="200.0" prefWidth="150.0"/>
+    <ChoiceBox fx:id="destinationCityChoice" layoutX="310.0" layoutY="200.0" prefWidth="150.0"/>
 </AnchorPane>

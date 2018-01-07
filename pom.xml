@@ -20,6 +20,7 @@
     <modules>
         <module>client</module>
         <module>serverRoot</module>
+        <module>util</module>
     </modules>
 
     <dependencies>

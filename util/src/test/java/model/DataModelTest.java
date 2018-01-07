@@ -4,17 +4,15 @@ import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
 import exceptions.FaRSameNameException;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -176,11 +174,11 @@ class DataModelTest{
                 LocalDateTime.parse( "15/12/2019 22:00" , DateTimeFormatter.ofPattern( "dd/MM/yyyy HH:mm" ) )
                              .atZone( ZoneId.of( "Europe/Samara" ) );
         assertIterableEquals( flights.stream().filter(
-                flight -> checkDateBetweenTwoDates( flight.getArriveDate().toLocalDateTime() ,
+                flight -> checkDateBetweenTwoDates( flight.getArriveDateTime().toLocalDateTime() ,
                                                     startRange.toLocalDateTime() , endRange.toLocalDateTime() ) )
                                      .sorted( Comparator.comparing( Flight::getNumber ) )
                                      .collect( Collectors.toList() ) , dataModel.listFlightsWithPredicate(
-                flight -> checkDateBetweenTwoDates( flight.getArriveDate().toLocalDateTime() ,
+                flight -> checkDateBetweenTwoDates( flight.getArriveDateTime().toLocalDateTime() ,
                                                     startRange.toLocalDateTime() , endRange.toLocalDateTime() ) )
                                                                                 .sorted( Comparator.comparing(
                                                                                         Flight::getNumber ) )
@@ -229,9 +227,9 @@ class DataModelTest{
         Flight editedFLight = dataModel.listFlightsWithPredicate( flight -> true ).collect( Collectors.toList() )
                                        .get( random.nextInt(
                                                ( int ) dataModel.listFlightsWithPredicate( flight -> true ).count() ) );
-        dataModel.editFlight( editedFLight , null , null , null , editedFLight.getArriveDate().plusHours( 1 ) );
+        dataModel.editFlight( editedFLight , null , null , null , editedFLight.getArriveDateTime().plusHours( 1 ) );
         assertThrows( FaRDateMismatchException.class , () -> dataModel
-                              .editFlight( editedFLight , null , null , null , editedFLight.getDepartureDate().minusHours( 1 ) ) ,
+                              .editFlight( editedFLight , null , null , null , editedFLight.getDepartureDateTime().minusHours( 1 ) ) ,
                       "Can't set arrival date before departure" );
         int i = 11;
         assertThrows( FaRIllegalEditedData.class ,
@@ -310,14 +308,6 @@ class DataModelTest{
     }
 
     @Test
-    @Disabled
-    void generateDataFile() throws IOException{
-        Path path = Paths.get( "test.far" );
-        File file = new File( ( Files.exists( path ) ? path : Files.createFile( path ) ).toUri() );
-        dataModel.saveToFile( file );
-    }
-
-    @Test
     void concurrency() throws InterruptedException, ExecutionException{
         int addingRoutes  = 10;
         int addingFlights = 12;
@@ -371,5 +361,52 @@ class DataModelTest{
                     dataModel.listFlightsWithPredicate( flight -> true ).collect( Collectors.toList() );
             return flights.stream().allMatch( databaseFlights::contains );
         } ).get() , "All flights were added from different threads" );
+    }
+
+    @Test
+    void timeZones(){
+        routes = new ArrayList<Route>(){{
+//            2 часа разницы
+            add( new Route( ZoneId.of( "Europe/Moscow" ) , ZoneId.of( "Europe/Berlin" ) ) );
+            add( new Route( ZoneId.of( "Europe/Berlin" ) , ZoneId.of( "Europe/Moscow" ) ) );
+            add( new Route( ZoneId.of( "Europe/Moscow" ) , ZoneId.of( "Europe/Berlin" ) ) );
+            add( new Route( ZoneId.of( "Europe/Berlin" ) , ZoneId.of( "Europe/Moscow" ) ) );
+//            5 часов разница
+            add( new Route( ZoneId.of( "Europe/Moscow" ) , ZoneId.of( "Asia/Tokyo" ) ) );
+            add( new Route( ZoneId.of( "Asia/Tokyo" ) , ZoneId.of( "Europe/Moscow" ) ) );
+            add( new Route( ZoneId.of( "Europe/Moscow" ) , ZoneId.of( "Asia/Tokyo" ) ) );
+            add( new Route( ZoneId.of( "Asia/Tokyo" ) , ZoneId.of( "Europe/Moscow" ) ) );
+        }};
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
+        Iterator<Pair<LocalDateTime, LocalDateTime>> times = new ArrayList<Pair<LocalDateTime, LocalDateTime>>(){{
+            add( new Pair<>( LocalDateTime.parse( "12.01.2018 10:00" , formatter ) ,
+                             LocalDateTime.parse( "12.01.2018 11:15" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "22.01.2018 11:45" , formatter ) ,
+                             LocalDateTime.parse( "22.01.2018 17:00" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "12.01.2018 05:25" , formatter ) ,
+                             LocalDateTime.parse( "12.01.2018 06:35" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "22.01.2018 10:35" , formatter ) ,
+                             LocalDateTime.parse( "22.01.2018 15:45" , formatter ) ) );
+
+//            5 часов разница
+            add( new Pair<>( LocalDateTime.parse( "20.03.2018 20:00" , formatter ) ,
+                             LocalDateTime.parse( "21.03.2018 11:40" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "27.03.2018 12:00" , formatter ) ,
+                             LocalDateTime.parse( "27.03.2018 16:10" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "21.03.2018 17:00" , formatter ) ,
+                             LocalDateTime.parse( "22.03.2018 08:35" , formatter ) ) );
+            add( new Pair<>( LocalDateTime.parse( "28.03.2018 10:45" , formatter ) ,
+                             LocalDateTime.parse( "28.03.2018 15:00" , formatter ) ) );
+        }}.iterator();
+        Iterator<Integer> indexes = IntStream.rangeClosed( 1 , 8 ).iterator();
+        assertIterableEquals( Arrays.asList( "3:15 3:15 3:10 3:10 9:40 10:10 9:35 10:15".split( " " ) ) ,
+                              routes.stream().map( route -> {
+                                  Integer                            index = indexes.next();
+                                  Pair<LocalDateTime, LocalDateTime> pair  = times.next();
+                                  return new Flight( String.valueOf( index ) , route , String.valueOf( index ) ,
+                                                     pair.getKey().atZone( route.getFrom() ) ,
+                                                     pair.getValue().atZone( route.getTo() ) );
+                              } ).map( Flight::getTravelTimeInHoursAndMinutes ).collect( Collectors.toList() ) ,
+                              "Travel times are right" );
     }
 }

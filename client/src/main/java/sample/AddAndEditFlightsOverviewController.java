@@ -1,13 +1,9 @@
 package sample;
 
-
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -16,13 +12,11 @@ import model.Flight;
 import model.Route;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,9 +42,11 @@ public class AddAndEditFlightsOverviewController{
     @FXML Label            mainLabel;
 
     private Flight editingFLight;
+    private Stage  thisStage;
 
-    AddAndEditFlightsOverviewController( Flight editingFLight ){
+    AddAndEditFlightsOverviewController( Flight editingFLight , Stage thisStage ){
         this.editingFLight = editingFLight;
+        this.thisStage = thisStage;
     }
 
     /**
@@ -61,7 +57,6 @@ public class AddAndEditFlightsOverviewController{
         departureDate.setValue( LocalDate.now() );
         arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
         box.setItems( controller.getRoutes() );
-
         StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
 
@@ -83,7 +78,6 @@ public class AddAndEditFlightsOverviewController{
         arrivingTime.setConverter( localTimeStringConverter );
         arrivingTime.setValue( LocalTime.MIDNIGHT );
 
-
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
 
@@ -104,57 +98,40 @@ public class AddAndEditFlightsOverviewController{
         planeID.textProperty().addListener(
                 ( observable , oldValue , newValue ) -> setErrorLabel( newValue , oldValue , errorPlaneIdLabel ,
                                                                        planeID ) );
-        DateFormat format = new SimpleDateFormat( "dd.MM.yyyy hh:mm" );
         addAndEditFlightButton.setOnAction( event -> {
-            Date arriveDate = new Date();
-            Date departDate = new Date();
-
-            try{
-                arriveDate =
-                        format.parse( arrivingDate.getEditor().getText() + " " + arrivingTime.getEditor().getText() );
-            }catch( ParseException ignored ){
-
-            }
-
-            try{
-                departDate =
-                        format.parse( departureDate.getEditor().getText() + " " + departureTime.getEditor().getText() );
-            }catch( ParseException ignored ){
-            }
-
-            if( arriveDate.getTime() <= departDate.getTime() ){
-
+            ZonedDateTime
+                    departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                     .atZone( box.getSelectionModel().getSelectedItem().getFrom() ),
+                    arriveDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                                                  .atZone( box.getSelectionModel().getSelectedItem().getTo() );
+            if( !departureDateTime.isBefore( arriveDateTime ) ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Incorrect data about date" );
                 alert.setHeaderText( "Flight has incorrect dates" );
                 alert.setContentText( "Please enter correct parameters for a new flight." );
-
                 alert.showAndWait();
             }else if( box.getValue() == null ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Route isn`t chosen" );
                 alert.setHeaderText( "Flight must have route" );
                 alert.setContentText( "Choose route" );
-
                 alert.showAndWait();
             }else if( planeID.getText().equals( "" ) ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "You have no plain" );
                 alert.setHeaderText( "Flight must have plain" );
                 alert.setContentText( "Write plain data" );
-
                 alert.showAndWait();
             }else{
-
                 try{
                     Controller.model.addFlight(
                             new Flight( number.getText() , box.getSelectionModel().getSelectedItem() ,
-                                        planeID.getText() , departDate , arriveDate ) );
+                                        planeID.getText() , departureDateTime , arriveDateTime ) );
                     controller.updateFlights();
                     Main.changed = true;
-                    closeWindow( event );
+                    closeWindow();
                 }catch( FlightAndRouteException e ){
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
+                    Alert alert = new Alert( Alert.AlertType.ERROR );
                     alert.setTitle( "Model`s message" );
                     alert.setHeaderText( "Model send message" );
                     alert.setContentText( e.getMessage() );
@@ -165,45 +142,6 @@ public class AddAndEditFlightsOverviewController{
 
         if( editingFLight != null ){
             setEditingFlightData();
-            addAndEditFlightButton.setOnAction( event -> {
-                Date arriveDate = new Date();
-                Date departDate = new Date();
-                try{
-                    arriveDate = format.parse(
-                            arrivingDate.getEditor().getText() + " " + arrivingTime.getEditor().getText() );
-                }catch( ParseException ignored ){
-                }
-                try{
-                    departDate = format.parse(
-                            departureDate.getEditor().getText() + " " + departureTime.getEditor().getText() );
-                }catch( ParseException ignored ){
-                }
-                if( arriveDate.getTime() <= departDate.getTime() ){
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
-                    alert.setTitle( "Incorrect data about date" );
-                    alert.setHeaderText( "Flight has incorrect dates" );
-                    alert.setContentText( "Please enter correct parameters for a flight." );
-
-                    alert.showAndWait();
-                }else{
-                    try{
-                        Controller.model
-                                .editFlight( Controller.flightForEdit , box.getSelectionModel().getSelectedItem() ,
-
-                                             planeID.getText() , departDate , arriveDate );
-                        controller.updateFlights();
-                        Main.changed = true;
-                        closeWindow( event );
-                    }catch( FlightAndRouteException e ){
-                        Alert alert = new Alert( Alert.AlertType.WARNING );
-                        alert.setTitle( "Model`s message" );
-                        alert.setHeaderText( "Edited data incorrect:" );
-                        alert.setContentText( e.getMessage() );
-
-                        alert.showAndWait();
-                    }
-                }
-            } );
             number.setEditable( false );
             addAndEditFlightButton.setText( "Edit" );
             mainLabel.setText( "Enter new data." );
@@ -214,16 +152,10 @@ public class AddAndEditFlightsOverviewController{
         number.textProperty().setValue( editingFLight.getNumber() );
         planeID.textProperty().setValue( editingFLight.getPlaneID() );
         box.getSelectionModel().select( editingFLight.getRoute() );
-        SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
-        SimpleDateFormat  timeFormat    = new SimpleDateFormat( "HH:mm" );
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
-        departureDate
-                .setValue( LocalDate.parse( dateFormat.format( editingFLight.getDepartureDate() ) , dateFormatter ) );
-        arrivingDate.setValue( LocalDate.parse( dateFormat.format( editingFLight.getArriveDate() ) , dateFormatter ) );
-        departureTime
-                .setValue( LocalTime.parse( timeFormat.format( editingFLight.getDepartureDate() ) , timeFormatter ) );
-        arrivingTime.setValue( LocalTime.parse( timeFormat.format( editingFLight.getArriveDate() ) , timeFormatter ) );
+        departureDate.setValue( editingFLight.getDepartureDateTime().toLocalDate() );
+        arrivingDate.setValue( editingFLight.getArriveDateTime().toLocalDate() );
+        departureTime.setValue( editingFLight.getDepartureDateTime().toLocalTime() );
+        arrivingTime.setValue( editingFLight.getArriveDateTime().toLocalTime() );
     }
 
     private void setErrorLabel( String newValue , String oldValue , Label errorLabel , TextField handlingTextField ){
@@ -255,6 +187,7 @@ public class AddAndEditFlightsOverviewController{
         }else{
             number.clear();
             planeID.clear();
+            box.getSelectionModel().clearSelection();
             departureDate.setValue( LocalDate.now() );
             arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
             arrivingTime.setValue( LocalTime.MIDNIGHT );
@@ -263,16 +196,14 @@ public class AddAndEditFlightsOverviewController{
     }
 
     /**
-     @param actionEvent Cancel Button. Close a window for adding a new flight
      */
     @FXML
-    public void handleCancelAction( ActionEvent actionEvent ){
-        closeWindow( actionEvent );
+    public void handleCancelAction(){
+        closeWindow();
     }
 
-    private void closeWindow( Event event ){
-        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
-        stage.close();
+    private void closeWindow(){
+        thisStage.close();
     }
 
     /**

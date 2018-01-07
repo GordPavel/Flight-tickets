@@ -60,8 +60,8 @@ public class MergeOverviewController{
         Controller.model.editFlight( flightTable.getSelectionModel().getSelectedItem() ,
                                      flightTable.getSelectionModel().getSelectedItem().getRoute() ,
                                      flightTable.getSelectionModel().getSelectedItem().getPlaneID() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getDepartureDate() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getArriveDate() );
+                                     flightTable.getSelectionModel().getSelectedItem().getDepartureDateTime() ,
+                                     flightTable.getSelectionModel().getSelectedItem().getArriveDateTime() );
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
         if (flightTable.getItems().isEmpty())
@@ -93,8 +93,8 @@ public class MergeOverviewController{
     @FXML
     public void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
-            Controller.model.editFlight( flight , flight.getRoute() , flight.getPlaneID() , flight.getDepartureDate() ,
-                                         flight.getArriveDate() );
+            Controller.model.editFlight( flight , flight.getRoute() , flight.getPlaneID() , flight.getDepartureDateTime() ,
+                                         flight.getArriveDateTime() );
         }
         flightTable.setItems( null );
         flightTable.refresh();

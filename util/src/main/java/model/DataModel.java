@@ -1,10 +1,15 @@
 package model;
 
 import exceptions.*;
+import javafx.beans.InvalidationListener;
+import javafx.collections.ArrayChangeListener;
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -20,7 +25,6 @@ import java.util.stream.Stream;
 
  @author pavelgordeev */
 public class DataModel{
-
     DataModel(){
     }
 
@@ -79,7 +83,7 @@ public class DataModel{
                legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
-        if( !flight.getDepartureDate().toLocalDateTime().isBefore( flight.getArriveDate().toLocalDateTime() ) ){
+        if( flight.getTravelTime() <= 0 ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( flights.stream().anyMatch(
@@ -92,8 +96,8 @@ public class DataModel{
         if( flights.stream().anyMatch(
                 flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() , flight.getPlaneID().toUpperCase() ) &&
                            Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
-                           Objects.equals( flight1.getDepartureDate() , flight.getDepartureDate() ) &&
-                           Objects.equals( flight1.getArriveDate() , flight.getArriveDate() ) ) ){
+                           Objects.equals( flight1.getDepartureDateTime() , flight.getDepartureDateTime() ) &&
+                           Objects.equals( flight1.getArriveDateTime() , flight.getArriveDateTime() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         flights.addIfAbsent( flight );
@@ -132,8 +136,8 @@ public class DataModel{
         if( !legalSymbolsChecker.matcher( newPlaneId != null ? newPlaneId : flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
-        if( !( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ).toLocalDateTime().isBefore(
-                ( newArriveDate != null ? newArriveDate : flight.getArriveDate() ).toLocalDateTime() ) ){
+        if( ChronoUnit.MILLIS.between( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) ,
+                                   ( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() ) ) <= 0 ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( routes.stream().noneMatch( route -> Objects
@@ -145,12 +149,12 @@ public class DataModel{
                                                                   flight.getPlaneID().toUpperCase() ) &&
                                                   Objects.equals( flight1.getRoute() ,
                                                                   newRoute != null ? newRoute : flight.getRoute() ) &&
-                                                  Objects.equals( flight1.getDepartureDate() ,
+                                                  Objects.equals( flight1.getDepartureDateTime() ,
                                                                   newDepartureDate != null ? newDepartureDate :
-                                                                  flight.getDepartureDate() ) &&
-                                                  Objects.equals( flight1.getArriveDate() ,
+                                                                  flight.getDepartureDateTime() ) &&
+                                                  Objects.equals( flight1.getArriveDateTime() ,
                                                                   newArriveDate != null ? newArriveDate :
-                                                                  flight.getArriveDate() ) ) ){
+                                                                  flight.getArriveDateTime() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         Flight editingFlight = flights.stream().filter(
@@ -159,8 +163,8 @@ public class DataModel{
                         () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
         editingFlight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
         editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
-        editingFlight.setDepartureDate( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDate() ) );
-        editingFlight.setArriveDate( newArriveDate != null ? newArriveDate : flight.getArriveDate() );
+        editingFlight.setDepartureDateTime( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) );
+        editingFlight.setArriveDateTime( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() );
     }
 
 

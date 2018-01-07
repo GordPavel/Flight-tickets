@@ -15,8 +15,8 @@ import model.Route;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,10 +74,10 @@ public class SearchFlightsOverviewController{
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
         numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         numberTextField.textProperty()
-                       .addListener( ( observable , oldValue , newValue ) -> formatcheck( numberTextField ) );
+                       .addListener( ( observable , oldValue , newValue ) -> formatCheck( numberTextField ) );
         planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         planeIdTextField.textProperty()
-                        .addListener( ( observable , oldValue , newValue ) -> formatcheck( planeIdTextField ) );
+                        .addListener( ( observable , oldValue , newValue ) -> formatCheck( planeIdTextField ) );
         departureFromDatePicker.getEditor().textProperty()
                                .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureFromDatePicker.getEditor().setDisable( true );
@@ -101,19 +101,19 @@ public class SearchFlightsOverviewController{
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom() ).matches();
+                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches();
             Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
+                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
             routesListView.getItems().setAll(
                     dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
         searchFromTextField.textProperty()
-                           .addListener( ( observable , oldValue , newValue ) -> formatcheck( searchFromTextField ) );
+                           .addListener( ( observable , oldValue , newValue ) -> formatCheck( searchFromTextField ) );
         searchToTextField.textProperty()
-                         .addListener( ( observable , oldValue , newValue ) -> formatcheck( searchToTextField ) );
+                         .addListener( ( observable , oldValue , newValue ) -> formatCheck( searchToTextField ) );
         thisStage.setOnCloseRequest( event -> {
             mainController.flightTable.setItems( controller.getFlights() );
             controller.setFlightSearchActive( false );
@@ -138,15 +138,15 @@ public class SearchFlightsOverviewController{
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
         SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
         Predicate<Flight> departureDatePredicate = flight ->
-                getDatePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                  dateFormat , true ).test( flight.getDepartureDate() ) &&
-                getDatePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                  dateFormat , false ).test( flight.getDepartureDate() );
+                getDateTimePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                      dateFormat , true ).test( flight.getDepartureDateTime() ) &&
+                getDateTimePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                      dateFormat , false ).test( flight.getDepartureDateTime() );
         Predicate<Flight> arriveDatePredicate = flight ->
-                getDatePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                  dateFormat , true ).test( flight.getDepartureDate() ) &&
-                getDatePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter , dateFormat ,
-                                  false ).test( flight.getDepartureDate() );
+                getDateTimePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                      dateFormat , true ).test( flight.getDepartureDateTime() ) &&
+                getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                      dateFormat , false ).test( flight.getDepartureDateTime() );
         Predicate<Flight> flightTime = flight -> {
             Pattern timePattern = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
             String  fromTime    = flightTimeFromTextField.getEditor().getText();
@@ -173,8 +173,8 @@ public class SearchFlightsOverviewController{
      @param field - textfield to check for acceptable symbols
      method used to not allow user to use unacceptable symbols for search
      */
-    private void formatcheck( TextField field ){
-        Pattern textPattern = Pattern.compile( "[\\w\\d\\?\\*\\-_]*" );
+    private void formatCheck( TextField field ){
+        Pattern textPattern = Pattern.compile( "[\\w\\d?*\\-_]*" );
         Matcher matcher     = textPattern.matcher( field.getText() );
         if( !matcher.matches() ){
             field.setStyle( "-fx-text-inner-color: red;" );
@@ -198,9 +198,10 @@ public class SearchFlightsOverviewController{
                60 * 1000;
     }
 
-    private Predicate<Date> getDatePredicate( String inputDate , Pattern datePattern , DateTimeFormatter dateFormatter ,
-                                              SimpleDateFormat dateFormat , Boolean before ){
-        Predicate<Date> datePredicate;
+    private Predicate<ZonedDateTime> getDateTimePredicate( String inputDate , Pattern datePattern ,
+                                                                    DateTimeFormatter dateFormatter ,
+                                                                    SimpleDateFormat dateFormat , Boolean before ){
+        Predicate<ZonedDateTime> datePredicate;
         if( datePattern.matcher( inputDate ).matches() ){
             datePredicate = date -> {
                 LocalDate inputLocalDate  = LocalDate.parse( inputDate , dateFormatter );

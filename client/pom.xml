@@ -20,14 +20,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>ru.netCracker</groupId>
-            <artifactId>root</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.jfoenix</groupId>
             <artifactId>jfoenix</artifactId>
             <version>${jfoenix.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.netCracker</groupId>
+            <artifactId>util</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -44,6 +44,7 @@
                             <mainClass>sample.Main</mainClass>
                         </manifest>
                     </archive>
+                    <finalName>flightSystem-${project.version}</finalName>
                 </configuration>
             </plugin>
         </plugins>
