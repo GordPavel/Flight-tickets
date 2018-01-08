@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
 import javafx.beans.value.ChangeListener;
@@ -53,8 +54,10 @@ public class SearchFlightsOverviewController{
     @FXML JFXDatePicker   arriveFromDatePicker;
     @FXML JFXDatePicker   arriveToDatePicker;
 
+    @FXML
+    JFXButton searchButton;
+
     private Controller controller = Controller.getInstance();
-    private DataModel  dataModel  = DataModel.getInstance();
     private RoutesFlightsOverviewController mainController;
     private Stage                           thisStage;
     private boolean                         correctSymbols;
@@ -92,7 +95,7 @@ public class SearchFlightsOverviewController{
         flightTimeFromTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         flightTimeToTextField.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
-        routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
+        routesListView.setItems( Controller.model.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
@@ -102,7 +105,7 @@ public class SearchFlightsOverviewController{
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo() ).matches();
             routesListView.getItems().setAll(
-                    dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
+                    Controller.model.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
@@ -112,6 +115,10 @@ public class SearchFlightsOverviewController{
             mainController.flightTable.setItems( controller.getFlights() );
             controller.setFlightSearchActive( false );
         } );
+        if (mainController instanceof RoutesFlightsReadOnlyOverviewController)
+        {
+            searchButton.setVisible(false);
+        }
     }
 
 
@@ -152,7 +159,7 @@ public class SearchFlightsOverviewController{
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if (correctSymbols) {
-            mainController.flightTable.setItems(dataModel.listFlightsWithPredicate(
+            mainController.flightTable.setItems(Controller.model.listFlightsWithPredicate(
                     numberPredicate.and(planePredicate).and(routePredicate).and(departureDatePredicate)
                             .and(arriveDatePredicate).and(flightTime)).collect(
                     Collectors.collectingAndThen(toList(), FXCollections::observableArrayList)));
@@ -253,7 +260,19 @@ public class SearchFlightsOverviewController{
         arriveToDatePicker.getEditor().clear();
         routesListView.getSelectionModel().clearSelection();
         mainController.flightTable.getItems()
-                                  .setAll( dataModel.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+                                  .setAll( Controller.model.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+    }
+
+
+    /**
+     *
+     */
+    @FXML
+    public void handleSearchAction(){
+
+        /**
+         * TODO: send predecate to server to request specified flights
+         */
     }
 
 }

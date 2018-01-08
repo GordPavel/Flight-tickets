@@ -3,6 +3,7 @@ package sample;
 import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -95,10 +96,14 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , departure ) );
         destination.textProperty()
                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
+
+        thisStage.setOnCloseRequest(event -> {controller.stopThread();});
+
+        Controller.getInstance().setThread(new WriteThread());
+        Controller.getInstance().startThread();
     }
 
-    private DataModel dataModel = DataModel.getInstance();
-    private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate(airport -> true ).collect(
+    private ObservableList<String> airports  = Controller.model.listAllAirportsWithPredicate(airport -> true ).collect(
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
     private void searchListeners( String newValue , TextField textField ){
@@ -120,7 +125,6 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
                     Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         }
 
-
     }
 
     /**
@@ -137,6 +141,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
 
     /**
      */
+    @Override
     @FXML
     public void handleDeleteRouteButton(){
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
@@ -145,13 +150,16 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
                 routeTable.getItems().remove( selectedRoute );
                 Controller.model.removeRoute( selectedRoute );
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
-                Main.changed = true;
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 controller.updateRoutes();
                 routeTable.refresh();
                 controller.updateFlights();
                 flightTable.setItems( controller.getFlights() );
                 flightTable.refresh();
+
+                /**
+                 * TODO: put here request to server to delete route
+                 */
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model exception" );
@@ -170,6 +178,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
 
     /**
      */
+    @Override
     @FXML
     public void handleDeleteFlightButton(){
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
@@ -180,6 +189,10 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
                 Main.changed = true;
                 controller.updateFlights();
                 flightTable.refresh();
+
+                /**
+                 * TODO: put here request to server to delete flight
+                 */
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model exception" );
@@ -196,6 +209,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }
     }
 
+    @Override
     @FXML
     public void handleAddRouteButton(){
         try{
@@ -216,25 +230,45 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }catch( IOException e ){
             e.printStackTrace();
         }
-        airports.setAll( dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+        airports.setAll( Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
         routeTable.setItems( controller.getRoutes() );
         routeTable.refresh();
         flightTable.setItems( controller.getFlights() );
         flightTable.refresh();
     }
 
+    @Override
     @FXML
     public void handleUpdateFlightButton(){
 
+        /**
+         * TODO: put here request to server to update DB about routes
+         */
+
     }
 
+    @Override
     @FXML
     public void handleUpdateRouteButton(){
 
+        /**
+         * TODO: put here reques to server to update DB about flights
+         */
+
+    }
+
+    @Override
+    @FXML
+    public void handleSearchRouteButton(){
+
+        /**
+         * TODO: put here reques to server to update DB about flights
+         */
+
     }
 
 
-
+    @Override
     @FXML
     public void handleEditRouteButton(){
         Route selectedRoute = routeTable.getSelectionModel().getSelectedItem();
@@ -262,7 +296,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 routeTable.setItems( this.controller.getRoutes() );
                 routeTable.refresh();
                 this.controller.updateFlights();
@@ -271,9 +305,12 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
             }catch( IOException e ){
                 e.printStackTrace();
             }
+
+
         }
     }
 
+    @Override
     @FXML
     public void handleAddFlightButton(){
         try{
@@ -300,6 +337,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }
     }
 
+    @Override
     @FXML
     public void handleEditFlightButton(){
         Flight selectedFlight = flightTable.getSelectionModel().getSelectedItem();
@@ -337,6 +375,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }
     }
 
+    @Override
     @FXML
     public void handleSearchFlightButton(){
         if( !controller.isFlightSearchActive() ){
@@ -369,6 +408,69 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }
     }
 
+
+    @FXML
+    private void handleChangeDBAction(){
+
+        Controller.model.clear();
+        controller.stopThread();
+
+        /**
+         * TODO: selecting new DB
+         *
+         * put here code to open window, that will allow you to download new DB.
+         */
+
+        try {
+            Stage primaryStage = new Stage();
+            FXMLLoader                      loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
+            loader.setController( controller );
+            primaryStage.setTitle( "Select DB" );
+            Scene scene = new Scene( loader.load() );
+            primaryStage.setScene( scene );
+            primaryStage.setResizable( false );
+            primaryStage.show();
+            thisStage.close();
+        } catch (IOException e)
+        {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    @FXML
+    private void handleLogOutAction(Event event ){
+
+        Controller.model.clear();
+        controller.stopThread();
+
+        /**
+         * TODO: server logout
+         *
+         * somehow let server know, that you change your login
+         */
+
+        try {
+            Stage loginStage = new Stage();
+            FXMLLoader loader =
+                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+            LoginOverviewController logInController = new LoginOverviewController(loginStage);
+            loader.setController(logInController);
+            loginStage.setTitle("Login");
+            Scene scene = new Scene(loader.load());
+            loginStage.setScene(scene);
+            loginStage.setResizable(false);
+            loginStage.show();
+            thisStage.close();
+        } catch (IOException e)
+        {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+    }
 
     @FXML
     private void handleAboutAction(){

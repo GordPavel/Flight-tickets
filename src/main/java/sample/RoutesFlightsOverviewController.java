@@ -88,8 +88,7 @@ public class RoutesFlightsOverviewController{
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
     }
 
-    private DataModel              dataModel = DataModel.getInstance();
-    private ObservableList<String> airports  = dataModel.listAllAirportsWithPredicate( airport -> true ).collect(
+    private ObservableList<String> airports  = Controller.model.listAllAirportsWithPredicate( airport -> true ).collect(
             Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) );
 
     private void searchListeners( String newValue , TextField textField ){
@@ -136,7 +135,7 @@ public class RoutesFlightsOverviewController{
                 routeTable.getItems().remove( selectedRoute );
                 Controller.model.removeRoute( selectedRoute );
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 Main.changed = true;
                 controller.updateRoutes();
                 routeTable.refresh();
@@ -207,7 +206,7 @@ public class RoutesFlightsOverviewController{
         }catch( IOException e ){
             e.printStackTrace();
         }
-        airports.setAll( dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+        airports.setAll( Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
         routeTable.setItems( controller.getRoutes() );
         routeTable.refresh();
         flightTable.setItems( controller.getFlights() );
@@ -221,6 +220,11 @@ public class RoutesFlightsOverviewController{
 
     @FXML
     public void handleUpdateRouteButton(){
+
+    }
+
+    @FXML
+    public void handleSearchRouteButton(){
 
     }
 
@@ -253,7 +257,7 @@ public class RoutesFlightsOverviewController{
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 routeTable.setItems( this.controller.getRoutes() );
                 routeTable.refresh();
                 this.controller.updateFlights();
@@ -369,7 +373,7 @@ public class RoutesFlightsOverviewController{
                 controller.updateFlights();
                 Main.changed = false;
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 Main.savingFile = file;
                 thisStage.setTitle( file.getName() );
             }catch( IOException | FlightAndRouteException e ){
@@ -416,7 +420,7 @@ public class RoutesFlightsOverviewController{
                         Controller.model.mergeData( file ).collect( ArrayList::new , List::add , List::addAll );
                 Main.changed = true;
                 airports.setAll(
-                        dataModel.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
+                        Controller.model.listAllAirportsWithPredicate( airport -> true ).collect( Collectors.toList() ) );
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );

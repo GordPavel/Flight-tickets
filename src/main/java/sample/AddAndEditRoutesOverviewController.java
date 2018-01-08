@@ -74,6 +74,9 @@ public class AddAndEditRoutesOverviewController{
                     Controller.model
                             .addRoute( new Route( departureTextField.getText() , destinationTextField.getText() ) );
                     controller.updateRoutes();
+                    /**
+                     * TODO: put here request to server to add route
+                     */
                     Main.changed = true;
                     closeWindow( event );
                 }catch( FlightAndRouteException e ){
@@ -105,6 +108,9 @@ public class AddAndEditRoutesOverviewController{
                                                     destinationTextField.getText() );
                         controller.updateRoutes();
                         Main.changed = true;
+                        /**
+                         * TODO: put here request to server to add route
+                         */
                         closeWindow( event );
                     }catch( FlightAndRouteException e ){
                         Alert alert = new Alert( Alert.AlertType.WARNING );

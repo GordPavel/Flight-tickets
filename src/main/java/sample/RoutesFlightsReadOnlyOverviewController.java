@@ -60,6 +60,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     @FXML Button                      updateFlightButton;
     @FXML Button                      searchFlightButton;
     @FXML Button                      updateRouteButton;
+    @FXML Button                      searchRouteButton;
 
 
     private Stage thisStage;
@@ -78,6 +79,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     /**
      initialization of view
      */
+    @Override
     @FXML
     public void initialize(){
 
@@ -90,6 +92,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         deleteFlightButton.setVisible(false);
         updateFlightButton.setVisible(false);
         updateRouteButton.setVisible(false);
+        searchRouteButton.setVisible(false);
 
         routeTable.setPrefWidth(600);
         departureColumn.setPrefWidth(300);
@@ -117,7 +120,6 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         Controller.getInstance().startThread();
     }
 
-    private DataModel              dataModel = DataModel.getInstance();
 
     private void searchListeners( String newValue , TextField textField ){
         if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
@@ -152,7 +154,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         }
     }
 
-
+    @Override
     @FXML
     public void handleSearchFlightButton(){
         if( !controller.isFlightSearchActive() ){
@@ -196,7 +198,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     @FXML
     private void handleChangeDBAction(){
 
-        dataModel.clear();
+        Controller.model.clear();
         controller.stopThread();
 
         /**
@@ -204,12 +206,31 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
          *
          * put here code to open window, that will allow you to download new DB.
          */
+
+        try {
+            Stage primaryStage = new Stage();
+            FXMLLoader                      loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
+            loader.setController( controller );
+            primaryStage.setTitle( "Select DB" );
+            Scene scene = new Scene( loader.load() );
+            primaryStage.setScene( scene );
+            primaryStage.setResizable( false );
+            primaryStage.show();
+            thisStage.close();
+        } catch (IOException e)
+        {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+
     }
 
     @FXML
     private void handleLogOutAction(Event event ){
 
-        dataModel.clear();
+        Controller.model.clear();
         controller.stopThread();
 
         /**
@@ -238,6 +259,8 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
 
 
     }
+
+
 
 
     public void closeWindow( Event event ){

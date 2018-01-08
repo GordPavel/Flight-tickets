@@ -152,6 +152,9 @@ public class AddAndEditFlightsOverviewController{
                             new Flight( number.getText() , box.getSelectionModel().getSelectedItem() ,
                                         planeID.getText() , departDate , arriveDate ) );
                     controller.updateFlights();
+                    /**
+                     * TODO: put here request to server to add flight
+                     */
                     Main.changed = true;
                     closeWindow( event );
                 }catch( FlightAndRouteException e ){
@@ -192,6 +195,9 @@ public class AddAndEditFlightsOverviewController{
                                 .editFlight( Controller.flightForEdit , box.getSelectionModel().getSelectedItem() ,
                                              planeID.getText() , departDate , arriveDate );
                         controller.updateFlights();
+                        /**
+                         * TODO: put here request to server to edit flight
+                         */
                         Main.changed = true;
                         closeWindow( event );
                     }catch( FlightAndRouteException e ){
