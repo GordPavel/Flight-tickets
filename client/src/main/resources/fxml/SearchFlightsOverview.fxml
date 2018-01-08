@@ -37,7 +37,7 @@
     </Label>
     <JFXDatePicker fx:id="departureFromDatePicker" defaultColor="darkslateblue" layoutX="134.0" layoutY="163.0" prefHeight="25.0" prefWidth="113.0" promptText="from date" />
     <JFXDatePicker fx:id="arriveFromDatePicker" defaultColor="darkslateblue" layoutX="145.0" layoutY="244.0" prefHeight="25.0" prefWidth="113.0" promptText="from date" />
-    <JFXTimePicker fx:id="flightTimeFromTextField" layoutX="143.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
+    <JFXTimePicker fx:id="flightTimeFrom" layoutX="143.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
     <Label layoutX="23.0" layoutY="389.0" text="Route:" textFill="#282c86" underline="true">
         <font>
             <Font name="System Italic" size="12.0" />
@@ -50,7 +50,7 @@
             <Font name="System Italic" size="12.0" />
         </font>
     </Label>
-    <JFXTimePicker fx:id="flightTimeToTextField" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
+    <JFXTimePicker fx:id="flightTimeTo" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
         <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="20.0" layoutY="535.0" mnemonicParsing="false" onAction="#handleClearAction" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #354a86;" textFill="WHITE" text="Clear" />
     <ListView fx:id="routesListView" layoutX="163.0" layoutY="382.0" prefHeight="200.0" prefWidth="200.0" />
     <TextField fx:id="searchFromTextField" layoutX="14.0" layoutY="416.0" prefHeight="27.0" prefWidth="137.0" promptText="search from" />

@@ -12,11 +12,9 @@ import model.Flight;
 import model.Route;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +27,7 @@ public class AddAndEditFlightsOverviewController{
 
     private Controller controller = Controller.getInstance();
 
-    @FXML ChoiceBox<Route> box;
+    @FXML ChoiceBox<Route> routesBox;
     @FXML TextField        number;
     @FXML Label            errorNumberLabel;
     @FXML TextField        planeID;
@@ -55,8 +53,8 @@ public class AddAndEditFlightsOverviewController{
     @FXML
     private void initialize() throws IOException{
         departureDate.setValue( LocalDate.now() );
-        arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
-        box.setItems( controller.getRoutes() );
+        arrivingDate.setValue( LocalDate.now() );
+        routesBox.setItems( controller.getRoutes() );
         StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
 
@@ -72,11 +70,29 @@ public class AddAndEditFlightsOverviewController{
         };
         departureTime.setIs24HourView( true );
         departureTime.setConverter( localTimeStringConverter );
-        departureTime.setValue( LocalTime.MIDNIGHT );
+        departureTime.setValue( LocalTime.NOON );
+        departureTime.getEditor().setDisable( true );
 
         arrivingTime.setIs24HourView( true );
         arrivingTime.setConverter( localTimeStringConverter );
-        arrivingTime.setValue( LocalTime.MIDNIGHT );
+        arrivingTime.setValue( LocalTime.NOON.plusHours( 1 ) );
+        arrivingTime.getEditor().setDisable( true );
+
+//        set minimal offset between departure and arrival ( 0 seconds flight )
+        routesBox.getSelectionModel().selectedItemProperty().addListener(
+                ( observable , oldValue , newValue ) -> Optional.ofNullable( newValue ).ifPresent( route -> {
+                    LocalDateTime departure = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() );
+                    long offset = route.getTo().getRules().getOffset( Instant.now() ).getTotalSeconds() -
+                                  route.getFrom().getRules().getOffset( Instant.now() ).getTotalSeconds();
+                    LocalDateTime arrive;
+                    if( offset >= 0 ){
+                        arrive = departure.plusSeconds( offset );
+                    }else{
+                        arrive = departure.minusSeconds( offset );
+                    }
+                    arrivingDate.setValue( arrive.toLocalDate() );
+                    arrivingTime.setValue( arrive.toLocalTime() );
+                } ) );
 
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
@@ -98,60 +114,67 @@ public class AddAndEditFlightsOverviewController{
         planeID.textProperty().addListener(
                 ( observable , oldValue , newValue ) -> setErrorLabel( newValue , oldValue , errorPlaneIdLabel ,
                                                                        planeID ) );
-        addAndEditFlightButton.setOnAction( event -> {
-            ZonedDateTime
-                    departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                                     .atZone( box.getSelectionModel().getSelectedItem().getFrom() ),
-                    arriveDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                                  .atZone( box.getSelectionModel().getSelectedItem().getTo() );
-            if( !departureDateTime.isBefore( arriveDateTime ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Incorrect data about date" );
-                alert.setHeaderText( "Flight has incorrect dates" );
-                alert.setContentText( "Please enter correct parameters for a new flight." );
-                alert.showAndWait();
-            }else if( box.getValue() == null ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Route isn`t chosen" );
-                alert.setHeaderText( "Flight must have route" );
-                alert.setContentText( "Choose route" );
-                alert.showAndWait();
-            }else if( planeID.getText().equals( "" ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "You have no plain" );
-                alert.setHeaderText( "Flight must have plain" );
-                alert.setContentText( "Write plain data" );
-                alert.showAndWait();
-            }else{
-                try{
-                    Controller.model.addFlight(
-                            new Flight( number.getText() , box.getSelectionModel().getSelectedItem() ,
-                                        planeID.getText() , departureDateTime , arriveDateTime ) );
-                    controller.updateFlights();
-                    Main.changed = true;
-                    closeWindow();
-                }catch( FlightAndRouteException e ){
-                    Alert alert = new Alert( Alert.AlertType.ERROR );
-                    alert.setTitle( "Model`s message" );
-                    alert.setHeaderText( "Model send message" );
-                    alert.setContentText( e.getMessage() );
-                    alert.showAndWait();
-                }
-            }
-        } );
 
         if( editingFLight != null ){
             setEditingFlightData();
-            number.setEditable( false );
+            number.setDisable( true );
             addAndEditFlightButton.setText( "Edit" );
             mainLabel.setText( "Enter new data." );
+        }
+        addAndEditFlightButton.setOnAction( event -> addOrEdit( editingFLight == null ) );
+    }
+
+    private void addOrEdit( Boolean isAdd ){
+        ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                       .atZone( routesBox.getSelectionModel().getSelectedItem()
+                                                                         .getFrom() ), arriveDateTime =
+                LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                             .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
+        if( !departureDateTime.isBefore( arriveDateTime ) ){
+            Alert alert = new Alert( Alert.AlertType.WARNING );
+            alert.setTitle( "Incorrect data about date" );
+            alert.setHeaderText( "Flight has incorrect dates" );
+            alert.setContentText( "Please enter correct parameters for a new flight." );
+            alert.showAndWait();
+        }else if( routesBox.getValue() == null ){
+            Alert alert = new Alert( Alert.AlertType.WARNING );
+            alert.setTitle( "Route isn`t chosen" );
+            alert.setHeaderText( "Flight must have route" );
+            alert.setContentText( "Choose route" );
+            alert.showAndWait();
+        }else if( planeID.getText().equals( "" ) ){
+            Alert alert = new Alert( Alert.AlertType.WARNING );
+            alert.setTitle( "You have no plain" );
+            alert.setHeaderText( "Flight must have plain" );
+            alert.setContentText( "Write plain data" );
+            alert.showAndWait();
+        }else{
+            try{
+                if( isAdd ){
+                    Controller.model.addFlight(
+                            new Flight( number.getText() , routesBox.getSelectionModel().getSelectedItem() ,
+                                        planeID.getText() , departureDateTime , arriveDateTime ) );
+                }else{
+                    Controller.model.editFlight( editingFLight , routesBox.getSelectionModel().getSelectedItem() ,
+                                                 planeID.getText() , departureDateTime , arriveDateTime );
+                }
+                controller.updateFlights();
+                Main.changed = true;
+                closeWindow();
+            }catch( FlightAndRouteException e ){
+                Alert alert = new Alert( Alert.AlertType.ERROR );
+                alert.setTitle( "Model`s message" );
+                alert.setHeaderText( "Model send message" );
+                alert.setContentText( e.getMessage() );
+                alert.showAndWait();
+            }
         }
     }
 
     private void setEditingFlightData(){
         number.textProperty().setValue( editingFLight.getNumber() );
         planeID.textProperty().setValue( editingFLight.getPlaneID() );
-        box.getSelectionModel().select( editingFLight.getRoute() );
+        routesBox.getSelectionModel().select( editingFLight.getRoute() );
         departureDate.setValue( editingFLight.getDepartureDateTime().toLocalDate() );
         arrivingDate.setValue( editingFLight.getArriveDateTime().toLocalDate() );
         departureTime.setValue( editingFLight.getDepartureDateTime().toLocalTime() );
@@ -187,7 +210,7 @@ public class AddAndEditFlightsOverviewController{
         }else{
             number.clear();
             planeID.clear();
-            box.getSelectionModel().clearSelection();
+            routesBox.getSelectionModel().clearSelection();
             departureDate.setValue( LocalDate.now() );
             arrivingDate.setValue( LocalDate.now().plusDays( 1 ) );
             arrivingTime.setValue( LocalTime.MIDNIGHT );

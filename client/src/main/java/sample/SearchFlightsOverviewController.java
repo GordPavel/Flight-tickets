@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,14 +45,15 @@ public class SearchFlightsOverviewController{
      */
     @FXML TextField       numberTextField;
     @FXML TextField       planeIdTextField;
-    @FXML JFXTimePicker   flightTimeFromTextField;
-    @FXML JFXTimePicker   flightTimeToTextField;
 
     @FXML JFXDatePicker departureFromDatePicker;
     @FXML JFXDatePicker departureToDatePicker;
 
     @FXML JFXDatePicker arriveFromDatePicker;
     @FXML JFXDatePicker arriveToDatePicker;
+
+    @FXML JFXTimePicker flightTimeFrom;
+    @FXML JFXTimePicker flightTimeTo;
 
     private Controller controller = Controller.getInstance();
     private DataModel  dataModel  = DataModelInstanceSaver.getInstance();
@@ -89,12 +91,12 @@ public class SearchFlightsOverviewController{
         arriveFromDatePicker.getEditor().setDisable( true );
         arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveToDatePicker.getEditor().setDisable( true );
-        flightTimeFromTextField.setValue( LocalTime.MIDNIGHT );
-        flightTimeToTextField.setValue( LocalTime.MIDNIGHT );
-        flightTimeFromTextField.getEditor().textProperty()
-                               .addListener( ( observable , oldValue , newValue ) -> changed() );
-        flightTimeToTextField.getEditor().textProperty()
-                             .addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeFrom.setValue( LocalTime.MIN );
+        flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
+        flightTimeFrom.getEditor().textProperty()
+                      .addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeTo.getEditor().textProperty()
+                    .addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
         routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
@@ -148,13 +150,12 @@ public class SearchFlightsOverviewController{
                 getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , false ).test( flight.getDepartureDateTime() );
         Predicate<Flight> flightTime = flight -> {
-            Pattern timePattern = Pattern.compile( "^(0|[1-9]\\d*):[0-5]\\d$" );
-            String  fromTime    = flightTimeFromTextField.getEditor().getText();
-            String  toTime      = flightTimeToTextField.getEditor().getText();
-            Predicate<Long> startTime = aLong -> fromTime.isEmpty() || !timePattern.matcher( fromTime ).matches() ||
-                                                 stringToMillis( fromTime ) <= flight.getTravelTime();
-            Predicate<Long> endTime = aLong -> toTime.isEmpty() || !timePattern.matcher( toTime ).matches() ||
-                                               stringToMillis( toTime ) >= flight.getTravelTime();
+            Predicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
+                                                 flightTimeFrom.getValue().get( ChronoField.MILLI_OF_DAY ) <=
+                                                 flight.getTravelTime();
+            Predicate<Long> endTime = aLong -> flightTimeTo.getEditor().getText().isEmpty() ||
+                                               flightTimeTo.getValue().get( ChronoField.MILLI_OF_DAY ) >=
+                                               flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if( correctSymbols ){
@@ -193,14 +194,9 @@ public class SearchFlightsOverviewController{
 
     }
 
-    private long stringToMillis( String fromTime ){
-        return ( Long.parseLong( fromTime.split( ":" )[ 0 ] ) * 60 + Long.parseLong( fromTime.split( ":" )[ 1 ] ) ) *
-               60 * 1000;
-    }
-
     private Predicate<ZonedDateTime> getDateTimePredicate( String inputDate , Pattern datePattern ,
-                                                                    DateTimeFormatter dateFormatter ,
-                                                                    SimpleDateFormat dateFormat , Boolean before ){
+                                                           DateTimeFormatter dateFormatter ,
+                                                           SimpleDateFormat dateFormat , Boolean before ){
         Predicate<ZonedDateTime> datePredicate;
         if( datePattern.matcher( inputDate ).matches() ){
             datePredicate = date -> {
@@ -236,11 +232,11 @@ public class SearchFlightsOverviewController{
         arriveToDatePicker.setLayoutX( arriveFromDatePicker.getLayoutX() );
         arriveToDatePicker.setLayoutY( arriveFromDatePicker.getLayoutY() + arriveFromDatePicker.getHeight() + 30 );
 
-        flightTimeFromTextField.setLayoutX( routesListView.getLayoutX() );
-        flightTimeFromTextField.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
-        flightTimeToTextField
-                .setLayoutX( flightTimeFromTextField.getLayoutX() + flightTimeFromTextField.getWidth() + 120 );
-        flightTimeToTextField.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
+        flightTimeFrom.setLayoutX( routesListView.getLayoutX() );
+        flightTimeFrom.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
+        flightTimeTo
+                .setLayoutX( flightTimeFrom.getLayoutX() + flightTimeFrom.getWidth() + 120 );
+        flightTimeTo.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
     }
 
     /**
@@ -257,6 +253,8 @@ public class SearchFlightsOverviewController{
         arriveFromDatePicker.getEditor().clear();
         arriveToDatePicker.getEditor().clear();
         routesListView.getSelectionModel().clearSelection();
+        flightTimeFrom.setValue( LocalTime.MIN );
+        flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
         mainController.flightTable.getItems()
                                   .setAll( dataModel.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
     }
