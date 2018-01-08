@@ -1,10 +1,6 @@
 package model;
 
 import exceptions.*;
-import javafx.beans.InvalidationListener;
-import javafx.collections.ArrayChangeListener;
-import javafx.collections.ObservableArray;
-import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.time.ZoneId;
@@ -137,7 +133,7 @@ public class DataModel{
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
         }
         if( ChronoUnit.MILLIS.between( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) ,
-                                   ( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() ) ) <= 0 ){
+                                       ( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() ) ) <= 0 ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
         if( routes.stream().noneMatch( route -> Objects
@@ -163,7 +159,8 @@ public class DataModel{
                         () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
         editingFlight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
         editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
-        editingFlight.setDepartureDateTime( ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) );
+        editingFlight.setDepartureDateTime(
+                ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) );
         editingFlight.setArriveDateTime( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() );
     }
 
@@ -327,18 +324,16 @@ public class DataModel{
             }
         } );
         routes.removeAll( failedRoutes );
-        flights.stream()
-               .filter( flight -> routeSet.contains( flight.getRoute() ) )
-               .forEach( flight -> {
-                    if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
-                                                                       .matcher( flight1.getNumber() ).matches() ) ){
-                        failedFlights.add( flight );
-                        return;
-                    }
-                    if( !flightSet.add( flight ) ){
-                        failedFlights.add( flight );
-                    }
-                } );
+        flights.stream().filter( flight -> routeSet.contains( flight.getRoute() ) ).forEach( flight -> {
+            if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
+                                                               .matcher( flight1.getNumber() ).matches() ) ){
+                failedFlights.add( flight );
+                return;
+            }
+            if( !flightSet.add( flight ) ){
+                failedFlights.add( flight );
+            }
+        } );
         flights.removeAll( failedFlights );
         routes.forEach( route -> route.setId( routesPrimaryKeysGenerator.next() ) );
         this.routes.addAll( routes );

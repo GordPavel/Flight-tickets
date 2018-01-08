@@ -72,12 +72,13 @@ class DataModelTest{
                 Stream.concat( routes.stream().map( Route::getFrom ) , routes.stream().map( Route::getTo ) ).distinct()
                       .collect( Collectors.toSet() );
         routes.forEach( dataModel::addRoute );
-        flights = IntStream.rangeClosed( 1 , 10 ).mapToObj( i -> new Flight( String.format( "number%d" , i ) , routes.get( random.nextInt( routes.size() ) ) ,
-                                                                         String.format( "planeId%d" , i + 1 ) ,
-                                                                         LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 )
-                                                                                      .atZone( ZoneId.of( "Europe/Samara" ) ) ,
-                                                                         LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 )
-                                                                                      .atZone( ZoneId.of( "Europe/Samara" ) ) ) )
+        flights = IntStream.rangeClosed( 1 , 10 ).mapToObj(
+                i -> new Flight( String.format( "number%d" , i ) , routes.get( random.nextInt( routes.size() ) ) ,
+                                 String.format( "planeId%d" , i + 1 ) , LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 )
+                                                                                     .atZone( ZoneId.of(
+                                                                                             "Europe/Samara" ) ) ,
+                                 LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 )
+                                              .atZone( ZoneId.of( "Europe/Samara" ) ) ) )
                            .collect( Collectors.toList() );
         flights.forEach( dataModel::addFlight );
     }
@@ -232,23 +233,21 @@ class DataModelTest{
                               .editFlight( editedFLight , null , null , null , editedFLight.getDepartureDateTime().minusHours( 1 ) ) ,
                       "Can't set arrival date before departure" );
         int i = 11;
-        assertThrows( FaRIllegalEditedData.class ,
-                      () -> dataModel.editFlight( new Flight( String.format( "number%d" , i ) , routes.get( random.nextInt( routes.size() ) ) ,
-                                                              String.format( "planeId%d" , i + 1 ) ,
-                                                              LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 )
-                                                                           .atZone( ZoneId.of( "Europe/Samara" ) ) ,
-                                                              LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 )
-                                                                           .atZone( ZoneId.of( "Europe/Samara" ) ) ) ,
-                                                  null , null , null , null ) ,
+        assertThrows( FaRIllegalEditedData.class , () -> dataModel.editFlight(
+                new Flight( String.format( "number%d" , i ) , routes.get( random.nextInt( routes.size() ) ) ,
+                            String.format( "planeId%d" , i + 1 ) ,
+                            LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) ) ,
+                            LocalDateTime.of( 2009 + i , 12 , 15 , 11 + i , 30 )
+                                         .atZone( ZoneId.of( "Europe/Samara" ) ) ) , null , null , null , null ) ,
                       "Must take previous version from database" );
     }
 
-    private Boolean checkDateBetweenTwoDates( LocalDateTime actual , LocalDateTime startRange , LocalDateTime endRange ){
+    private Boolean checkDateBetweenTwoDates( LocalDateTime actual , LocalDateTime startRange ,
+                                              LocalDateTime endRange ){
         return ( startRange != null ? startRange :
-                  LocalDateTime.ofInstant( Instant.ofEpochMilli( 0L ) , ZoneId.of( "Europe/Samara" ) ) )
-                .isBefore( actual ) &&
-               actual.isBefore( endRange != null ? endRange : LocalDateTime
-                       .ofInstant( Instant.ofEpochMilli( Long.MAX_VALUE ) , ZoneId.of( "Europe/Samara" ) ) );
+                 LocalDateTime.ofInstant( Instant.ofEpochMilli( 0L ) , ZoneId.of( "Europe/Samara" ) ) )
+                       .isBefore( actual ) && actual.isBefore( endRange != null ? endRange : LocalDateTime
+                .ofInstant( Instant.ofEpochMilli( Long.MAX_VALUE ) , ZoneId.of( "Europe/Samara" ) ) );
     }
 
     @Test
@@ -281,11 +280,10 @@ class DataModelTest{
         List<Flight> copyFlights = dataModel.listFlightsWithPredicate( flight -> routes.contains( flight.getRoute() ) ).
                 collect( Collectors.toList() );
         List<Flight> newFlights = IntStream.rangeClosed( 11 , 15 ).mapToObj(
-                i -> new Flight( String.format( "number%d" , i ) ,
-                                 routes.get( random.nextInt( routes.size() ) ) ,
-                                 String.format( "planeId%d" , i + 1 ) ,
-                                 LocalDateTime.of( 2000 + i , 12 , 15 , 7 , 30 )
-                                              .atZone( ZoneId.of( "Europe/Samara" ) ) ,
+                i -> new Flight( String.format( "number%d" , i ) , routes.get( random.nextInt( routes.size() ) ) ,
+                                 String.format( "planeId%d" , i + 1 ) , LocalDateTime.of( 2000 + i , 12 , 15 , 7 , 30 )
+                                                                                     .atZone( ZoneId.of(
+                                                                                             "Europe/Samara" ) ) ,
                                  LocalDateTime.of( 2000 + i , 12 , 15 , 8 + i , 30 )
                                               .atZone( ZoneId.of( "Europe/Samara" ) ) ) )
                                            .collect( Collectors.toList() );
@@ -339,14 +337,12 @@ class DataModelTest{
             return result;
         } ).get() , "All routes were added from different threads" );
         List<Route> databaseRoutes = dataModel.listRoutesWithPredicate( route -> true ).collect( Collectors.toList() );
-        List<Flight> flights = IntStream.range( 11 , 11 + addingFlights ).mapToObj( i ->
-                                                                            new Flight( String.format( "number%d" , i ) ,
-                                                                                        databaseRoutes.get( random.nextInt( databaseRoutes.size() ) ) ,
-                                                                                        String.format( "planeId%d" , i + 1 ) ,
-                                                                                        LocalDateTime.now().minusDays( i )
-                                                                                                     .atZone( ZoneId.of( "Europe/Samara" ) ) ,
-                                                                                        LocalDateTime.now().plusDays( i )
-                                                                                                     .atZone( ZoneId.of( "Europe/Samara" ) ) ) )
+        List<Flight> flights = IntStream.range( 11 , 11 + addingFlights ).mapToObj(
+                i -> new Flight( String.format( "number%d" , i ) ,
+                                 databaseRoutes.get( random.nextInt( databaseRoutes.size() ) ) ,
+                                 String.format( "planeId%d" , i + 1 ) ,
+                                 LocalDateTime.now().minusDays( i ).atZone( ZoneId.of( "Europe/Samara" ) ) ,
+                                 LocalDateTime.now().plusDays( i ).atZone( ZoneId.of( "Europe/Samara" ) ) ) )
                                         .limit( addingFlights ).collect( Collectors.toList() );
         CountDownLatch  flightsLatch   = new CountDownLatch( addingFlights );
         ExecutorService flightsService = Executors.newFixedThreadPool( addingFlights );

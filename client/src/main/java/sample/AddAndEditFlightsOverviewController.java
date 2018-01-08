@@ -3,6 +3,8 @@ package sample;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Font;
@@ -12,8 +14,11 @@ import model.Flight;
 import model.Route;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,9 +43,11 @@ public class AddAndEditFlightsOverviewController{
     @FXML JFXTimePicker    arrivingTime;
     @FXML Button           addAndEditFlightButton;
     @FXML Label            mainLabel;
+    @FXML Label            flightTimeErrorLabel;
 
-    private Flight editingFLight;
-    private Stage  thisStage;
+    private Flight          editingFLight;
+    private Stage           thisStage;
+    private BooleanProperty ifFlightTimeRight;
 
     AddAndEditFlightsOverviewController( Flight editingFLight , Stage thisStage ){
         this.editingFLight = editingFLight;
@@ -52,15 +59,34 @@ public class AddAndEditFlightsOverviewController{
      */
     @FXML
     private void initialize() throws IOException{
-        departureDate.setValue( LocalDate.now() );
-        arrivingDate.setValue( LocalDate.now() );
-        routesBox.setItems( controller.getRoutes() );
-        StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
+        final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
+        StringConverter<LocalDate> localDateStringConverter = new StringConverter<LocalDate>(){
+            @Override
+            public String toString( LocalDate date ){
+                return dateFormatter.format( date );
+            }
 
             @Override
-            public String toString( LocalTime object ){
-                return timeFormatter.format( object );
+            public LocalDate fromString( String string ){
+                return LocalDate.parse( string , dateFormatter );
+            }
+        };
+
+        departureDate.setConverter( localDateStringConverter );
+        departureDate.setValue( LocalDate.now() );
+        departureDate.getEditor().setDisable( true );
+
+        arrivingDate.setConverter( localDateStringConverter );
+        arrivingDate.setValue( LocalDate.now() );
+        arrivingDate.getEditor().setDisable( true );
+
+        routesBox.setItems( controller.getRoutes() );
+
+        StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
+            @Override
+            public String toString( LocalTime time ){
+                return timeFormatter.format( time );
             }
 
             @Override
@@ -68,6 +94,7 @@ public class AddAndEditFlightsOverviewController{
                 return LocalTime.parse( string , timeFormatter );
             }
         };
+
         departureTime.setIs24HourView( true );
         departureTime.setConverter( localTimeStringConverter );
         departureTime.setValue( LocalTime.NOON );
@@ -78,24 +105,45 @@ public class AddAndEditFlightsOverviewController{
         arrivingTime.setValue( LocalTime.NOON.plusHours( 1 ) );
         arrivingTime.getEditor().setDisable( true );
 
+        flightTimeErrorLabel.setVisible( false );
+
+        departureDate.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> {
+            String time = departureTime.getValue().format( timeFormatter );
+            departureDateTimeMoved( oldValue , time , newValue , time );
+        } );
+        departureTime.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> {
+            String date = departureDate.getValue().format( dateFormatter );
+            departureDateTimeMoved( date , oldValue , date , newValue );
+        } );
+
 //        set minimal offset between departure and arrival ( 0 seconds flight )
         routesBox.getSelectionModel().selectedItemProperty().addListener(
-                ( observable , oldValue , newValue ) -> Optional.ofNullable( newValue ).ifPresent( route -> {
-                    LocalDateTime departure = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() );
-                    long offset = route.getTo().getRules().getOffset( Instant.now() ).getTotalSeconds() -
-                                  route.getFrom().getRules().getOffset( Instant.now() ).getTotalSeconds();
-                    LocalDateTime arrive;
-                    if( offset >= 0 ){
-                        arrive = departure.plusSeconds( offset );
-                    }else{
-                        arrive = departure.minusSeconds( offset );
-                    }
-                    arrivingDate.setValue( arrive.toLocalDate() );
-                    arrivingTime.setValue( arrive.toLocalTime() );
+                ( observable , oldValue , newValue ) -> Optional.ofNullable( newValue ).ifPresent( newRoute -> {
+                    ZonedDateTime arriveTimeWithOffset;
+                    long flightTimeInMinutes = Optional.ofNullable( oldValue ).map( oldRoute -> ChronoUnit.MINUTES
+                            .between( LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                   .atZone( oldRoute.getFrom() ) ,
+                                      LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                                                   .atZone( oldRoute.getTo() ) ) ).orElse( 60L );
+                    arriveTimeWithOffset = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                        .atZone( newRoute.getFrom() )
+                                                        .withZoneSameInstant( newRoute.getTo() )
+                                                        .plusMinutes( flightTimeInMinutes );
+                    arrivingDate.setValue( arriveTimeWithOffset.toLocalDate() );
+                    arrivingTime.setValue( arriveTimeWithOffset.toLocalTime() );
                 } ) );
 
-        departureDate.getEditor().setDisable( true );
-        arrivingDate.getEditor().setDisable( true );
+        ifFlightTimeRight = new SimpleBooleanProperty( true );
+        departureDate.getEditor().textProperty()
+                     .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
+        arrivingDate.getEditor().textProperty()
+                    .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
+        departureTime.getEditor().textProperty()
+                     .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
+        arrivingTime.getEditor().textProperty()
+                    .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
+        addAndEditFlightButton.disableProperty().bind( ifFlightTimeRight.not() );
+        flightTimeErrorLabel.visibleProperty().bind( ifFlightTimeRight.not() );
 
         Font PT_Mono = Font.loadFont( getClass().getResource( "/PT_Mono.ttf" ).openStream() , 15 );
 
@@ -124,19 +172,37 @@ public class AddAndEditFlightsOverviewController{
         addAndEditFlightButton.setOnAction( event -> addOrEdit( editingFLight == null ) );
     }
 
+    private void departureDateTimeMoved( String oldDate , String oldTime , String newDate , String newTime ){
+        LocalDateTime oldDepartureDateTime = LocalDateTime.of( departureDate.getConverter().fromString( oldDate ) ,
+                                                               departureTime.getConverter().fromString( oldTime ) ),
+                newDepartureDateTime = LocalDateTime.of( departureDate.getConverter().fromString( newDate ) ,
+                                                         departureTime.getConverter().fromString( newTime ) ),
+                oldArriveDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() ),
+                newArriveDateTime;
+        Long departureMovedInMinutes = ChronoUnit.MINUTES.between( oldDepartureDateTime , newDepartureDateTime );
+        newArriveDateTime = oldArriveDateTime.plusMinutes( departureMovedInMinutes );
+        arrivingDate.setValue( newArriveDateTime.toLocalDate() );
+        arrivingTime.setValue( newArriveDateTime.toLocalTime() );
+    }
+
+    private void checkFlightTime(){
+        ifFlightTimeRight.setValue( !LocalDateTime.of( departureDate.getValue() , departureTime.getValue() ).atZone(
+                Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
+                        .map( Route::getFrom )
+                        .orElse( ZoneId.systemDefault() ) )
+                                                  .isAfter( LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                                                                         .atZone( Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
+                                                                                          .map( Route::getTo )
+                                                                                          .orElse( ZoneId.systemDefault() ) ) ) );
+    }
+
     private void addOrEdit( Boolean isAdd ){
         ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
                                                        .atZone( routesBox.getSelectionModel().getSelectedItem()
                                                                          .getFrom() ), arriveDateTime =
                 LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
                              .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
-        if( !departureDateTime.isBefore( arriveDateTime ) ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Incorrect data about date" );
-            alert.setHeaderText( "Flight has incorrect dates" );
-            alert.setContentText( "Please enter correct parameters for a new flight." );
-            alert.showAndWait();
-        }else if( routesBox.getValue() == null ){
+        if( routesBox.getValue() == null ){
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Route isn`t chosen" );
             alert.setHeaderText( "Flight must have route" );
