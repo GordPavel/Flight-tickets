@@ -67,7 +67,8 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     @SuppressWarnings( "EqualsWhichDoesntCheckParameterClass" )
     @Override
     public boolean equals( Object obj ){
-        return pointsEquals( obj ) && this.id.equals( ( ( Route ) obj ).id );
+        Route route = ( Route ) obj;
+        return pointsEquals( obj ) && this.id == null ? route.id == null : this.id.equals( route.id );
     }
 
     boolean pointsEquals( Object obj ){

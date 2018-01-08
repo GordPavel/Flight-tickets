@@ -4,6 +4,7 @@ import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
 import exceptions.FaRSameNameException;
+import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,6 +191,7 @@ class DataModelTest{
 
     @Test
     void addNewFLight(){
+//        todo: Протестировать неправильное время в часовых поясах
         int i = 11;
         ZonedDateTime departure =
                 LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( ZoneId.of( "Europe/Samara" ) );
@@ -405,4 +407,20 @@ class DataModelTest{
                               } ).map( Flight::getTravelTimeInHoursAndMinutes ).collect( Collectors.toList() ) ,
                               "Travel times are right" );
     }
+
+    @Test
+    void testObservable(){
+        List<Route> addedRoutes =
+                Collections.singletonList( new Route( ZoneId.of( "Europe/Samara" ) , ZoneId.of( "Europe/Moscow" ) ) );
+        dataModel.addRoutesListener( change -> {
+            while( change.next() ){
+                if( change.wasAdded() ){
+                    assertTrue( change.getAddedSubList().stream().noneMatch(
+                            ( Predicate<Route> ) route -> addedRoutes.stream().noneMatch( route::pointsEquals ) ) , "Observe added routes" );
+                }
+            }
+        } );
+        addedRoutes.forEach( dataModel::addRoute );
+    }
+
 }

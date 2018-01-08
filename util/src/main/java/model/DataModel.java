@@ -1,6 +1,9 @@
 package model;
 
 import exceptions.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.time.ZoneId;
@@ -24,8 +27,24 @@ public class DataModel{
     DataModel(){
     }
 
-    private CopyOnWriteArrayList<Flight> flights = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<Route>  routes  = new CopyOnWriteArrayList<>();
+    void addFlightsListener( ListChangeListener<Flight> listener ){
+        flights.addListener( listener );
+    }
+
+    void removeFlightsListener( ListChangeListener<Flight> listener ){
+        flights.removeListener( listener );
+    }
+
+    void addRoutesListener( ListChangeListener<Route> listener ){
+        routes.addListener( listener );
+    }
+
+    void removeRoutesListener( ListChangeListener<Route> listener ){
+        routes.removeListener( listener );
+    }
+
+    private ObservableList<Flight> flights = FXCollections.observableList( new CopyOnWriteArrayList<>() );
+    private ObservableList<Route>  routes  = FXCollections.observableList( new CopyOnWriteArrayList<>() );
 
     /**
      List all unique airport, that stores in routes
@@ -96,7 +115,7 @@ public class DataModel{
                            Objects.equals( flight1.getArriveDateTime() , flight.getArriveDateTime() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
-        flights.addIfAbsent( flight );
+        flights.add( flight );
     }
 
 
@@ -192,7 +211,7 @@ public class DataModel{
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
         route.setId( routesPrimaryKeysGenerator.next() );
-        routes.addIfAbsent( route );
+        routes.add( route );
     }
 
     private Iterator<Integer> routesPrimaryKeysGenerator = IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
@@ -280,8 +299,8 @@ public class DataModel{
         routesPrimaryKeysGenerator = IntStream
                 .rangeClosed( routes.stream().mapToInt( Route::getId ).max().orElse( 0 ) + 1 , Integer.MAX_VALUE )
                 .iterator();
-        this.routes = new CopyOnWriteArrayList<>( routes );
-        this.flights = new CopyOnWriteArrayList<>( flights );
+        this.routes = FXCollections.observableList( new CopyOnWriteArrayList<>( routes ) );
+        this.flights = FXCollections.observableList( new CopyOnWriteArrayList<>( flights ) );
     }
 
     /**
@@ -387,8 +406,8 @@ public class DataModel{
     }
 
     public void clear(){
-        routes = new CopyOnWriteArrayList<>();
-        flights = new CopyOnWriteArrayList<>();
+        routes.clear();
+        flights.clear();
         routesPrimaryKeysGenerator = IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
     }
 }
