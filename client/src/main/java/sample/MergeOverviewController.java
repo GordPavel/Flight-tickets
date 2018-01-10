@@ -6,6 +6,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import model.DataModelInstanceSaver;
 import model.Flight;
 
 public class MergeOverviewController{
@@ -57,11 +58,11 @@ public class MergeOverviewController{
      */
     @FXML
     public void handleAcceptNew(){
-        Controller.model.editFlight( flightTable.getSelectionModel().getSelectedItem() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getRoute() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getPlaneID() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getDepartureDateTime() ,
-                                     flightTable.getSelectionModel().getSelectedItem().getArriveDateTime() );
+        DataModelInstanceSaver.getInstance().editFlight( flightTable.getSelectionModel().getSelectedItem() ,
+                                                         flightTable.getSelectionModel().getSelectedItem().getRoute() ,
+                                                         flightTable.getSelectionModel().getSelectedItem().getPlaneID() ,
+                                                         flightTable.getSelectionModel().getSelectedItem().getDepartureDateTime() ,
+                                                         flightTable.getSelectionModel().getSelectedItem().getArriveDateTime() );
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
         if (flightTable.getItems().isEmpty())
@@ -93,8 +94,8 @@ public class MergeOverviewController{
     @FXML
     public void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
-            Controller.model.editFlight( flight , flight.getRoute() , flight.getPlaneID() , flight.getDepartureDateTime() ,
-                                         flight.getArriveDateTime() );
+            DataModelInstanceSaver.getInstance().editFlight( flight , flight.getRoute() , flight.getPlaneID() , flight.getDepartureDateTime() ,
+                                                             flight.getArriveDateTime() );
         }
         flightTable.setItems( null );
         flightTable.refresh();

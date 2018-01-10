@@ -2,21 +2,25 @@ package sample;
 
 import com.jfoenix.controls.JFXButton;
 import exceptions.FlightAndRouteException;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.text.Font;
+import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
+import model.DataModelInstanceSaver;
 import model.Route;
 
-import java.io.IOException;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  Controller for adding route view
@@ -24,162 +28,144 @@ import java.util.regex.Pattern;
  */
 
 public class AddAndEditRoutesOverviewController{
-    private Controller controller = Controller.getInstance();
-
-    @FXML TextField departureTextField;
-    @FXML Label     errorDepartureLabel;
-    @FXML TextField destinationTextField;
-    @FXML Label     errorDestinationLabel;
-    @FXML Label     mainLabel;
-    @FXML JFXButton addAndEditRouteButton;
+    @FXML ChoiceBox<String> departureCountryChoice;
+    @FXML ChoiceBox<String> destinationCountryChoice;
+    @FXML ChoiceBox<ZoneId> departureCityChoice;
+    @FXML ChoiceBox<ZoneId> destinationCityChoice;
+    @FXML JFXButton         addAndEditRouteButton;
 
     private Route editingRoute;
 
-    AddAndEditRoutesOverviewController( Route editingRoute ){
+    private Stage thisStage;
+    private Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds().stream().sorted().filter(
+            Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate().and( pattern.asPredicate() ) ).collect(
+            Collector.of( HashMap::new , ( Map<String, List<ZoneId>> map , String zone ) -> {
+                Matcher matcher = pattern.matcher( zone );
+                //noinspection ResultOfMethodCallIgnored
+                matcher.find();
+                String       key    = matcher.group( 1 );
+                final ZoneId zoneId = ZoneId.of( zone );
+                if( map.containsKey( key ) ){
+                    map.get( key ).add( zoneId );
+                }else{
+                    map.put( key , new ArrayList<ZoneId>(){{
+                        add( zoneId );
+                    }} );
+                }
+            } , ( map1 , map2 ) -> {
+                map1.forEach(
+                        ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
+                return map2;
+            } ) );
+
+    AddAndEditRoutesOverviewController( Route editingRoute , Stage thisStage ){
         this.editingRoute = editingRoute;
+        this.thisStage = thisStage;
     }
 
     /**
      initialization of view
      */
+    @SuppressWarnings( "ResultOfMethodCallIgnored" )
     @FXML
-    private void initialize() throws IOException{
-        Font PT_Mono = Font.loadFont( getClass().getResource("/PT_Mono.ttf").openStream() , 15 );
-        departureTextField.setFont( PT_Mono );
-        errorDepartureLabel.setVisible( false );
-        errorDepartureLabel.setLayoutX( departureTextField.getLayoutX() + 8.5 );
-        errorDepartureLabel.setLayoutY( departureTextField.getLayoutY() + 16 );
-        departureTextField.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> textFieldErrorHandler( newValue , oldValue ,
-                                                                               errorDepartureLabel ,
-                                                                               departureTextField ) );
-
-        destinationTextField.setFont( PT_Mono );
-        errorDestinationLabel.setVisible( false );
-        errorDestinationLabel.setLayoutX( destinationTextField.getLayoutX() + 8.5 );
-        errorDestinationLabel.setLayoutY( destinationTextField.getLayoutY() + 16 );
-        destinationTextField.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> textFieldErrorHandler( newValue , oldValue ,
-                                                                               errorDepartureLabel ,
-                                                                               departureTextField ) );
-        addAndEditRouteButton.setOnAction( event -> {
-            if( departureTextField.getText().equals( "" ) || destinationTextField.getText().equals( "" ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Empty fields " );
-                alert.setHeaderText( "No parameters" );
-                alert.setContentText( "Please enter all parameters for adding a new route." );
-                alert.showAndWait();
-            }else{
-                try{
-                    Controller.model
-                            .addRoute( new Route( departureTextField.getText() , destinationTextField.getText() ) );
-                    controller.updateRoutes();
-                    /**
-                     * TODO: put here request to server to add route
-                     */
-                    Main.changed = true;
-                    closeWindow( event );
-                }catch( FlightAndRouteException e ){
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
-                    alert.setTitle( "Model`s message" );
-                    alert.setHeaderText( "Model send message:" );
-                    alert.setContentText( e.getMessage() );
-                    alert.showAndWait();
-                }
+    private void initialize(){
+        departureCountryChoice.setItems( zones.keySet().stream().collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+        destinationCountryChoice.setItems( zones.keySet().stream().collect(
+                Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+        StringConverter<ZoneId> zoneIdStringConverter = new StringConverter<ZoneId>(){
+            @Override
+            public String toString( ZoneId zone ){
+                Matcher matcher = pattern.matcher( zone.getId() );
+                matcher.find();
+                return matcher.group( 2 );
             }
-        } );
+
+            @Override
+            public ZoneId fromString( String string ){
+                return ZoneId.of( string );
+            }
+        };
+        departureCityChoice.setConverter( zoneIdStringConverter );
+        destinationCityChoice.setConverter( zoneIdStringConverter );
+        departureCountryChoice.getSelectionModel().selectedItemProperty().addListener(
+                ( observable , oldValue , newValue ) -> countrySelected( newValue , departureCityChoice ) );
+        destinationCountryChoice.getSelectionModel().selectedItemProperty().addListener(
+                ( observable , oldValue , newValue ) -> countrySelected( newValue , destinationCityChoice ) );
+
+        BooleanProperty addAvailable = new SimpleBooleanProperty(
+                Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() ).isPresent() &&
+                Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() ).isPresent() );
+        addAvailable.bind( departureCityChoice.getSelectionModel().selectedItemProperty().isNotNull()
+                                              .and( destinationCityChoice.getSelectionModel().selectedItemProperty()
+                                                                         .isNotNull() ) );
+        addAndEditRouteButton.setDisable( !addAvailable.getValue() );
+        addAndEditRouteButton.disableProperty().bind( addAvailable.not() );
 
         if( editingRoute != null ){
-            departureTextField.textProperty().setValue( editingRoute.getFrom() );
-            destinationTextField.textProperty().setValue( editingRoute.getTo() );
-            addAndEditRouteButton.setText( "Edit" );
-            mainLabel.setText( "Enter new data." );
-//            Edit action
-            addAndEditRouteButton.setOnAction( event -> {
-                if( departureTextField.getText().equals( "" ) || destinationTextField.getText().equals( "" ) ){
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
-                    alert.setTitle( "Empty fields " );
-                    alert.setHeaderText( "No parameters" );
-                    alert.setContentText( "Please enter all parameters for adding a new route." );
-                    alert.showAndWait();
-                }else{
-                    try{
-                        Controller.model.editRoute( Controller.routeForEdit , departureTextField.getText() ,
-                                                    destinationTextField.getText() );
-                        controller.updateRoutes();
-                        Main.changed = true;
-                        /**
-                         * TODO: put here request to server to add route
-                         */
-                        closeWindow( event );
-                    }catch( FlightAndRouteException e ){
-                        Alert alert = new Alert( Alert.AlertType.WARNING );
-                        alert.setTitle( "Model`s message" );
-                        alert.setHeaderText( "Model send message:" );
-                        alert.setContentText( e.getMessage() );
-                        alert.showAndWait();
-                    }
-                }
-            } );
+            Matcher departureCountryMatcher = pattern.matcher( editingRoute.getFrom().getId() );
+            departureCountryMatcher.find();
+            departureCountryChoice.getSelectionModel().select( departureCountryMatcher.group( 1 ) );
+            departureCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getFrom().getId() ) );
+
+            Matcher destinationCountryMatcher = pattern.matcher( editingRoute.getTo().getId() );
+            destinationCountryMatcher.find();
+            destinationCountryChoice.getSelectionModel().select( destinationCountryMatcher.group( 1 ) );
+            destinationCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getTo().getId() ) );
+        }
+    }
+
+    @FXML
+    private void handleAddAction(){
+        try{
+            DataModelInstanceSaver.getInstance().addRoute( new Route(
+                    Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
+                            .orElseThrow( IllegalStateException::new ) ,
+                    Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
+                            .orElseThrow( IllegalStateException::new ) ) );
+//            Controller.getInstance().updateRoutes();
+//            TODO: put here request to server to add flight
+            Main.changed = true;
+            closeWindow();
+        }catch( FlightAndRouteException e ){
+            Alert alert = new Alert( Alert.AlertType.WARNING );
+            alert.setTitle( "Model`s message" );
+            alert.setHeaderText( "Model send message:" );
+            alert.setContentText( e.getMessage() );
+            alert.showAndWait();
+        }
+    }
+
+    private void countrySelected( String newValue , ChoiceBox<ZoneId> cityBox ){
+        Optional<String> chosenCorty = Optional.ofNullable( newValue );
+        if( chosenCorty.isPresent() ){
+            cityBox.setItems( zones.get( chosenCorty.get() ).stream().collect(
+                    Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+        }else{
+            cityBox.getItems().clear();
         }
     }
 
     /**
      Clear Button. Clear all fields in GUI
      */
-
     @FXML
-    private void clearData(){
-        departureTextField.clear();
-        destinationTextField.clear();
+    private void handleClearData(){
+        departureCountryChoice.getSelectionModel().clearSelection();
+        destinationCountryChoice.getSelectionModel().clearSelection();
+        departureCityChoice.getSelectionModel().clearSelection();
+        destinationCityChoice.getSelectionModel().clearSelection();
     }
 
     /**
-     @param actionEvent Cancel Button.
-     Close a window for adding a new route
      */
-
     @FXML
-    public void handleCancelAction( ActionEvent actionEvent ){
-        closeWindow( actionEvent );
+    public void handleCancelAction(){
+        closeWindow();
     }
 
-    private void closeWindow( Event event ){
-        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
-
-        stage.close();
-    }
-
-    private void textFieldErrorHandler( String newValue , String oldValue , Label errorLabel ,
-                                        TextField handlingTextField ){
-        if( newValue.length() > 20 ){
-            handlingTextField.textProperty().setValue( oldValue );
-        }
-        Matcher matcher = Pattern.compile( "[^0-9\\-_\\w]+" ).matcher( newValue );
-        if( matcher.find() ){
-            handlingTextField.setStyle( "-fx-text-inner-color: red;" );
-            handlingTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
-            errorLabel.setVisible( true );
-            errorLabel.setLayoutX( handlingTextField.getLayoutX() + 8.5 +
-                                   matcher.start() * ( errorLabel.getFont().getSize() / 1.43 ) );
-        }else{
-            errorLabel.setVisible( false );
-            handlingTextField.setStyle( "-fx-text-inner-color: black;" );
-            handlingTextField.setTooltip( null );
-        }
-        checkErrors();
-    }
-
-    /**
-     Check for enable/disable add button. Switch it off, if user use unacceptable symbols
-     */
-    private void checkErrors(){
-        Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
-        if( pattern.matcher( departureTextField.getText() ).matches() &&
-            pattern.matcher( destinationTextField.getText() ).matches() ){
-            addAndEditRouteButton.setDisable( false );
-        }else{
-            addAndEditRouteButton.setDisable( true );
-        }
+    private void closeWindow(){
+        thisStage.close();
     }
 }

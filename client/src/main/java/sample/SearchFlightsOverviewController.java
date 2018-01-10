@@ -102,7 +102,7 @@ public class SearchFlightsOverviewController{
         flightTimeTo.getEditor().textProperty()
                     .addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
-        routesListView.setItems( Controller.model.listRoutesWithPredicate( route -> true ).collect(
+        routesListView.setItems( DataModelInstanceSaver.getInstance().listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
@@ -112,7 +112,7 @@ public class SearchFlightsOverviewController{
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
             routesListView.getItems().setAll(
-                    Controller.model.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
+                    DataModelInstanceSaver.getInstance().listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
@@ -264,7 +264,8 @@ public class SearchFlightsOverviewController{
         flightTimeFrom.setValue( LocalTime.MIN );
         flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
         mainController.flightTable.getItems()
-                                  .setAll( Controller.model.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+                                  .setAll( DataModelInstanceSaver.getInstance()
+                                                                 .listFlightsWithPredicate( flight -> true ).collect( toList() ) );
     }
 
 

@@ -1,8 +1,6 @@
 package sample;
 
-import exceptions.FlightAndRouteException;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,18 +8,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import model.DataModel;
+import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -32,7 +25,7 @@ import static java.util.stream.Collectors.toList;
  Controller for routes and flights view
  Shows the information about all routes and flights
  */
-public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverviewController{
+public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
 
 
     private Controller controller = Controller.getInstance();
@@ -66,14 +59,13 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     private Stage thisStage;
 
 
-    RoutesFlightsReadOnlyOverviewController(Stage thisStage ){
+    RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
         this.thisStage = thisStage;
 
     }
 
-    RoutesFlightsReadOnlyOverviewController(  ){
+    RoutesFlightsReadOnlyOverviewController(){
     }
-
 
 
     /**
@@ -82,21 +74,20 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
     @Override
     @FXML
     public void initialize(){
+        fileMenu.setVisible( false );
+        addRouteButton.setVisible( false );
+        editRouteButton.setVisible( false );
+        deleteRouteButton.setVisible( false );
+        addFlightButton.setVisible( false );
+        editFlightButton.setVisible( false );
+        deleteFlightButton.setVisible( false );
+        updateFlightButton.setVisible( false );
+        updateRouteButton.setVisible( false );
+        searchRouteButton.setVisible( false );
 
-        fileMenu.setVisible(false);
-        addRouteButton.setVisible(false);
-        editRouteButton.setVisible(false);
-        deleteRouteButton.setVisible(false);
-        addFlightButton.setVisible(false);
-        editFlightButton.setVisible(false);
-        deleteFlightButton.setVisible(false);
-        updateFlightButton.setVisible(false);
-        updateRouteButton.setVisible(false);
-        searchRouteButton.setVisible(false);
-
-        routeTable.setPrefWidth(600);
-        departureColumn.setPrefWidth(300);
-        destinationColumn.setPrefWidth(300);
+        routeTable.setPrefWidth( 600 );
+        departureColumn.setPrefWidth( 300 );
+        destinationColumn.setPrefWidth( 300 );
 
         controller.updateFlights();
         controller.updateRoutes();
@@ -114,15 +105,15 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         destination.textProperty()
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
 
-        thisStage.setOnCloseRequest(event -> {controller.stopThread();});
+        thisStage.setOnCloseRequest( event -> {controller.stopThread();} );
 
-        Controller.getInstance().setThread(new ReadOnlyThread());
+        Controller.getInstance().setThread( new ReadOnlyThread() );
         Controller.getInstance().startThread();
     }
 
 
     private void searchListeners( String newValue , TextField textField ){
-        if( !newValue.matches( "[\\w\\d\\-_\\?\\*]*" ) ){
+        if( !newValue.matches( "[\\w\\d\\-_?*]*" ) ){
             textField.setStyle( "-fx-text-inner-color: red;" );
             textField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, ?, *" ) );
         }else{
@@ -130,13 +121,13 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
             textField.setTooltip( null );
             Pattern departurePattern = Pattern.compile(
                     ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" );
+                    ".*" , Pattern.CASE_INSENSITIVE );
             Pattern destinationPattern = Pattern.compile(
                     ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" );
+                    ".*" , Pattern.CASE_INSENSITIVE );
             routeTable.setItems( controller.getRoutes().stream().filter(
-                    route -> departurePattern.matcher( route.getFrom().toUpperCase() ).matches() &&
-                             destinationPattern.matcher( route.getTo().toUpperCase() ).matches() ).collect(
+                    route -> departurePattern.matcher( route.getFrom().getId() ).matches() &&
+                             destinationPattern.matcher( route.getTo().getId() ).matches() ).collect(
                     Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         }
 
@@ -162,7 +153,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
             try{
                 Stage                           popUp         = new Stage();
                 FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource("/fxml/SearchFlightsOverview.fxml") );
+                        new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
                 SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -190,15 +181,15 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
         alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +
-                "You can use it to search for routes and flights in data base." );
-        alert.setContentText(" - Use * and ? in search field instead of many or one unknown symbol;\n");
+                             "You can use it to search for routes and flights in data base." );
+        alert.setContentText( " - Use * and ? in search field instead of many or one unknown symbol;\n" );
         alert.showAndWait();
     }
 
     @FXML
     private void handleChangeDBAction(){
 
-        Controller.model.clear();
+        DataModelInstanceSaver.getInstance().clear();
         controller.stopThread();
 
         /**
@@ -207,11 +198,11 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
          * put here code to open window, that will allow you to download new DB.
          */
 
-        try {
-            Stage primaryStage = new Stage();
-            FXMLLoader                      loader     =
-                    new FXMLLoader( getClass().getResource("/fxml/ChoiseOverview.fxml") );
-            ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
+        try{
+            Stage                    primaryStage = new Stage();
+            FXMLLoader               loader       =
+                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            ChoiseOverviewController controller   = new ChoiseOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
             Scene scene = new Scene( loader.load() );
@@ -219,18 +210,17 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
             primaryStage.setResizable( false );
             primaryStage.show();
             thisStage.close();
-        } catch (IOException e)
-        {
-            System.out.println("load problem");
-            System.out.println(e.getMessage());
+        }catch( IOException e ){
+            System.out.println( "load problem" );
+            System.out.println( e.getMessage() );
         }
 
     }
 
     @FXML
-    private void handleLogOutAction(Event event ){
+    private void handleLogOutAction( Event event ){
 
-        Controller.model.clear();
+        DataModelInstanceSaver.getInstance().clear();
         controller.stopThread();
 
         /**
@@ -239,28 +229,25 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
          * somehow let server know, that you change your login
          */
 
-        try {
-            Stage loginStage = new Stage();
-            FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
-            LoginOverviewController logInController = new LoginOverviewController(loginStage);
-            loader.setController(logInController);
-            loginStage.setTitle("Login");
-            Scene scene = new Scene(loader.load());
-            loginStage.setScene(scene);
-            loginStage.setResizable(false);
+        try{
+            Stage                   loginStage      = new Stage();
+            FXMLLoader              loader          =
+                    new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+            LoginOverviewController logInController = new LoginOverviewController( loginStage );
+            loader.setController( logInController );
+            loginStage.setTitle( "Login" );
+            Scene scene = new Scene( loader.load() );
+            loginStage.setScene( scene );
+            loginStage.setResizable( false );
             loginStage.show();
             thisStage.close();
-        } catch (IOException e)
-        {
-            System.out.println("load problem");
-            System.out.println(e.getMessage());
+        }catch( IOException e ){
+            System.out.println( "load problem" );
+            System.out.println( e.getMessage() );
         }
 
 
     }
-
-
 
 
     public void closeWindow( Event event ){

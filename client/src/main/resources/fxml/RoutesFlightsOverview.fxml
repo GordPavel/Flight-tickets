@@ -39,12 +39,12 @@
                            ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
                            text="Add" textFill="WHITE"/>
-                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="310.0"
+                <JFXButton fx:id="editRoute" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="310.0"
                            mnemonicParsing="false" onAction="#handleEditRouteButton" prefHeight="36.0" prefWidth="75.0"
                            ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
                            text="Edit" textFill="WHITE"/>
-                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="370.0"
+                <JFXButton fx:id="deleteRoute" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="370.0"
                            mnemonicParsing="false" onAction="#handleDeleteRouteButton" prefHeight="36.0"
                            prefWidth="75.0" ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
@@ -66,12 +66,12 @@
                            ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
                            text="Add" textFill="WHITE"/>
-                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="310.0"
+                <JFXButton fx:id="editFlight" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="310.0"
                            mnemonicParsing="false" onAction="#handleEditFlightButton" prefHeight="35.0" prefWidth="75.0"
                            ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
                            text="Edit" textFill="WHITE"/>
-                <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="360.0"
+                <JFXButton fx:id="deleteFlight" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="360.0"
                            mnemonicParsing="false" onAction="#handleDeleteFlightButton" prefHeight="35.0"
                            prefWidth="75.0" ripplerFill="#dfe3ee"
                            style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"

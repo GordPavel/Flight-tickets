@@ -43,6 +43,14 @@ public class DataModel{
         routes.removeListener( listener );
     }
 
+    public ObservableList<Flight> getFLightObservableList(){
+        return flights;
+    }
+
+    public ObservableList<Route> getRouteObservableList(){
+        return routes;
+    }
+
     private ObservableList<Flight> flights = FXCollections.observableList( new CopyOnWriteArrayList<>() );
     private ObservableList<Route>  routes  = FXCollections.observableList( new CopyOnWriteArrayList<>() );
 
