@@ -213,7 +213,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
     @FXML
     public void handleAddRouteButton(){
         try{
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            FXMLLoader loader = new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/AddRoutesOverview.fxml") );
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null );
             loader.setController( controller );
             Stage popUp = new Stage();
@@ -281,7 +281,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }else{
             controller.setRouteForEdit( selectedRoute );
             try{
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+                FXMLLoader loader = new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/AddRoutesOverview.fxml") );
                 AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( selectedRoute );
                 loader.setController( controller );
 
@@ -315,7 +315,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
     public void handleAddFlightButton(){
         try{
             FXMLLoader                          loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+                    new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/AddFlightsOverview.fxml") );
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null );
             loader.setController( controller );
             Stage popUp = new Stage();
@@ -352,7 +352,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         }else{
             controller.setFlightForEdit( selectedFlight );
             try{
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+                FXMLLoader loader = new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/AddFlightsOverview.fxml") );
                 AddAndEditFlightsOverviewController controller =
                         new AddAndEditFlightsOverviewController( selectedFlight );
                 loader.setController( controller );
@@ -383,7 +383,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
             try{
                 Stage                           popUp         = new Stage();
                 FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+                        new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/SearchFlightsOverview.fxml") );
                 SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -424,7 +424,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         try {
             Stage primaryStage = new Stage();
             FXMLLoader                      loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+                    new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/ChoiseOverview.fxml") );
             ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
@@ -456,7 +456,7 @@ public class RoutesFlightsWriteOverviewController extends  RoutesFlightsOverview
         try {
             Stage loginStage = new Stage();
             FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+                    new FXMLLoader(getClass().getResource("/buffer/src/main/resources/fxml/LoginOverview.fxml"));
             LoginOverviewController logInController = new LoginOverviewController(loginStage);
             loader.setController(logInController);
             loginStage.setTitle("Login");

@@ -23,7 +23,7 @@ public class Main extends Application{
     public void start( Stage primaryStage ) throws Exception{
 
         FXMLLoader                      loader     =
-                new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+                new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/RoutesFlightsOverview.fxml") );
         RoutesFlightsOverviewController controller = new RoutesFlightsOverviewController( primaryStage );
         loader.setController( controller );
         primaryStage.setTitle( "Information system about flights and routes" );

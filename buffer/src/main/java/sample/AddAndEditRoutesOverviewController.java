@@ -44,7 +44,7 @@ public class AddAndEditRoutesOverviewController{
      */
     @FXML
     private void initialize() throws IOException{
-        Font PT_Mono = Font.loadFont( getClass().getResource( "/PT_Mono.ttf" ).openStream() , 15 );
+        Font PT_Mono = Font.loadFont( getClass().getResource("/buffer/src/main/resources/PT_Mono.ttf").openStream() , 15 );
         departureTextField.setFont( PT_Mono );
         errorDepartureLabel.setVisible( false );
         errorDepartureLabel.setLayoutX( departureTextField.getLayoutX() + 8.5 );

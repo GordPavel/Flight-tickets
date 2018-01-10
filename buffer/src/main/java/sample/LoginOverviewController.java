@@ -84,7 +84,7 @@ public class LoginOverviewController {
         try {
             Stage primaryStage = new Stage();
             FXMLLoader                      loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+                    new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/ChoiseOverview.fxml") );
             ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );

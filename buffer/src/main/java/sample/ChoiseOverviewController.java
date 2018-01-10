@@ -70,7 +70,7 @@ public class ChoiseOverviewController {
         try {
             Stage primaryStage = new Stage();
             FXMLLoader                      loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+                    new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/RoutesFlightsOverview.fxml") );
             RoutesFlightsWriteOverviewController controller = new RoutesFlightsWriteOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Information system about flights and routes" );

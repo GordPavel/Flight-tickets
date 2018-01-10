@@ -24,7 +24,7 @@ public class ClientMain extends Application{
     public void start( Stage primaryStage ) throws Exception{
 
         FXMLLoader                      loader     =
-                new FXMLLoader( getClass().getResource( "/fxml/ConnectionOverview.fxml" ) );
+                new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/ConnectionOverview.fxml") );
         ConnectionOverviewController controller = new ConnectionOverviewController( primaryStage );
         loader.setController( controller );
         primaryStage.setTitle( "Connection to server" );

@@ -67,7 +67,7 @@ public class ConnectionOverviewController {
         try {
             Stage loginStage = new Stage();
             FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+                    new FXMLLoader(getClass().getResource("/buffer/src/main/resources/fxml/LoginOverview.fxml"));
             LoginOverviewController controller = new LoginOverviewController(loginStage);
             loader.setController(controller);
             loginStage.setTitle("Login");
