@@ -88,7 +88,7 @@ public class AddAndEditFlightsOverviewController{
         departureDate.getEditor().setDisable( true );
         arrivingDate.getEditor().setDisable( true );
 
-        Font PT_Mono = Font.loadFont( getClass().getResource("/buffer/src/main/resources/PT_Mono.ttf").openStream() , 15 );
+        Font PT_Mono = Font.loadFont( getClass().getResource("/PT_Mono.ttf").openStream() , 15 );
 
         number.setFont( PT_Mono );
         errorNumberLabel.setVisible( false );

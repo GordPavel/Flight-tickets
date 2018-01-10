@@ -162,7 +162,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
             try{
                 Stage                           popUp         = new Stage();
                 FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/SearchFlightsOverview.fxml") );
+                        new FXMLLoader( getClass().getResource("/fxml/SearchFlightsOverview.fxml") );
                 SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -210,7 +210,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         try {
             Stage primaryStage = new Stage();
             FXMLLoader                      loader     =
-                    new FXMLLoader( getClass().getResource("/buffer/src/main/resources/fxml/ChoiseOverview.fxml") );
+                    new FXMLLoader( getClass().getResource("/fxml/ChoiseOverview.fxml") );
             ChoiseOverviewController controller = new ChoiseOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
@@ -242,7 +242,7 @@ public class RoutesFlightsReadOnlyOverviewController extends  RoutesFlightsOverv
         try {
             Stage loginStage = new Stage();
             FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/buffer/src/main/resources/fxml/LoginOverview.fxml"));
+                    new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
             LoginOverviewController logInController = new LoginOverviewController(loginStage);
             loader.setController(logInController);
             loginStage.setTitle("Login");
