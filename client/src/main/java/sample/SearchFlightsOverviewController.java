@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
 import javafx.beans.value.ChangeListener;
@@ -55,6 +56,9 @@ public class SearchFlightsOverviewController{
     @FXML JFXTimePicker flightTimeFrom;
     @FXML JFXTimePicker flightTimeTo;
 
+    @FXML
+    JFXButton searchButton;
+
     private Controller controller = Controller.getInstance();
     private DataModel  dataModel  = DataModelInstanceSaver.getInstance();
     private RoutesFlightsOverviewController mainController;
@@ -98,7 +102,7 @@ public class SearchFlightsOverviewController{
         flightTimeTo.getEditor().textProperty()
                     .addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.setOnMouseClicked( event -> changed() );
-        routesListView.setItems( dataModel.listRoutesWithPredicate( route -> true ).collect(
+        routesListView.setItems( Controller.model.listRoutesWithPredicate( route -> true ).collect(
                 Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
@@ -108,7 +112,7 @@ public class SearchFlightsOverviewController{
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
             routesListView.getItems().setAll(
-                    dataModel.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
+                    Controller.model.listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
@@ -120,6 +124,10 @@ public class SearchFlightsOverviewController{
             mainController.flightTable.setItems( controller.getFlights() );
             controller.setFlightSearchActive( false );
         } );
+        if (mainController instanceof RoutesFlightsReadOnlyOverviewController)
+        {
+            searchButton.setVisible(false);
+        }
     }
 
 
@@ -256,7 +264,19 @@ public class SearchFlightsOverviewController{
         flightTimeFrom.setValue( LocalTime.MIN );
         flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
         mainController.flightTable.getItems()
-                                  .setAll( dataModel.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+                                  .setAll( Controller.model.listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+    }
+
+
+    /**
+     *
+     */
+    @FXML
+    public void handleSearchAction(){
+
+        /**
+         * TODO: send predecate to server to request specified flights
+         */
     }
 
 }

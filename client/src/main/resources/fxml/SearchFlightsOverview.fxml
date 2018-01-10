@@ -52,6 +52,9 @@
     </Label>
     <JFXTimePicker fx:id="flightTimeTo" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
         <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="20.0" layoutY="535.0" mnemonicParsing="false" onAction="#handleClearAction" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #354a86;" textFill="WHITE" text="Clear" />
+    <JFXTimePicker fx:id="flightTimeToTextField" layoutX="224.0" layoutY="333.0" prefHeight="25.0" prefWidth="100.0" defaultColor="darkslateblue" />
+    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="20.0" layoutY="535.0" mnemonicParsing="false" onAction="#handleClearAction"  prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #354a86;"  textFill="WHITE" text="Clear" />
+    <JFXButton fx:id="searchButton" buttonType="RAISED" focusTraversable="false" layoutX="20.0" layoutY="505.0" mnemonicParsing="false" onAction="#handleSearchAction"  prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #354a86;"  textFill="WHITE" text="Search" />
     <ListView fx:id="routesListView" layoutX="163.0" layoutY="382.0" prefHeight="200.0" prefWidth="200.0" />
     <TextField fx:id="searchFromTextField" layoutX="14.0" layoutY="416.0" prefHeight="27.0" prefWidth="137.0" promptText="search from" />
     <TextField fx:id="searchToTextField" layoutX="16.0" layoutY="468.0" prefHeight="27.0" prefWidth="137.0" promptText="search to" />
