@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
  Allows to enter data for adding a new flight
  */
 
-@SuppressWarnings( "WeakerAccess" )
 class AddAndEditFlightsOverviewController{
     @FXML ChoiceBox<Route> routesBox;
     @FXML TextField        number;
@@ -45,11 +44,13 @@ class AddAndEditFlightsOverviewController{
     private Flight          editingFlight;
     private Stage           thisStage;
     private BooleanProperty ifFlightTimeRight;
+    private BooleanProperty syntaxErrors;
 
     AddAndEditFlightsOverviewController( Flight editingFlight , Stage thisStage ){
         this.editingFlight = editingFlight;
         this.thisStage = thisStage;
         ifFlightTimeRight = new SimpleBooleanProperty( true );
+        syntaxErrors = new SimpleBooleanProperty( false );
     }
 
     /**
@@ -232,7 +233,6 @@ class AddAndEditFlightsOverviewController{
                                           .editFlight( editingFlight , routesBox.getSelectionModel().getSelectedItem() ,
                                                        planeID.getText() , departureDateTime , arriveDateTime );
                 }
-                Controller.getInstance().updateFlights();
 //            TODO: put here request to server to add flight
                 Main.changed = true;
                 closeWindow();
@@ -260,12 +260,13 @@ class AddAndEditFlightsOverviewController{
             errorLabel.setVisible( true );
             errorLabel.setLayoutX( handlingTextField.getLayoutX() + 8.5 +
                                    matcher.start() * ( errorLabel.getFont().getSize() / 1.43 ) );
+            syntaxErrors.setValue( true );
         }else{
             errorLabel.setVisible( false );
             handlingTextField.setStyle( "-fx-text-inner-color: black;" );
             handlingTextField.setTooltip( null );
+            syntaxErrors.setValue( false );
         }
-        checkErrors();
     }
 
     /**
@@ -289,7 +290,7 @@ class AddAndEditFlightsOverviewController{
     /**
      */
     @FXML
-    public void handleCancelAction(){
+    private void handleCancelAction(){
         closeWindow();
     }
 
@@ -297,15 +298,4 @@ class AddAndEditFlightsOverviewController{
         thisStage.close();
     }
 
-    /**
-     Check for enable/disable add button. Switch it off, if user use unacceptable symbols
-     */
-    private void checkErrors(){
-        Pattern pattern = Pattern.compile( "[0-9\\-_\\w]*" );
-        if( pattern.matcher( number.getText() ).matches() && pattern.matcher( planeID.getText() ).matches() ){
-            addAndEditFlightButton.setDisable( false );
-        }else{
-            addAndEditFlightButton.setDisable( true );
-        }
-    }
 }

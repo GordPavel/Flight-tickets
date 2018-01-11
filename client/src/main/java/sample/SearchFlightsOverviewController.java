@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
  Controller for flight search view
  Allows to search flights in DataModel with params
  */
-@SuppressWarnings( "WeakerAccess" )
 class SearchFlightsOverviewController{
 
     @FXML Label           numberLabel;
@@ -55,28 +54,32 @@ class SearchFlightsOverviewController{
 
     @FXML JFXButton searchButton;
 
-    private RoutesFlightsOverviewController   mainController;
-    private Stage                             thisStage;
-    private boolean                           correctSymbols;
-    private FilteredList<Flight>              flightFilteredList;
-    private ObjectProperty<Predicate<Flight>> filteringPredicate;
+    private RoutesFlightsOverviewController mainController;
+    private Stage                           thisStage;
+    private boolean                         correctSymbols;
+    private ObjectProperty<Predicate<Flight>> flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
+    private FilteredList<Route>               routeFilteredList =
+            DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
+    private ObjectProperty<Predicate<Route>>  routesPredicate   = new SimpleObjectProperty<>( route -> true );
 
     SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
         this.thisStage = thisStage;
-        flightFilteredList = mainController.flightTable.getItems().filtered( flight -> true );
+        FilteredList<Flight> flightFilteredList = mainController.flightTable.getItems().filtered( flight -> true );
         mainController.flightTable.setItems( flightFilteredList );
-        filteringPredicate = new SimpleObjectProperty<>( flight -> true );
+        flightFilteredList.predicateProperty().bind( flightsPredicate );
+
+        routeFilteredList.predicateProperty().bind( routesPredicate );
     }
 
     /**
      initialization of view
      */
     @FXML
-    public void initialize(){
-        flightFilteredList.predicateProperty().bind( filteringPredicate );
+    private void initialize(){
         correctSymbols = true;
         setLayouts();
+        routesListView.setItems( routeFilteredList );
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
         numberTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         numberTextField.textProperty()
@@ -99,6 +102,7 @@ class SearchFlightsOverviewController{
         flightTimeTo.setValue( LocalTime.MAX );
         StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
             final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
+
             @Override
             public String toString( LocalTime time ){
                 return timeFormatter.format( time );
@@ -115,7 +119,6 @@ class SearchFlightsOverviewController{
         flightTimeTo.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         routesListView.getSelectionModel().selectedItemProperty()
                       .addListener( ( observable , oldValue , newValue ) -> changed() );
-        routesListView.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList() );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
@@ -123,8 +126,7 @@ class SearchFlightsOverviewController{
             Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
-            routesListView.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList()
-                                                           .filtered( fromPredicate.and( toPredicate ) ) );
+            routesPredicate.setValue( fromPredicate.and( toPredicate ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
@@ -133,7 +135,7 @@ class SearchFlightsOverviewController{
         searchToTextField.textProperty()
                          .addListener( ( observable , oldValue , newValue ) -> formatCheck( searchToTextField ) );
         thisStage.setOnCloseRequest( event -> {
-            mainController.flightTable.setItems( Controller.getInstance().getFlights() );
+            mainController.flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
             Controller.getInstance().setFlightSearchActive( false );
         } );
         if( mainController instanceof RoutesFlightsReadOnlyOverviewController ){
@@ -180,7 +182,7 @@ class SearchFlightsOverviewController{
             Predicate<Flight> v =
                     numberPredicate.and( planePredicate ).and( routePredicate ).and( departureDatePredicate )
                                    .and( arriveDatePredicate ).and( flightTimePredicate );
-            filteringPredicate.setValue( v );
+            flightsPredicate.setValue( v );
         }
     }
 
@@ -254,7 +256,7 @@ class SearchFlightsOverviewController{
      Clear button. Clears all fields
      */
     @FXML
-    public void handleClearAction(){
+    private void handleClearAction(){
         numberTextField.clear();
         planeIdTextField.clear();
         searchFromTextField.clear();
@@ -275,7 +277,7 @@ class SearchFlightsOverviewController{
      *
      */
     @FXML
-    public void handleSearchAction(){
+    private void handleSearchAction(){
         // TODO: send predicate to server to request specified flights
     }
 

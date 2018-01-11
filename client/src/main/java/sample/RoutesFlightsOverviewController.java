@@ -2,7 +2,12 @@ package sample;
 
 import com.jfoenix.controls.JFXButton;
 import exceptions.FlightAndRouteException;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -20,6 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 
@@ -27,7 +33,7 @@ import java.util.regex.Pattern;
  Controller for routes and flights view
  Shows the information about all routes and flights
  */
-@SuppressWarnings( "WeakerAccess" )
+
 class RoutesFlightsOverviewController{
 
     private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
@@ -50,24 +56,24 @@ class RoutesFlightsOverviewController{
     @FXML JFXButton                   editRoute;
     @FXML JFXButton                   deleteRoute;
 
-    private Stage thisStage;
-    private FileChooser fileChooser = new FileChooser();
+    protected Stage thisStage;
+    private ObjectProperty<Predicate<Route>> routesPredicate = new SimpleObjectProperty<>( route -> true );
+    private FileChooser                      fileChooser     = new FileChooser();
 
     RoutesFlightsOverviewController( Stage thisStage ){
         this.thisStage = thisStage;
         fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
     }
 
-    RoutesFlightsOverviewController(){
-    }
-
     /**
      initialization of view
      */
     @FXML
-    public void initialize(){
-        Controller.getInstance().setFlights( DataModelInstanceSaver.getInstance().getFLightObservableList() );
-        Controller.getInstance().setRoutes( DataModelInstanceSaver.getInstance().getRouteObservableList() );
+    void initialize(){
+        FilteredList<Route> routeFilteredList =
+                DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
+        routeTable.setItems( routeFilteredList );
+        routeFilteredList.predicateProperty().bind( routesPredicate );
 
         editFlight.disableProperty().bind( flightTable.getSelectionModel().selectedItemProperty().isNull() );
         deleteFlight.disableProperty().bind( flightTable.getSelectionModel().selectedItemProperty().isNull() );
@@ -76,13 +82,22 @@ class RoutesFlightsOverviewController{
 
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
         destinationColumn.setCellValueFactory( new PropertyValueFactory<>( "to" ) );
-        routeTable.setItems( Controller.getInstance().getRoutes() );
 
         number.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         routeColumnFlight.setCellValueFactory( new PropertyValueFactory<>( "route" ) );
-        flightTable.setItems( Controller.getInstance().getFlights() );
-        flightTable.getSelectionModel().selectedItemProperty()
-                   .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
+        flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
+        detailsTextArea.textProperty().bind( new StringBinding(){
+            ReadOnlyObjectProperty<Flight> currentFlight = flightTable.getSelectionModel().selectedItemProperty();
+
+            {
+                bind( currentFlight );
+            }
+
+            @Override
+            protected String computeValue(){
+                return Optional.ofNullable( currentFlight.getValue() ).map( Flight::toString ).orElse( "" );
+            }
+        } );
 
         departure.textProperty().addListener(
                 ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
@@ -93,31 +108,19 @@ class RoutesFlightsOverviewController{
     }
 
     private void searchListeners( String departure , String destination ){
-        routeTable.setItems( Controller.getInstance().getRoutes().filtered( route -> Pattern.compile(
-                ".*" + departure.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() && Pattern.compile(
-                ".*" + destination.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches() ) );
-    }
-
-    /**
-     @param flight show detail information about chosen flight
-     */
-    private void showFlightDetails( Flight flight ){
-        if( flight != null ){
-            detailsTextArea.setWrapText( true );
-            detailsTextArea.setText( flight.toString() );
-        }else{
-            detailsTextArea.setText( "" );
-        }
+        Predicate<Route> v = route ->
+                Pattern.compile( ".*" + departure.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                 Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                Pattern.compile( ".*" + destination.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                 Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches();
+        routesPredicate.setValue( v );
     }
 
     @FXML
-    public void handleAddRouteButton(){
+    void handleAddRouteButton(){
         try{
-            FXMLLoader                         loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             Stage                              popUp      = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
             loader.setController( controller );
             popUp.initModality( Modality.APPLICATION_MODAL );
@@ -136,7 +139,7 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    public void handleEditRouteButton(){
+    void handleEditRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
@@ -164,7 +167,7 @@ class RoutesFlightsOverviewController{
     /**
      */
     @FXML
-    public void handleDeleteRouteButton(){
+    void handleDeleteRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataModelInstanceSaver.getInstance().removeRoute( selectedRoute );
@@ -176,10 +179,9 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    public void handleAddFlightButton(){
+    void handleAddFlightButton(){
         try{
-            FXMLLoader                          loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
             Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
@@ -200,7 +202,7 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    public void handleEditFlightButton(){
+    void handleEditFlightButton(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
@@ -228,7 +230,7 @@ class RoutesFlightsOverviewController{
     /**
      */
     @FXML
-    public void handleDeleteFlightButton(){
+    void handleDeleteFlightButton(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataModelInstanceSaver.getInstance().removeFlight( selectedFlight.getNumber() );
@@ -247,13 +249,12 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    public void handleSearchFlightButton(){
+    void handleSearchFlightButton(){
         if( !Controller.getInstance().isFlightSearchActive() ){
             Controller.getInstance().setFlightSearchActive( true );
             try{
-                Stage                           popUp         = new Stage();
-                FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+                Stage popUp = new Stage();
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
                 SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -277,12 +278,10 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleOpenAction(){
+    void handleOpenAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 DataModelInstanceSaver.getInstance().importFromFile( file );
-                Controller.getInstance().updateRoutes();
-                Controller.getInstance().updateFlights();
                 Main.changed = false;
                 Main.savingFile = file;
                 thisStage.setTitle( file.getName() );
@@ -292,7 +291,8 @@ class RoutesFlightsOverviewController{
         } );
     }
 
-    public void handleSaveAction(){
+    @FXML
+    void handleSaveAction(){
         if( Main.savingFile == null ){
             Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
                 Main.savingFile = file;
@@ -308,7 +308,7 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleSaveAsAction(){
+    void handleSaveAsAction(){
         Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 DataModelInstanceSaver.getInstance().saveToFile( file );
@@ -319,7 +319,7 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    private void handleMergeAction(){
+    void handleMergeAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance().mergeData( file )
@@ -354,9 +354,8 @@ class RoutesFlightsOverviewController{
                 }
 
                 if( !mergeFlights.isEmpty() ){
-                    Stage                   popUp                   = new Stage();
-                    FXMLLoader              loader                  =
-                            new FXMLLoader( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
+                    Stage popUp = new Stage();
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
                     MergeOverviewController mergeOverviewController = new MergeOverviewController( popUp );
                     loader.setController( mergeOverviewController );
                     Scene scene = new Scene( loader.load() );
@@ -373,7 +372,7 @@ class RoutesFlightsOverviewController{
     }
 
     @FXML
-    public void handleAboutAction(){
+    void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
         alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +

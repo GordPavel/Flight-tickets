@@ -1,7 +1,6 @@
 package sample;
 
 import exceptions.FlightAndRouteException;
-import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,12 +16,8 @@ import model.Route;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
-@SuppressWarnings( "WeakerAccess" )
-public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
+class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
     private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
     private static final String ADD_ROUTE_WINDOW     = "Add a route";
@@ -53,29 +48,23 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
     @FXML Button                      searchFlightButton;
     @FXML Button                      updateRouteButton;
 
-
-    private Stage thisStage;
     RoutesFlightsWriteOverviewController( Stage thisStage ){
-        this.thisStage = thisStage;
+        super( thisStage );
     }
 
     /**
      initialization of view
      */
     @FXML
-    public void initialize(){
+    void initialize(){
         updateFlightButton.setLayoutX( updateFlightButton.getLayoutX() - 37 );
         searchFlightButton.setLayoutX( searchFlightButton.getLayoutX() - 37 );
-
-        Controller.getInstance().updateFlights();
-        Controller.getInstance().updateRoutes();
-
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
         destinationColumn.setCellValueFactory( new PropertyValueFactory<>( "to" ) );
-        routeTable.setItems( Controller.getInstance().getRoutes() );
+        routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList() );
         number.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         routeColumnFlight.setCellValueFactory( new PropertyValueFactory<>( "route" ) );
-        flightTable.setItems( Controller.getInstance().getFlights() );
+        flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
@@ -103,10 +92,9 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
             Pattern destinationPattern = Pattern.compile(
                     ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" , Pattern.CASE_INSENSITIVE );
-            routeTable.setItems( Controller.getInstance().getRoutes().stream().filter(
+            routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList().filtered(
                     route -> departurePattern.matcher( route.getFrom().getId() ).matches() &&
-                             destinationPattern.matcher( route.getTo().getId() ).matches() ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+                             destinationPattern.matcher( route.getTo().getId() ).matches() ) );
         }
     }
 
@@ -126,24 +114,13 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
      */
     @Override
     @FXML
-    public void handleDeleteRouteButton(){
+    void handleDeleteRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
-                routeTable.getItems().remove( selectedRoute );
                 DataModelInstanceSaver.getInstance().removeRoute( selectedRoute );
-                Controller.getInstance().updateRoutes();
-                routeTable.refresh();
-                Controller.getInstance().updateFlights();
-                flightTable.setItems( Controller.getInstance().getFlights() );
-                flightTable.refresh();
-
                 // TODO: put here request to server to delete route
             }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
-                alert.setContentText( e.getMessage() );
-                alert.showAndWait();
+                showModelAlert( e );
             }
         } );
     }
@@ -152,31 +129,24 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
      */
     @Override
     @FXML
-    public void handleDeleteFlightButton(){
+    void handleDeleteFlightButton(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
-                flightTable.getItems().remove( selectedFlight );
                 DataModelInstanceSaver.getInstance().removeFlight( selectedFlight.getNumber() );
                 Main.changed = true;
-                Controller.getInstance().updateFlights();
-                flightTable.refresh();
-
                 // TODO: put here request to server to delete flight
             }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Model exception" );
-                alert.setHeaderText( "Model throw an exception" );
-                alert.setContentText( e.getMessage() );
-                alert.showAndWait();
+                showModelAlert( e );
             }
         } );
     }
 
     @Override
     @FXML
-    public void handleAddRouteButton(){
+    void handleAddRouteButton(){
         try{
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            FXMLLoader                         loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             Stage                              popUp      = new Stage();
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
             loader.setController( controller );
@@ -193,10 +163,6 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
         }catch( IOException e ){
             e.printStackTrace();
         }
-        routeTable.setItems( Controller.getInstance().getRoutes() );
-        routeTable.refresh();
-        flightTable.setItems( Controller.getInstance().getFlights() );
-        flightTable.refresh();
     }
 
     @FXML
@@ -218,7 +184,7 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
     @Override
     @FXML
-    public void handleEditRouteButton(){
+    void handleEditRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
@@ -236,11 +202,6 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
-                routeTable.setItems( Controller.getInstance().getRoutes() );
-                routeTable.refresh();
-                Controller.getInstance().updateFlights();
-                flightTable.setItems( Controller.getInstance().getFlights() );
-                flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
             }
@@ -249,10 +210,9 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
     @Override
     @FXML
-    public void handleAddFlightButton(){
+    void handleAddFlightButton(){
         try{
-            FXMLLoader                          loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
             Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
@@ -266,9 +226,6 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
-            thisStage.setOpacity( 1 );
-            flightTable.setItems( Controller.getInstance().getFlights() );
-            flightTable.refresh();
         }catch( IOException e ){
             e.printStackTrace();
         }
@@ -276,7 +233,7 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
     @Override
     @FXML
-    public void handleEditFlightButton(){
+    void handleEditFlightButton(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
@@ -294,8 +251,6 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
 
-                flightTable.setItems( Controller.getInstance().getFlights() );
-                flightTable.refresh();
             }catch( IOException e ){
                 e.printStackTrace();
             }
@@ -304,13 +259,12 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
     @Override
     @FXML
-    public void handleSearchFlightButton(){
+    void handleSearchFlightButton(){
         if( !Controller.getInstance().isFlightSearchActive() ){
             Controller.getInstance().setFlightSearchActive( true );
             try{
-                Stage                           popUp         = new Stage();
-                FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+                Stage popUp = new Stage();
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
                 SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -330,14 +284,12 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
             }catch( IOException e ){
                 e.printStackTrace();
             }
-            flightTable.setItems( Controller.getInstance().getFlights() );
-            flightTable.refresh();
         }
     }
 
 
     @FXML
-    private void handleChangeDBAction(){
+    void handleChangeDBAction(){
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
 
@@ -348,9 +300,8 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
          */
 
         try{
-            Stage                    primaryStage = new Stage();
-            FXMLLoader               loader       =
-                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            Stage primaryStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
             ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
@@ -367,7 +318,7 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
     }
 
     @FXML
-    private void handleLogOutAction( Event event ){
+    void handleLogOutAction( Event event ){
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
@@ -379,9 +330,8 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
          */
 
         try{
-            Stage                   loginStage      = new Stage();
-            FXMLLoader              loader          =
-                    new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+            Stage loginStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
             LoginOverviewController logInController = new LoginOverviewController( loginStage );
             loader.setController( logInController );
             loginStage.setTitle( "Login" );

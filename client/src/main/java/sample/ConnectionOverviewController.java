@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.regex.Pattern;
 
-@SuppressWarnings( "WeakerAccess" )
 class ConnectionOverviewController{
 
     private Stage thisStage;
@@ -30,7 +29,7 @@ class ConnectionOverviewController{
      initializing of view
      */
     @FXML
-    public void initialize(){
+    private void initialize(){
         ipTextField.setText( "127.0.0.1" );
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "1" );
@@ -44,7 +43,7 @@ class ConnectionOverviewController{
 
      */
     @FXML
-    public void handleConnectAction(){
+    private void handleConnectAction(){
 
         try{
             Socket socket = new Socket( ipTextField.getText() , Integer.parseInt( portTextField.getText() ) );
@@ -79,7 +78,7 @@ class ConnectionOverviewController{
 
      */
     @FXML
-    public void handleCancelAction(){
+    private void handleCancelAction(){
         closeWindow();
     }
 

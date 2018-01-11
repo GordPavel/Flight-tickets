@@ -43,7 +43,7 @@ public class DataModel{
         routes.removeListener( listener );
     }
 
-    public ObservableList<Flight> getFLightObservableList(){
+    public ObservableList<Flight> getFlightObservableList(){
         return flights;
     }
 

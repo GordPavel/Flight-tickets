@@ -31,7 +31,7 @@ class LoginOverviewController{
      initializing of view
      */
     @FXML
-    public void initialize(){
+    private void initialize(){
 //        todo : Закончить
     }
 
@@ -40,13 +40,13 @@ class LoginOverviewController{
      Cancel button action handler. Closes window, when button pushed
      */
     @FXML
-    public void handleCancelAction(){
+    private void handleCancelAction(){
         closeWindow();
     }
 
 
     @FXML
-    public void handleLogInAction(){
+    private void handleLogInAction(){
 
         Pattern pattern      = Pattern.compile( "^[\\w\\d]+$" );
         Boolean userCanWrite = false;

@@ -27,7 +27,6 @@ import static java.util.stream.Collectors.toList;
  Allows to enter data for adding a new route
  */
 
-@SuppressWarnings( "WeakerAccess" )
 class AddAndEditRoutesOverviewController{
 
     @FXML Label mainLabel;
@@ -170,7 +169,7 @@ class AddAndEditRoutesOverviewController{
     /**
      */
     @FXML
-    public void handleCancelAction(){
+    private void handleCancelAction(){
         closeWindow();
     }
 

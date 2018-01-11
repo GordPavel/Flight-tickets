@@ -24,7 +24,7 @@ class ChoiceOverviewController{
      initializing of view
      */
     @FXML
-    public void initialize(){
+    private void initialize(){
         System.out.println( "test" );
     }
 
@@ -34,13 +34,13 @@ class ChoiceOverviewController{
 
      */
     @FXML
-    public void handleCancelAction(){
+    private void handleCancelAction(){
         closeWindow();
     }
 
 
     @FXML
-    public void handleSelectAction(){
+    private void handleSelectAction(){
 
         /*
           TODO: Select database

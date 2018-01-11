@@ -8,7 +8,7 @@ import java.net.Socket;
  <p>
  create new parent tread, that will leave until stop command... Also, change in Controller "Thread thread" to new parrent
  */
-public class ReadOnlyThread extends FaRThread{
+class ReadOnlyThread extends FaRThread{
 
     private Socket clientSocket;
     public  int     test = 0;

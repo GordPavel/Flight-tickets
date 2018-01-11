@@ -1,6 +1,5 @@
 package sample;
 
-import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,17 +14,13 @@ import model.Route;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
  Controller for routes and flights view
  Shows the information about all routes and flights
  */
-@SuppressWarnings( "WeakerAccess" )
-public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
+class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
 
 
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
@@ -53,12 +48,8 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     @FXML Button                      updateRouteButton;
     @FXML Button                      searchRouteButton;
 
-
-    private Stage thisStage;
-
-    RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
-        this.thisStage = thisStage;
-
+    public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
+        super( thisStage );
     }
 
     /**
@@ -66,7 +57,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
      */
     @Override
     @FXML
-    public void initialize(){
+    void initialize(){
         fileMenu.setVisible( false );
         addRouteButton.setVisible( false );
         editRouteButton.setVisible( false );
@@ -82,14 +73,12 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
         departureColumn.setPrefWidth( 300 );
         destinationColumn.setPrefWidth( 300 );
 
-        Controller.getInstance().updateFlights();
-        Controller.getInstance().updateRoutes();
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
         destinationColumn.setCellValueFactory( new PropertyValueFactory<>( "to" ) );
-        routeTable.setItems( Controller.getInstance().getRoutes() );
+        routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList() );
         number.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         routeColumnFlight.setCellValueFactory( new PropertyValueFactory<>( "route" ) );
-        flightTable.setItems( Controller.getInstance().getFlights() );
+        flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
@@ -118,12 +107,10 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
             Pattern destinationPattern = Pattern.compile(
                     ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" , Pattern.CASE_INSENSITIVE );
-            routeTable.setItems( Controller.getInstance().getRoutes().stream().filter(
+            routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList().filtered(
                     route -> departurePattern.matcher( route.getFrom().getId() ).matches() &&
-                             destinationPattern.matcher( route.getTo().getId() ).matches() ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+                             destinationPattern.matcher( route.getTo().getId() ).matches() ) );
         }
-
     }
 
     /**
@@ -140,7 +127,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
 
     @Override
     @FXML
-    public void handleSearchFlightButton(){
+    void handleSearchFlightButton(){
         if( !Controller.getInstance().isFlightSearchActive() ){
             Controller.getInstance().setFlightSearchActive( true );
             try{
@@ -164,14 +151,14 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
             }catch( IOException e ){
                 e.printStackTrace();
             }
-            flightTable.setItems( Controller.getInstance().getFlights() );
+            flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
             flightTable.refresh();
         }
     }
 
 
     @FXML
-    public void handleAboutAction(){
+    void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
         alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +
@@ -181,7 +168,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     }
 
     @FXML
-    private void handleChangeDBAction(){
+    void handleChangeDBAction(){
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
@@ -212,7 +199,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     }
 
     @FXML
-    private void handleLogOutAction( Event event ){
+    void handleLogOutAction( Event event ){
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
@@ -243,8 +230,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
 
     }
 
-
-    public void closeWindow(){
+    private void closeWindow(){
         thisStage.close();
     }
 
