@@ -10,7 +10,7 @@ import model.Route;
  */
 public class Controller{
 
-    Controller(){}
+    private Controller(){}
 
     private static class InstanceHolder{
         private static final Controller instance = new Controller();

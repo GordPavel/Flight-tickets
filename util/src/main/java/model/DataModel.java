@@ -307,8 +307,8 @@ public class DataModel{
         routesPrimaryKeysGenerator = IntStream
                 .rangeClosed( routes.stream().mapToInt( Route::getId ).max().orElse( 0 ) + 1 , Integer.MAX_VALUE )
                 .iterator();
-        this.routes = FXCollections.observableList( new CopyOnWriteArrayList<>( routes ) );
-        this.flights = FXCollections.observableList( new CopyOnWriteArrayList<>( flights ) );
+        this.routes.setAll( FXCollections.observableList( new CopyOnWriteArrayList<>( routes ) ) );
+        this.flights.setAll( FXCollections.observableList( new CopyOnWriteArrayList<>( flights ) ) );
     }
 
     /**
@@ -400,6 +400,7 @@ public class DataModel{
 
      @throws IllegalArgumentException if collection contains not just flights and routes
      */
+    @SuppressWarnings( "WeakerAccess" )
     public void exportSpecifiedData( Collection<Serializable> data , OutputStream outputStream ) throws IOException{
         if( !data.parallelStream().allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
                                                              serializable.getClass().equals( Flight.class ) ) ){

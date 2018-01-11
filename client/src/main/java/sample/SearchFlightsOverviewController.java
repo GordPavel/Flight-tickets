@@ -3,12 +3,14 @@ package sample;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import model.DataModel;
+import javafx.util.StringConverter;
 import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
@@ -22,16 +24,13 @@ import java.time.temporal.ChronoField;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  Controller for flight search view
  Allows to search flights in DataModel with params
  */
-public class SearchFlightsOverviewController{
-
+@SuppressWarnings( "WeakerAccess" )
+class SearchFlightsOverviewController{
 
     @FXML Label           numberLabel;
     @FXML Label           planeIdLabel;
@@ -41,11 +40,9 @@ public class SearchFlightsOverviewController{
     @FXML ListView<Route> routesListView;
     @FXML TextField       searchFromTextField;
     @FXML TextField       searchToTextField;
-    /**
-     Connecting to FXML items
-     */
-    @FXML TextField       numberTextField;
-    @FXML TextField       planeIdTextField;
+
+    @FXML TextField numberTextField;
+    @FXML TextField planeIdTextField;
 
     @FXML JFXDatePicker departureFromDatePicker;
     @FXML JFXDatePicker departureToDatePicker;
@@ -56,18 +53,20 @@ public class SearchFlightsOverviewController{
     @FXML JFXTimePicker flightTimeFrom;
     @FXML JFXTimePicker flightTimeTo;
 
-    @FXML
-    JFXButton searchButton;
+    @FXML JFXButton searchButton;
 
-    private Controller controller = Controller.getInstance();
-    private DataModel  dataModel  = DataModelInstanceSaver.getInstance();
-    private RoutesFlightsOverviewController mainController;
-    private Stage                           thisStage;
-    private boolean                         correctSymbols;
+    private RoutesFlightsOverviewController   mainController;
+    private Stage                             thisStage;
+    private boolean                           correctSymbols;
+    private FilteredList<Flight>              flightFilteredList;
+    private ObjectProperty<Predicate<Flight>> filteringPredicate;
 
-    public SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
+    SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
         this.thisStage = thisStage;
+        flightFilteredList = mainController.flightTable.getItems().filtered( flight -> true );
+        mainController.flightTable.setItems( flightFilteredList );
+        filteringPredicate = new SimpleObjectProperty<>( flight -> true );
     }
 
     /**
@@ -75,6 +74,7 @@ public class SearchFlightsOverviewController{
      */
     @FXML
     public void initialize(){
+        flightFilteredList.predicateProperty().bind( filteringPredicate );
         correctSymbols = true;
         setLayouts();
         routesListView.getSelectionModel().setSelectionMode( SelectionMode.MULTIPLE );
@@ -96,14 +96,26 @@ public class SearchFlightsOverviewController{
         arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveToDatePicker.getEditor().setDisable( true );
         flightTimeFrom.setValue( LocalTime.MIN );
-        flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
-        flightTimeFrom.getEditor().textProperty()
+        flightTimeTo.setValue( LocalTime.MAX );
+        StringConverter<LocalTime> localTimeStringConverter = new StringConverter<LocalTime>(){
+            final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
+            @Override
+            public String toString( LocalTime time ){
+                return timeFormatter.format( time );
+            }
+
+            @Override
+            public LocalTime fromString( String string ){
+                return LocalTime.parse( string , timeFormatter );
+            }
+        };
+        flightTimeFrom.setConverter( localTimeStringConverter );
+        flightTimeTo.setConverter( localTimeStringConverter );
+        flightTimeFrom.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        flightTimeTo.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
+        routesListView.getSelectionModel().selectedItemProperty()
                       .addListener( ( observable , oldValue , newValue ) -> changed() );
-        flightTimeTo.getEditor().textProperty()
-                    .addListener( ( observable , oldValue , newValue ) -> changed() );
-        routesListView.setOnMouseClicked( event -> changed() );
-        routesListView.setItems( DataModelInstanceSaver.getInstance().listRoutesWithPredicate( route -> true ).collect(
-                Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
+        routesListView.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList() );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
@@ -111,8 +123,8 @@ public class SearchFlightsOverviewController{
             Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
-            routesListView.getItems().setAll(
-                    DataModelInstanceSaver.getInstance().listRoutesWithPredicate( fromPredicate.and( toPredicate ) ).collect( toList() ) );
+            routesListView.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList()
+                                                           .filtered( fromPredicate.and( toPredicate ) ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
         searchToTextField.textProperty().addListener( routeSearchListener );
@@ -121,15 +133,13 @@ public class SearchFlightsOverviewController{
         searchToTextField.textProperty()
                          .addListener( ( observable , oldValue , newValue ) -> formatCheck( searchToTextField ) );
         thisStage.setOnCloseRequest( event -> {
-            mainController.flightTable.setItems( controller.getFlights() );
-            controller.setFlightSearchActive( false );
+            mainController.flightTable.setItems( Controller.getInstance().getFlights() );
+            Controller.getInstance().setFlightSearchActive( false );
         } );
-        if (mainController instanceof RoutesFlightsReadOnlyOverviewController)
-        {
-            searchButton.setVisible(false);
+        if( mainController instanceof RoutesFlightsReadOnlyOverviewController ){
+            searchButton.setVisible( false );
         }
     }
-
 
     /**
      Flight search method, used in listeners
@@ -157,7 +167,7 @@ public class SearchFlightsOverviewController{
                                       dateFormat , true ).test( flight.getDepartureDateTime() ) &&
                 getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , false ).test( flight.getDepartureDateTime() );
-        Predicate<Flight> flightTime = flight -> {
+        Predicate<Flight> flightTimePredicate = flight -> {
             Predicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
                                                  flightTimeFrom.getValue().get( ChronoField.MILLI_OF_DAY ) <=
                                                  flight.getTravelTime();
@@ -167,19 +177,16 @@ public class SearchFlightsOverviewController{
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if( correctSymbols ){
-            mainController.flightTable.setItems( dataModel.listFlightsWithPredicate(
+            Predicate<Flight> v =
                     numberPredicate.and( planePredicate ).and( routePredicate ).and( departureDatePredicate )
-                                   .and( arriveDatePredicate ).and( flightTime ) ).collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
-            mainController.flightTable.refresh();
-            routesListView.setItems( controller.getRoutes() );
-            routesListView.refresh();
+                                   .and( arriveDatePredicate ).and( flightTimePredicate );
+            filteringPredicate.setValue( v );
         }
     }
 
 
     /**
-     @param field - textfield to check for acceptable symbols
+     @param field - text field to check for acceptable symbols
      method used to not allow user to use unacceptable symbols for search
      */
     private void formatCheck( TextField field ){
@@ -221,13 +228,11 @@ public class SearchFlightsOverviewController{
 
     //        Don't touch this layout settings! too hard to make correctly!
     private void setLayouts(){
-        numberTextField.setLayoutX( routesListView.getLayoutX() );
         numberTextField.setLayoutY( numberLabel.getLayoutY() );
 
-        planeIdTextField.setLayoutX( routesListView.getLayoutX() );
+        planeIdTextField.setLayoutX( numberTextField.getLayoutX() );
         planeIdTextField.setLayoutY( planeIdLabel.getLayoutY() );
 
-        departureFromDatePicker.setLayoutX( routesListView.getLayoutX() );
         departureFromDatePicker.setLayoutY( departureDateLabel.getLayoutY() );
 
         departureToDatePicker.setLayoutX( departureFromDatePicker.getLayoutX() );
@@ -240,10 +245,8 @@ public class SearchFlightsOverviewController{
         arriveToDatePicker.setLayoutX( arriveFromDatePicker.getLayoutX() );
         arriveToDatePicker.setLayoutY( arriveFromDatePicker.getLayoutY() + arriveFromDatePicker.getHeight() + 30 );
 
-        flightTimeFrom.setLayoutX( routesListView.getLayoutX() );
         flightTimeFrom.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
-        flightTimeTo
-                .setLayoutX( flightTimeFrom.getLayoutX() + flightTimeFrom.getWidth() + 120 );
+        flightTimeTo.setLayoutX( flightTimeFrom.getLayoutX() + flightTimeFrom.getWidth() + 150 );
         flightTimeTo.setLayoutY( flightTimeLabel.getLayoutY() - 10 );
     }
 
@@ -261,11 +264,10 @@ public class SearchFlightsOverviewController{
         arriveFromDatePicker.getEditor().clear();
         arriveToDatePicker.getEditor().clear();
         routesListView.getSelectionModel().clearSelection();
-        flightTimeFrom.setValue( LocalTime.MIN );
-        flightTimeTo.setValue( LocalTime.MIN.plusHours( 1 ) );
-        mainController.flightTable.getItems()
-                                  .setAll( DataModelInstanceSaver.getInstance()
-                                                                 .listFlightsWithPredicate( flight -> true ).collect( toList() ) );
+        flightTimeFrom.getEditor().clear();
+        flightTimeTo.getEditor().clear();
+        searchFromTextField.clear();
+        searchToTextField.clear();
     }
 
 
@@ -274,10 +276,7 @@ public class SearchFlightsOverviewController{
      */
     @FXML
     public void handleSearchAction(){
-
-        /**
-         * TODO: send predecate to server to request specified flights
-         */
+        // TODO: send predicate to server to request specified flights
     }
 
 }

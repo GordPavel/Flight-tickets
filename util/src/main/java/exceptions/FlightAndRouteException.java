@@ -4,6 +4,7 @@ package exceptions;
  Superclass for all exceptions in this project
  */
 
+@SuppressWarnings( "WeakerAccess" )
 public abstract class FlightAndRouteException extends RuntimeException{
     /**
      Constructs an <code>FlightAndRouteException</code> with no

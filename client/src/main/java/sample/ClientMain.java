@@ -5,26 +5,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ClientMain extends Application{
 
-    static Socket clientSocket;
+    private static Socket clientSocket;
 
-    public static Socket getClientSocket() {
+    public static Socket getClientSocket(){
         return clientSocket;
     }
 
-    public static void setClientSocket(Socket clientSocket) {
+    public static void setClientSocket( Socket clientSocket ){
         ClientMain.clientSocket = clientSocket;
     }
 
     @Override
     public void start( Stage primaryStage ) throws Exception{
 
-        FXMLLoader                      loader     =
-                new FXMLLoader( getClass().getResource("/fxml/ConnectionOverview.fxml") );
+        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ConnectionOverview.fxml" ) );
         ConnectionOverviewController controller = new ConnectionOverviewController( primaryStage );
         loader.setController( controller );
         primaryStage.setTitle( "Connection to server" );

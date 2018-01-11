@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
+@SuppressWarnings( "WeakerAccess" )
 public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
     private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
@@ -54,14 +55,9 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
 
 
     private Stage thisStage;
-
     RoutesFlightsWriteOverviewController( Stage thisStage ){
         this.thisStage = thisStage;
     }
-
-    RoutesFlightsWriteOverviewController(){
-    }
-
 
     /**
      initialization of view
@@ -112,7 +108,6 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
                              destinationPattern.matcher( route.getTo().getId() ).matches() ).collect(
                     Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
         }
-
     }
 
     /**
@@ -142,9 +137,7 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
                 flightTable.setItems( Controller.getInstance().getFlights() );
                 flightTable.refresh();
 
-                /**
-                 * TODO: put here request to server to delete route
-                 */
+                // TODO: put here request to server to delete route
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model exception" );
@@ -168,9 +161,7 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
                 Controller.getInstance().updateFlights();
                 flightTable.refresh();
 
-                /**
-                 * TODO: put here request to server to delete flight
-                 */
+                // TODO: put here request to server to delete flight
             }catch( FlightAndRouteException e ){
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Model exception" );
@@ -208,29 +199,19 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
         flightTable.refresh();
     }
 
-    @Override
     @FXML
     public void handleUpdateFlightButton(){
-        /**
-         * TODO: put here request to server to update DB about routes
-         */
-
+        // TODO: put here request to server to update DB about routes
     }
 
-    @Override
     @FXML
     public void handleUpdateRouteButton(){
-        /**
-         * TODO: put here request to server to update DB about flights
-         */
+        // TODO: put here request to server to update DB about flights
     }
 
-    @Override
     @FXML
     public void handleSearchRouteButton(){
-        /**
-         * TODO: put here reques to server to update DB about flights
-         */
+        // TODO: put here request to server to update DB about flights
 
     }
 
@@ -360,17 +341,17 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
 
-        /**
-         * TODO: selecting new DB
-         *
-         * put here code to open window, that will allow you to download new DB.
+        /*
+          TODO: selecting new DB
+
+          put here code to open window, that will allow you to download new DB.
          */
 
         try{
             Stage                    primaryStage = new Stage();
             FXMLLoader               loader       =
                     new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiseOverviewController controller   = new ChoiseOverviewController( primaryStage );
+            ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
             Scene scene = new Scene( loader.load() );
@@ -391,10 +372,10 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
 
-        /**
-         * TODO: server logout
-         *
-         * somehow let server know, that you change your login
+        /*
+          TODO: server logout
+
+          somehow let server know, that you change your login
          */
 
         try{
@@ -413,18 +394,5 @@ public class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewC
             System.out.println( "load problem" );
             System.out.println( e.getMessage() );
         }
-    }
-
-    @FXML
-    private void handleAboutAction(){
-        Alert alert = new Alert( Alert.AlertType.INFORMATION );
-        alert.setTitle( "About" );
-        alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +
-                             "You can use it to add, edit, delete routes and flights in data base and to search for them." );
-        alert.setContentText( " - Don`t forget to fill all fields, when you add/edit route or flight;\n" +
-                              " - Use only a-z, 0-9, - and _ in names/numbers;\n" +
-                              " - Use * and ? in search field instead of many or one unknown symbol;\n" +
-                              " - If you add/edit/delete some route/flight, update search parameters to update tables with routes and flights." );
-        alert.showAndWait();
     }
 }

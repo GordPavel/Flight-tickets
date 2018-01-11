@@ -4,7 +4,6 @@ import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
 import exceptions.FaRSameNameException;
-import javafx.collections.ListChangeListener;
 import javafx.util.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

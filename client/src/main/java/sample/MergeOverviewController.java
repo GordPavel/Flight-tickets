@@ -9,10 +9,13 @@ import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
 
-public class MergeOverviewController{
+@SuppressWarnings( "WeakerAccess" )
+class MergeOverviewController{
 
-    public MergeOverviewController(){
+    private Stage thisStage;
 
+    MergeOverviewController( Stage thisStage ){
+        this.thisStage = thisStage;
     }
 
     @FXML TableView<Flight>           flightTable;
@@ -32,7 +35,6 @@ public class MergeOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
         flightTable.refresh();
-
     }
 
     /**
@@ -54,70 +56,69 @@ public class MergeOverviewController{
 
 
     /**
-     * Accept New button. Selected flight from model changes for new one
+     Accept New button. Selected flight from model changes for new one
      */
     @FXML
     public void handleAcceptNew(){
         DataModelInstanceSaver.getInstance().editFlight( flightTable.getSelectionModel().getSelectedItem() ,
                                                          flightTable.getSelectionModel().getSelectedItem().getRoute() ,
-                                                         flightTable.getSelectionModel().getSelectedItem().getPlaneID() ,
-                                                         flightTable.getSelectionModel().getSelectedItem().getDepartureDateTime() ,
-                                                         flightTable.getSelectionModel().getSelectedItem().getArriveDateTime() );
+                                                         flightTable.getSelectionModel().getSelectedItem()
+                                                                    .getPlaneID() ,
+                                                         flightTable.getSelectionModel().getSelectedItem()
+                                                                    .getDepartureDateTime() ,
+                                                         flightTable.getSelectionModel().getSelectedItem()
+                                                                    .getArriveDateTime() );
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
-        if (flightTable.getItems().isEmpty())
-        {
-            Stage stage = (Stage) flightTable.getScene().getWindow();
+        if( flightTable.getItems().isEmpty() ){
+            Stage stage = ( Stage ) flightTable.getScene().getWindow();
             stage.close();
         }
 
     }
 
     /**
-     * Accept New button. Selected flight from model don`t changes for new one
+     Accept New button. Selected flight from model don`t changes for new one
      */
     @FXML
     public void handleAcceptOld(){
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
-        if (flightTable.getItems().isEmpty())
-        {
-            Stage stage = (Stage) flightTable.getScene().getWindow();
+        if( flightTable.getItems().isEmpty() ){
+            Stage stage = ( Stage ) flightTable.getScene().getWindow();
             stage.close();
         }
     }
 
 
     /**
-     * Accept New button. All flights from model changes for new one
+     Accept New button. All flights from model changes for new one
      */
     @FXML
     public void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
-            DataModelInstanceSaver.getInstance().editFlight( flight , flight.getRoute() , flight.getPlaneID() , flight.getDepartureDateTime() ,
+            DataModelInstanceSaver.getInstance().editFlight( flight , flight.getRoute() , flight.getPlaneID() ,
+                                                             flight.getDepartureDateTime() ,
                                                              flight.getArriveDateTime() );
         }
         flightTable.setItems( null );
         flightTable.refresh();
-        if (flightTable.getItems().isEmpty())
-        {
-            Stage stage = (Stage) flightTable.getScene().getWindow();
+        if( flightTable.getItems().isEmpty() ){
+            Stage stage = ( Stage ) flightTable.getScene().getWindow();
             stage.close();
         }
 
     }
 
     /**
-     * Accept New button. None flight from model changes for new one
+     Accept New button. None flight from model changes for new one
      */
     @FXML
     public void handleAcceptAllOld(){
         flightTable.setItems( null );
         flightTable.refresh();
-        if (flightTable.getItems().isEmpty())
-        {
-            Stage stage = (Stage) flightTable.getScene().getWindow();
-            stage.close();
+        if( flightTable.getItems().isEmpty() ){
+            thisStage.close();
         }
     }
 }

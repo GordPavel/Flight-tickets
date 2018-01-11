@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -25,10 +24,9 @@ import static java.util.stream.Collectors.toList;
  Controller for routes and flights view
  Shows the information about all routes and flights
  */
+@SuppressWarnings( "WeakerAccess" )
 public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
 
-
-    private Controller controller = Controller.getInstance();
 
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
@@ -58,15 +56,10 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
 
     private Stage thisStage;
 
-
     RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
         this.thisStage = thisStage;
 
     }
-
-    RoutesFlightsReadOnlyOverviewController(){
-    }
-
 
     /**
      initialization of view
@@ -89,14 +82,14 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
         departureColumn.setPrefWidth( 300 );
         destinationColumn.setPrefWidth( 300 );
 
-        controller.updateFlights();
-        controller.updateRoutes();
+        Controller.getInstance().updateFlights();
+        Controller.getInstance().updateRoutes();
         departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
         destinationColumn.setCellValueFactory( new PropertyValueFactory<>( "to" ) );
-        routeTable.setItems( controller.getRoutes() );
+        routeTable.setItems( Controller.getInstance().getRoutes() );
         number.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         routeColumnFlight.setCellValueFactory( new PropertyValueFactory<>( "route" ) );
-        flightTable.setItems( controller.getFlights() );
+        flightTable.setItems( Controller.getInstance().getFlights() );
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
 
@@ -105,7 +98,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
         destination.textProperty()
                    .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
 
-        thisStage.setOnCloseRequest( event -> {controller.stopThread();} );
+        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
 
         Controller.getInstance().setThread( new ReadOnlyThread() );
         Controller.getInstance().startThread();
@@ -125,7 +118,7 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
             Pattern destinationPattern = Pattern.compile(
                     ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" , Pattern.CASE_INSENSITIVE );
-            routeTable.setItems( controller.getRoutes().stream().filter(
+            routeTable.setItems( Controller.getInstance().getRoutes().stream().filter(
                     route -> departurePattern.matcher( route.getFrom().getId() ).matches() &&
                              destinationPattern.matcher( route.getTo().getId() ).matches() ).collect(
                     Collectors.collectingAndThen( toList() , FXCollections::observableArrayList ) ) );
@@ -148,8 +141,8 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     @Override
     @FXML
     public void handleSearchFlightButton(){
-        if( !controller.isFlightSearchActive() ){
-            controller.setFlightSearchActive( true );
+        if( !Controller.getInstance().isFlightSearchActive() ){
+            Controller.getInstance().setFlightSearchActive( true );
             try{
                 Stage                           popUp         = new Stage();
                 FXMLLoader                      loader        =
@@ -171,13 +164,14 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
             }catch( IOException e ){
                 e.printStackTrace();
             }
-            flightTable.setItems( controller.getFlights() );
+            flightTable.setItems( Controller.getInstance().getFlights() );
             flightTable.refresh();
         }
     }
 
+
     @FXML
-    private void handleAboutAction(){
+    public void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
         alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +
@@ -190,19 +184,19 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     private void handleChangeDBAction(){
 
         DataModelInstanceSaver.getInstance().clear();
-        controller.stopThread();
+        Controller.getInstance().stopThread();
 
-        /**
-         * TODO: selecting new DB
-         *
-         * put here code to open window, that will allow you to download new DB.
+        /*
+          TODO: selecting new DB
+
+          put here code to open window, that will allow you to download new DB.
          */
 
         try{
             Stage                    primaryStage = new Stage();
             FXMLLoader               loader       =
                     new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiseOverviewController controller   = new ChoiseOverviewController( primaryStage );
+            ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
             Scene scene = new Scene( loader.load() );
@@ -221,12 +215,12 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     private void handleLogOutAction( Event event ){
 
         DataModelInstanceSaver.getInstance().clear();
-        controller.stopThread();
+        Controller.getInstance().stopThread();
 
-        /**
-         * TODO: server logout
-         *
-         * somehow let server know, that you change your login
+        /*
+          TODO: server logout
+
+          somehow let server know, that you change your login
          */
 
         try{
@@ -250,12 +244,9 @@ public class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOvervi
     }
 
 
-    public void closeWindow( Event event ){
-
-        Stage stage = ( Stage ) ( ( Parent ) event.getSource() ).getScene().getWindow();
-        stage.close();
+    public void closeWindow(){
+        thisStage.close();
     }
-
 
 }
 

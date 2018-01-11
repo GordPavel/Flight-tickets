@@ -6,8 +6,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
-            prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="sample.MergeOverviewController">
+            prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <TableView fx:id="flightTable" layoutX="27.0" layoutY="50.0" prefHeight="354.0" prefWidth="130.0"
                style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
         <columns>

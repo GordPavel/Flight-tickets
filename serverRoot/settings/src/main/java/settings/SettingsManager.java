@@ -83,7 +83,7 @@ public class SettingsManager{
         return settings;
     }
 
-    public static void saveSettings(){
+    private static void saveSettings(){
         try( OutputStream outputStream = new FileOutputStream( settingsFilePath ) ){
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT , true );

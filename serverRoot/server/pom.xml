@@ -25,6 +25,11 @@
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>ru.netCracker</groupId>
+            <artifactId>util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

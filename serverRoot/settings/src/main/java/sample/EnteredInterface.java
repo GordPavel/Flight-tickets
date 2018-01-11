@@ -5,7 +5,7 @@ import settings.SettingsManager;
 
 import java.io.IOException;
 
-public class EnteredInterface implements ShellDependent{
+class EnteredInterface implements ShellDependent{
 
     private Shell shell;
 

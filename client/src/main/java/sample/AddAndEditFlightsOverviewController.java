@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
  Allows to enter data for adding a new flight
  */
 
-public class AddAndEditFlightsOverviewController{
+@SuppressWarnings( "WeakerAccess" )
+class AddAndEditFlightsOverviewController{
     @FXML ChoiceBox<Route> routesBox;
     @FXML TextField        number;
     @FXML Label            errorNumberLabel;
@@ -41,13 +42,14 @@ public class AddAndEditFlightsOverviewController{
     @FXML Label            mainLabel;
     @FXML Label            flightTimeErrorLabel;
 
-    private Flight          editingFLight;
+    private Flight          editingFlight;
     private Stage           thisStage;
     private BooleanProperty ifFlightTimeRight;
 
-    AddAndEditFlightsOverviewController( Flight editingFLight , Stage thisStage ){
-        this.editingFLight = editingFLight;
+    AddAndEditFlightsOverviewController( Flight editingFlight , Stage thisStage ){
+        this.editingFlight = editingFlight;
         this.thisStage = thisStage;
+        ifFlightTimeRight = new SimpleBooleanProperty( true );
     }
 
     /**
@@ -129,7 +131,6 @@ public class AddAndEditFlightsOverviewController{
                     arrivingTime.setValue( arriveTimeWithOffset.toLocalTime() );
                 } ) );
 
-        ifFlightTimeRight = new SimpleBooleanProperty( true );
         departureDate.getEditor().textProperty()
                      .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
         arrivingDate.getEditor().textProperty()
@@ -167,13 +168,13 @@ public class AddAndEditFlightsOverviewController{
         planeID.textProperty().addListener(
                 ( observable , oldValue , newValue ) -> setErrorLabel( newValue , errorPlaneIdLabel , planeID ) );
 
-        if( editingFLight != null ){
+        if( editingFlight != null ){
             setEditingFlightData();
             number.setDisable( true );
             addAndEditFlightButton.setText( "Edit" );
             mainLabel.setText( "Enter new data." );
         }
-        addAndEditFlightButton.setOnAction( event -> addOrEdit( editingFLight == null ) );
+        addAndEditFlightButton.setOnAction( event -> addOrEdit( editingFlight == null ) );
     }
 
     private void departureDateTimeMoved( String oldDate , String oldTime , String newDate , String newTime ){
@@ -228,7 +229,7 @@ public class AddAndEditFlightsOverviewController{
                                         planeID.getText() , departureDateTime , arriveDateTime ) );
                 }else{
                     DataModelInstanceSaver.getInstance()
-                                          .editFlight( editingFLight , routesBox.getSelectionModel().getSelectedItem() ,
+                                          .editFlight( editingFlight , routesBox.getSelectionModel().getSelectedItem() ,
                                                        planeID.getText() , departureDateTime , arriveDateTime );
                 }
                 Controller.getInstance().updateFlights();
@@ -236,23 +237,19 @@ public class AddAndEditFlightsOverviewController{
                 Main.changed = true;
                 closeWindow();
             }catch( FlightAndRouteException e ){
-                Alert alert = new Alert( Alert.AlertType.ERROR );
-                alert.setTitle( "Model`s message" );
-                alert.setHeaderText( "Model send message" );
-                alert.setContentText( e.getMessage() );
-                alert.showAndWait();
+                RoutesFlightsOverviewController.showModelAlert( e );
             }
         }
     }
 
     private void setEditingFlightData(){
-        number.textProperty().setValue( editingFLight.getNumber() );
-        planeID.textProperty().setValue( editingFLight.getPlaneID() );
-        routesBox.getSelectionModel().select( editingFLight.getRoute() );
-        departureDate.setValue( editingFLight.getDepartureDateTime().toLocalDate() );
-        arrivingDate.setValue( editingFLight.getArriveDateTime().toLocalDate() );
-        departureTime.setValue( editingFLight.getDepartureDateTime().toLocalTime() );
-        arrivingTime.setValue( editingFLight.getArriveDateTime().toLocalTime() );
+        number.textProperty().setValue( editingFlight.getNumber() );
+        planeID.textProperty().setValue( editingFlight.getPlaneID() );
+        routesBox.getSelectionModel().select( editingFlight.getRoute() );
+        departureDate.setValue( editingFlight.getDepartureDateTime().toLocalDate() );
+        arrivingDate.setValue( editingFlight.getArriveDateTime().toLocalDate() );
+        departureTime.setValue( editingFlight.getDepartureDateTime().toLocalTime() );
+        arrivingTime.setValue( editingFlight.getArriveDateTime().toLocalTime() );
     }
 
     private void setErrorLabel( String newValue , Label errorLabel , TextField handlingTextField ){
@@ -276,7 +273,7 @@ public class AddAndEditFlightsOverviewController{
      */
     @FXML
     private void clearData(){
-        if( editingFLight != null ){
+        if( editingFlight != null ){
             setEditingFlightData();
         }else{
             number.clear();

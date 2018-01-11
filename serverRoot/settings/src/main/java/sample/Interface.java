@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Scanner;
 
-public class Interface{
+class Interface{
 
     private static Shell    mainShell;
     private static Settings settings;

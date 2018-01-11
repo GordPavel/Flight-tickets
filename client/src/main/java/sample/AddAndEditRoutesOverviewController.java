@@ -6,8 +6,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.DataModelInstanceSaver;
@@ -27,7 +27,10 @@ import static java.util.stream.Collectors.toList;
  Allows to enter data for adding a new route
  */
 
-public class AddAndEditRoutesOverviewController{
+@SuppressWarnings( "WeakerAccess" )
+class AddAndEditRoutesOverviewController{
+
+    @FXML Label mainLabel;
     @FXML ChoiceBox<String> departureCountryChoice;
     @FXML ChoiceBox<String> destinationCountryChoice;
     @FXML ChoiceBox<ZoneId> departureCityChoice;
@@ -102,6 +105,7 @@ public class AddAndEditRoutesOverviewController{
                                                                          .isNotNull() ) );
         addAndEditRouteButton.setDisable( !addAvailable.getValue() );
         addAndEditRouteButton.disableProperty().bind( addAvailable.not() );
+        addAndEditRouteButton.setOnAction( event -> addOrEdit( editingRoute == null ) );
 
         if( editingRoute != null ){
             Matcher departureCountryMatcher = pattern.matcher( editingRoute.getFrom().getId() );
@@ -113,27 +117,32 @@ public class AddAndEditRoutesOverviewController{
             destinationCountryMatcher.find();
             destinationCountryChoice.getSelectionModel().select( destinationCountryMatcher.group( 1 ) );
             destinationCityChoice.getSelectionModel().select( ZoneId.of( editingRoute.getTo().getId() ) );
+
+            addAndEditRouteButton.setText( "Edit" );
+            mainLabel.setText( "Enter new data." );
         }
     }
 
-    @FXML
-    private void handleAddAction(){
+    private void addOrEdit( Boolean isAdd ){
         try{
-            DataModelInstanceSaver.getInstance().addRoute( new Route(
-                    Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
-                            .orElseThrow( IllegalStateException::new ) ,
-                    Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
-                            .orElseThrow( IllegalStateException::new ) ) );
-//            Controller.getInstance().updateRoutes();
+            if( isAdd ){
+                DataModelInstanceSaver.getInstance().addRoute( new Route(
+                        Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
+                                .orElseThrow( IllegalStateException::new ) ,
+                        Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
+                                .orElseThrow( IllegalStateException::new ) ) );
+            }else {
+                DataModelInstanceSaver.getInstance().editRoute( editingRoute ,
+                                                                Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
+                                                                        .orElseThrow( IllegalStateException::new ) ,
+                                                                Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
+                                                                        .orElseThrow( IllegalStateException::new ) );
+            }
 //            TODO: put here request to server to add flight
             Main.changed = true;
             closeWindow();
         }catch( FlightAndRouteException e ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Model`s message" );
-            alert.setHeaderText( "Model send message:" );
-            alert.setContentText( e.getMessage() );
-            alert.showAndWait();
+            RoutesFlightsOverviewController.showModelAlert( e );
         }
     }
 
