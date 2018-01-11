@@ -55,6 +55,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     /**
      initialization of view
      */
+    @Override
     @FXML
     void initialize(){
         updateFlightButton.setLayoutX( updateFlightButton.getLayoutX() - 37 );
@@ -165,16 +166,19 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         }
     }
 
+    @Override
     @FXML
     public void handleUpdateFlightButton(){
         // TODO: put here request to server to update DB about routes
     }
 
+    @Override
     @FXML
     public void handleUpdateRouteButton(){
         // TODO: put here request to server to update DB about flights
     }
 
+    @Override
     @FXML
     public void handleSearchRouteButton(){
         // TODO: put here request to server to update DB about flights
@@ -287,7 +291,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         }
     }
 
-
+    @Override
     @FXML
     void handleChangeDBAction(){
         DataModelInstanceSaver.getInstance().clear();
@@ -317,6 +321,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
     }
 
+    @Override
     @FXML
     void handleLogOutAction( Event event ){
 

@@ -8,6 +8,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -382,6 +383,29 @@ class RoutesFlightsOverviewController{
                               " - Use * and ? in search field instead of many or one unknown symbol;\n" +
                               " - If you add/edit/delete some route/flight, update search parameters to update tables with routes and flights." );
         alert.showAndWait();
+    }
+
+    @FXML
+    public void handleUpdateFlightButton(){
+
+    }
+
+    @FXML
+    public void handleUpdateRouteButton(){
+
+    }
+
+    @FXML
+    public void handleSearchRouteButton(){
+
+    }
+
+    @FXML
+    void handleChangeDBAction(){
+    }
+
+    @FXML
+    void handleLogOutAction( Event event ){
     }
 }
 

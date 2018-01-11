@@ -156,7 +156,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         }
     }
 
-
+    @Override
     @FXML
     void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
@@ -167,6 +167,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         alert.showAndWait();
     }
 
+    @Override
     @FXML
     void handleChangeDBAction(){
 
@@ -198,6 +199,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
 
     }
 
+    @Override
     @FXML
     void handleLogOutAction( Event event ){
 
