@@ -17,13 +17,12 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ Controller for routes and flights view, client write application.
+ disables and hides all buttons/menus, that write client must not see
+ */
 class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
-    private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
-    private static final String ADD_ROUTE_WINDOW     = "Add a route";
-    private static final String EDIT_FLIGHT_WINDOW   = "Edit a flight";
-    private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
-    private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
 
     @FXML TextField                   departure;
@@ -35,18 +34,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     @FXML TableColumn<Flight, String> number;
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
-    @FXML MenuBar                     menuBar;
-    @FXML Menu                        fileMenu;
-    @FXML Menu                        helpMenu;
-    @FXML Button                      addRouteButton;
-    @FXML Button                      editRouteButton;
-    @FXML Button                      deleteRouteButton;
-    @FXML Button                      addFlightButton;
-    @FXML Button                      editFlightButton;
-    @FXML Button                      deleteFlightButton;
     @FXML Button                      updateFlightButton;
     @FXML Button                      searchFlightButton;
-    @FXML Button                      updateRouteButton;
 
     RoutesFlightsWriteOverviewController( Stage thisStage ){
         super( thisStage );
@@ -54,6 +43,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
     /**
      initialization of view
+     Hiding menus, add listners, start thread
      */
     @Override
     @FXML
@@ -112,6 +102,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
     /**
+     * deleting route from DB
      */
     @Override
     @FXML
@@ -127,6 +118,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
     /**
+     * deleting flight from DB
      */
     @Override
     @FXML
@@ -134,7 +126,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataModelInstanceSaver.getInstance().removeFlight( selectedFlight.getNumber() );
-                Main.changed = true;
+                ClientMain.changed = true;
                 // TODO: put here request to server to delete flight
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
@@ -142,42 +134,27 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         } );
     }
 
-    @Override
-    @FXML
-    void handleAddRouteButton(){
-        try{
-            FXMLLoader                         loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-            Stage                              popUp      = new Stage();
-            AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
-            loader.setController( controller );
-            popUp.initModality( Modality.APPLICATION_MODAL );
-            popUp.initOwner( thisStage );
-
-            popUp.setTitle( ADD_ROUTE_WINDOW );
-            popUp.setScene( new Scene( loader.load() ) );
-            popUp.setResizable( false );
-
-            thisStage.setOpacity( 0.9 );
-            popUp.showAndWait();
-            thisStage.setOpacity( 1 );
-        }catch( IOException e ){
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Update flight list
+     */
     @Override
     @FXML
     public void handleUpdateFlightButton(){
         // TODO: put here request to server to update DB about routes
     }
 
+    /**
+     * Update route list
+     */
     @Override
     @FXML
     public void handleUpdateRouteButton(){
         // TODO: put here request to server to update DB about flights
     }
 
+    /**
+     * Search for routes
+     */
     @Override
     @FXML
     public void handleSearchRouteButton(){
@@ -186,168 +163,4 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
 
-    @Override
-    @FXML
-    void handleEditRouteButton(){
-        Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
-            try{
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-                Stage      popUp  = new Stage();
-                AddAndEditRoutesOverviewController controller =
-                        new AddAndEditRoutesOverviewController( selectedRoute , popUp );
-                loader.setController( controller );
-
-                popUp.initModality( Modality.APPLICATION_MODAL );
-                popUp.initOwner( thisStage );
-
-                popUp.setTitle( EDIT_ROUTE_WINDOW );
-                popUp.setScene( new Scene( loader.load() ) );
-                popUp.setResizable( false );
-                thisStage.setOpacity( 0.9 );
-                popUp.showAndWait();
-                thisStage.setOpacity( 1 );
-            }catch( IOException e ){
-                e.printStackTrace();
-            }
-        } );
-    }
-
-    @Override
-    @FXML
-    void handleAddFlightButton(){
-        try{
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-            Stage                               popUp      = new Stage();
-            AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
-            loader.setController( controller );
-
-            popUp.initModality( Modality.APPLICATION_MODAL );
-            popUp.initOwner( thisStage );
-
-            popUp.setTitle( ADD_FLIGHT_WINDOW );
-            popUp.setScene( new Scene( loader.load() ) );
-            popUp.setResizable( false );
-
-            thisStage.setOpacity( 0.9 );
-            popUp.showAndWait();
-        }catch( IOException e ){
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    @FXML
-    void handleEditFlightButton(){
-        Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
-            try{
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-                Stage      popUp  = new Stage();
-                AddAndEditFlightsOverviewController controller =
-                        new AddAndEditFlightsOverviewController( selectedFlight , popUp );
-                loader.setController( controller );
-                popUp.initModality( Modality.APPLICATION_MODAL );
-                popUp.initOwner( thisStage );
-
-                popUp.setTitle( EDIT_FLIGHT_WINDOW );
-                popUp.setScene( new Scene( loader.load() ) );
-                popUp.setResizable( false );
-                thisStage.setOpacity( 0.9 );
-                popUp.showAndWait();
-                thisStage.setOpacity( 1 );
-
-            }catch( IOException e ){
-                e.printStackTrace();
-            }
-        } );
-    }
-
-    @Override
-    @FXML
-    void handleSearchFlightButton(){
-        if( !Controller.getInstance().isFlightSearchActive() ){
-            Controller.getInstance().setFlightSearchActive( true );
-            try{
-                Stage popUp = new Stage();
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
-                SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
-                loader.setController( searchFlights );
-                Scene scene = new Scene( loader.load() );
-
-                popUp.initModality( Modality.NONE );
-                popUp.initOwner( thisStage.getOwner() );
-                popUp.setX( thisStage.getX() + thisStage.getWidth() );
-                popUp.setY( thisStage.getY() );
-
-                popUp.setTitle( SEARCH_FLIGHT_WINDOW );
-                popUp.setScene( scene );
-                popUp.setResizable( false );
-
-                thisStage.setOpacity( 0.9 );
-                popUp.show();
-                thisStage.setOpacity( 1 );
-            }catch( IOException e ){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    @FXML
-    void handleChangeDBAction(){
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
-
-        /*
-          TODO: selecting new DB
-
-          put here code to open window, that will allow you to download new DB.
-         */
-
-        try{
-            Stage primaryStage = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
-            loader.setController( controller );
-            primaryStage.setTitle( "Select DB" );
-            Scene scene = new Scene( loader.load() );
-            primaryStage.setScene( scene );
-            primaryStage.setResizable( false );
-            primaryStage.show();
-            thisStage.close();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
-        }
-
-    }
-
-    @Override
-    @FXML
-    void handleLogOutAction( Event event ){
-
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
-
-        /*
-          TODO: server logout
-
-          somehow let server know, that you change your login
-         */
-
-        try{
-            Stage loginStage = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
-            LoginOverviewController logInController = new LoginOverviewController( loginStage );
-            loader.setController( logInController );
-            loginStage.setTitle( "Login" );
-            Scene scene = new Scene( loader.load() );
-            loginStage.setScene( scene );
-            loginStage.setResizable( false );
-            loginStage.show();
-            thisStage.close();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
-        }
-    }
 }

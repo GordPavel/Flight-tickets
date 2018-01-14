@@ -138,7 +138,7 @@ class SearchFlightsOverviewController{
             mainController.flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
             Controller.getInstance().setFlightSearchActive( false );
         } );
-        if( mainController instanceof RoutesFlightsReadOnlyOverviewController ){
+        if( !(mainController instanceof RoutesFlightsWriteOverviewController) ){
             searchButton.setVisible( false );
         }
     }

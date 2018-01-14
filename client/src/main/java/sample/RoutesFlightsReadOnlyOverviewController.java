@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
 
 
 /**
- Controller for routes and flights view
+ Controller for routes and flights view, client read-only application.
+ disables and hides all buttons/menus, that read-only client must not see. Allows to search in big data base
  Shows the information about all routes and flights
  */
 class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
@@ -34,9 +35,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
     @FXML TableColumn<Flight, String> number;
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
     @FXML TextArea                    detailsTextArea;
-    @FXML MenuBar                     menuBar;
     @FXML Menu                        fileMenu;
-    @FXML Menu                        helpMenu;
     @FXML Button                      addRouteButton;
     @FXML Button                      editRouteButton;
     @FXML Button                      deleteRouteButton;
@@ -44,7 +43,6 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
     @FXML Button                      editFlightButton;
     @FXML Button                      deleteFlightButton;
     @FXML Button                      updateFlightButton;
-    @FXML Button                      searchFlightButton;
     @FXML Button                      updateRouteButton;
     @FXML Button                      searchRouteButton;
 
@@ -54,6 +52,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
 
     /**
      initialization of view
+     hide, what client mustn`t see, set listners, start thread
      */
     @Override
     @FXML
@@ -125,6 +124,10 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         }
     }
 
+
+    /**
+     * Search buttona action. Open only 1 search window.
+     */
     @Override
     @FXML
     void handleSearchFlightButton(){
@@ -156,6 +159,10 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         }
     }
 
+
+    /**
+     * About menu handler, shows information about app to user.
+     */
     @Override
     @FXML
     void handleAboutAction(){
@@ -167,70 +174,6 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         alert.showAndWait();
     }
 
-    @Override
-    @FXML
-    void handleChangeDBAction(){
-
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
-
-        /*
-          TODO: selecting new DB
-
-          put here code to open window, that will allow you to download new DB.
-         */
-
-        try{
-            Stage                    primaryStage = new Stage();
-            FXMLLoader               loader       =
-                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage );
-            loader.setController( controller );
-            primaryStage.setTitle( "Select DB" );
-            Scene scene = new Scene( loader.load() );
-            primaryStage.setScene( scene );
-            primaryStage.setResizable( false );
-            primaryStage.show();
-            thisStage.close();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
-        }
-
-    }
-
-    @Override
-    @FXML
-    void handleLogOutAction( Event event ){
-
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
-
-        /*
-          TODO: server logout
-
-          somehow let server know, that you change your login
-         */
-
-        try{
-            Stage                   loginStage      = new Stage();
-            FXMLLoader              loader          =
-                    new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
-            LoginOverviewController logInController = new LoginOverviewController( loginStage );
-            loader.setController( logInController );
-            loginStage.setTitle( "Login" );
-            Scene scene = new Scene( loader.load() );
-            loginStage.setScene( scene );
-            loginStage.setResizable( false );
-            loginStage.show();
-            thisStage.close();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
-        }
-
-
-    }
 
     private void closeWindow(){
         thisStage.close();

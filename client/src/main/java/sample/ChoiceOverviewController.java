@@ -56,7 +56,7 @@ class ChoiceOverviewController{
             FXMLLoader                           loader       =
                     new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
             RoutesFlightsOverviewController controller   =
-                    new RoutesFlightsReadOnlyOverviewController( primaryStage );
+                    new RoutesFlightsWriteOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Information system about flights and routes" );
             Scene scene = new Scene( loader.load() , 700 , 500 );

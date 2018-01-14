@@ -3,13 +3,11 @@ package sample;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings( "WeakerAccess" )
@@ -21,7 +19,7 @@ class LoginOverviewController{
         this.thisStage = thisStage;
     }
 
-    @FXML Button        connectButton;
+    @FXML Button        cancelButton;
     @FXML Button        logInButton;
     @FXML TextField     loginTextField;
     @FXML PasswordField passwordField;
@@ -32,7 +30,19 @@ class LoginOverviewController{
      */
     @FXML
     private void initialize(){
-//        todo : Закончить
+        loginTextField.textProperty().addListener((observable) -> {
+            Pattern textPattern = Pattern.compile( "[\\w\\d\\-_]*" );
+            Matcher matcher     = textPattern.matcher( loginTextField.getText() );
+            if( !matcher.matches() ){
+                loginTextField.setStyle( "-fx-text-inner-color: red;" );
+                loginTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
+                logInButton.setDisable(true);
+            }else{
+                loginTextField.setStyle( "-fx-text-inner-color: black;" );
+                loginTextField.setTooltip( null );
+                logInButton.setDisable(false);
+            }
+        });
     }
 
 

@@ -46,6 +46,7 @@ class AddAndEditFlightsOverviewController{
     private BooleanProperty ifFlightTimeRight;
     private BooleanProperty syntaxErrors;
 
+
     AddAndEditFlightsOverviewController( Flight editingFlight , Stage thisStage ){
         this.editingFlight = editingFlight;
         this.thisStage = thisStage;
@@ -234,7 +235,7 @@ class AddAndEditFlightsOverviewController{
                                                        planeID.getText() , departureDateTime , arriveDateTime );
                 }
 //            TODO: put here request to server to add flight
-                Main.changed = true;
+                ClientMain.changed = true;
                 closeWindow();
             }catch( FlightAndRouteException e ){
                 RoutesFlightsOverviewController.showModelAlert( e );

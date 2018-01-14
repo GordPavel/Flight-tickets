@@ -117,6 +117,9 @@ class RoutesFlightsOverviewController{
         routesPredicate.setValue( v );
     }
 
+    /**
+     * Open add route view
+     */
     @FXML
     void handleAddRouteButton(){
         try{
@@ -139,6 +142,9 @@ class RoutesFlightsOverviewController{
         }
     }
 
+    /**
+     * Open edit route view
+     */
     @FXML
     void handleEditRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
@@ -166,19 +172,23 @@ class RoutesFlightsOverviewController{
     }
 
     /**
+     * Delete route from local DB
      */
     @FXML
     void handleDeleteRouteButton(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataModelInstanceSaver.getInstance().removeRoute( selectedRoute );
-                Main.changed = true;
+                ClientMain.changed = true;
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
             }
         } );
     }
 
+    /**
+     * Open add flight view
+     */
     @FXML
     void handleAddFlightButton(){
         try{
@@ -202,6 +212,9 @@ class RoutesFlightsOverviewController{
         }
     }
 
+    /**
+     * Open edit flight view
+     */
     @FXML
     void handleEditFlightButton(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
@@ -229,6 +242,7 @@ class RoutesFlightsOverviewController{
     }
 
     /**
+     * Delete flight from local DB
      */
     @FXML
     void handleDeleteFlightButton(){
@@ -241,6 +255,10 @@ class RoutesFlightsOverviewController{
         } );
     }
 
+
+    /**
+     * Shows alert view with message from model
+     */
     static void showModelAlert( FlightAndRouteException e ){
         Alert alert = new Alert( Alert.AlertType.ERROR );
         alert.setTitle( "Model exception" );
@@ -249,6 +267,9 @@ class RoutesFlightsOverviewController{
         alert.showAndWait();
     }
 
+    /**
+     * Open search flight view
+     */
     @FXML
     void handleSearchFlightButton(){
         if( !Controller.getInstance().isFlightSearchActive() ){
@@ -278,13 +299,16 @@ class RoutesFlightsOverviewController{
         }
     }
 
+    /**
+     * Open file with saved data
+     */
     @FXML
     void handleOpenAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 DataModelInstanceSaver.getInstance().importFromFile( file );
-                Main.changed = false;
-                Main.savingFile = file;
+                ClientMain.changed = false;
+                ClientMain.savingFile = file;
                 thisStage.setTitle( file.getName() );
             }catch( IOException | FlightAndRouteException e ){
                 e.printStackTrace();
@@ -292,22 +316,28 @@ class RoutesFlightsOverviewController{
         } );
     }
 
+    /**
+     * Save local DB to file
+     */
     @FXML
     void handleSaveAction(){
-        if( Main.savingFile == null ){
+        if( ClientMain.savingFile == null ){
             Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
-                Main.savingFile = file;
+                ClientMain.savingFile = file;
                 thisStage.setTitle( file.getName() );
             } );
         }
         try{
-            DataModelInstanceSaver.getInstance().saveToFile( Main.savingFile );
-            Main.changed = false;
+            DataModelInstanceSaver.getInstance().saveToFile( ClientMain.savingFile );
+            ClientMain.changed = false;
         }catch( IOException | FlightAndRouteException e ){
             new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
         }
     }
 
+    /**
+     * Save local DB to selected/new file
+     */
     @FXML
     void handleSaveAsAction(){
         Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
@@ -319,6 +349,9 @@ class RoutesFlightsOverviewController{
         } );
     }
 
+    /**
+     * Merging data from file with local DB
+     */
     @FXML
     void handleMergeAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
@@ -326,7 +359,7 @@ class RoutesFlightsOverviewController{
                 ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance().mergeData( file )
                                                                               .collect( ArrayList::new , List::add ,
                                                                                         List::addAll );
-                Main.changed = true;
+                ClientMain.changed = true;
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
@@ -372,6 +405,7 @@ class RoutesFlightsOverviewController{
         } );
     }
 
+
     @FXML
     void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
@@ -402,10 +436,59 @@ class RoutesFlightsOverviewController{
 
     @FXML
     void handleChangeDBAction(){
+        DataModelInstanceSaver.getInstance().clear();
+        Controller.getInstance().stopThread();
+
+        /*
+          TODO: selecting new DB
+
+          put here code to open window, that will allow you to download new DB.
+         */
+
+        try{
+            Stage primaryStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
+            loader.setController( controller );
+            primaryStage.setTitle( "Select DB" );
+            Scene scene = new Scene( loader.load() );
+            primaryStage.setScene( scene );
+            primaryStage.setResizable( false );
+            primaryStage.show();
+            thisStage.close();
+        }catch( IOException e ){
+            System.out.println( "load problem" );
+            System.out.println( e.getMessage() );
+        }
+
     }
 
     @FXML
     void handleLogOutAction( Event event ){
+        DataModelInstanceSaver.getInstance().clear();
+        Controller.getInstance().stopThread();
+
+        /*
+          TODO: server logout
+
+          somehow let server know, that you change your login
+         */
+
+        try{
+            Stage loginStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+            LoginOverviewController logInController = new LoginOverviewController( loginStage );
+            loader.setController( logInController );
+            loginStage.setTitle( "Login" );
+            Scene scene = new Scene( loader.load() );
+            loginStage.setScene( scene );
+            loginStage.setResizable( false );
+            loginStage.show();
+            thisStage.close();
+        }catch( IOException e ){
+            System.out.println( "load problem" );
+            System.out.println( e.getMessage() );
+        }
     }
 }
 

@@ -5,9 +5,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.net.Socket;
 
 public class ClientMain extends Application{
+
+    static Boolean changed = false;
+    static File savingFile;
 
     private static Socket clientSocket;
 
@@ -30,13 +34,6 @@ public class ClientMain extends Application{
         primaryStage.setScene( scene );
         primaryStage.setResizable( false );
         primaryStage.show();
-//            try {
-//                ServerSocket serverSocket = new ServerSocket(1);
-//                System.out.println("test");
-//            } catch (Exception e)
-//            {
-//                System.out.println("test");
-//            }
 
     }
 
