@@ -34,8 +34,7 @@ import java.util.regex.Pattern;
  Controller for routes and flights view
  Shows the information about all routes and flights
  */
-
-class RoutesFlightsOverviewController{
+abstract class RoutesFlightsOverviewController{
 
     private static final String EDIT_ROUTE_WINDOW    = "Edit a route";
     private static final String ADD_ROUTE_WINDOW     = "Add a route";
@@ -43,15 +42,22 @@ class RoutesFlightsOverviewController{
     private static final String ADD_FLIGHT_WINDOW    = "Add a flight";
     private static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
 
+    /**
+     Two text fields to filter routes table
+     */
     @FXML TextField                   departure;
     @FXML TextField                   destination;
+
     @FXML TableView<Route>            routeTable;
     @FXML TableColumn<Route, String>  departureColumn;
     @FXML TableColumn<Route, String>  destinationColumn;
+
     @FXML TableView<Flight>           flightTable;
     @FXML TableColumn<Flight, String> number;
     @FXML TableColumn<Flight, Route>  routeColumnFlight;
+
     @FXML TextArea                    detailsTextArea;
+
     @FXML JFXButton                   editFlight;
     @FXML JFXButton                   deleteFlight;
     @FXML JFXButton                   editRoute;
@@ -71,6 +77,10 @@ class RoutesFlightsOverviewController{
      */
     @FXML
     void initialize(){
+        routeTable.setPrefWidth( 600 );
+        departureColumn.setPrefWidth( 300 );
+        destinationColumn.setPrefWidth( 300 );
+
         FilteredList<Route> routeFilteredList =
                 DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
         routeTable.setItems( routeFilteredList );
@@ -417,21 +427,6 @@ class RoutesFlightsOverviewController{
                               " - Use * and ? in search field instead of many or one unknown symbol;\n" +
                               " - If you add/edit/delete some route/flight, update search parameters to update tables with routes and flights." );
         alert.showAndWait();
-    }
-
-    @FXML
-    public void handleUpdateFlightButton(){
-
-    }
-
-    @FXML
-    public void handleUpdateRouteButton(){
-
-    }
-
-    @FXML
-    public void handleSearchRouteButton(){
-
     }
 
     @FXML

@@ -23,19 +23,8 @@ import java.util.regex.Pattern;
  */
 class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
-
-
-    @FXML TextField                   departure;
-    @FXML TextField                   destination;
-    @FXML TableView<Route>            routeTable;
-    @FXML TableColumn<Route, String>  departureColumn;
-    @FXML TableColumn<Route, String>  destinationColumn;
-    @FXML TableView<Flight>           flightTable;
-    @FXML TableColumn<Flight, String> number;
-    @FXML TableColumn<Flight, Route>  routeColumnFlight;
-    @FXML TextArea                    detailsTextArea;
-    @FXML Button                      updateFlightButton;
-    @FXML Button                      searchFlightButton;
+    @FXML Button updateFlightButton;
+    @FXML Button searchFlightButton;
 
     RoutesFlightsWriteOverviewController( Stage thisStage ){
         super( thisStage );
@@ -48,61 +37,18 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     @Override
     @FXML
     void initialize(){
+        super.initialize();
+
         updateFlightButton.setLayoutX( updateFlightButton.getLayoutX() - 37 );
         searchFlightButton.setLayoutX( searchFlightButton.getLayoutX() - 37 );
-        departureColumn.setCellValueFactory( new PropertyValueFactory<>( "from" ) );
-        destinationColumn.setCellValueFactory( new PropertyValueFactory<>( "to" ) );
-        routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList() );
-        number.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
-        routeColumnFlight.setCellValueFactory( new PropertyValueFactory<>( "route" ) );
-        flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
-        flightTable.getSelectionModel().selectedItemProperty()
-                   .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
-
-        departure.textProperty()
-                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , departure ) );
-        destination.textProperty()
-                   .addListener( ( observable , oldValue , newValue ) -> searchListeners( newValue , destination ) );
-
-        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
 
         Controller.getInstance().setThread( new WriteThread() );
+        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         Controller.getInstance().startThread();
     }
 
-    private void searchListeners( String newValue , TextField textField ){
-        if( !newValue.matches( "[\\w\\d\\-_?*]*" ) ){
-            textField.setStyle( "-fx-text-inner-color: red;" );
-            textField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, ?, *" ) );
-        }else{
-            textField.setStyle( "-fx-text-inner-color: black;" );
-            textField.setTooltip( null );
-            Pattern departurePattern = Pattern.compile(
-                    ".*" + departure.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" , Pattern.CASE_INSENSITIVE );
-            Pattern destinationPattern = Pattern.compile(
-                    ".*" + destination.getText().toUpperCase().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" , Pattern.CASE_INSENSITIVE );
-            routeTable.setItems( DataModelInstanceSaver.getInstance().getRouteObservableList().filtered(
-                    route -> departurePattern.matcher( route.getFrom().getId() ).matches() &&
-                             destinationPattern.matcher( route.getTo().getId() ).matches() ) );
-        }
-    }
-
     /**
-     @param flight show detail information about chosen flight
-     */
-    private void showFlightDetails( Flight flight ){
-        if( flight != null ){
-            detailsTextArea.setWrapText( true );
-            detailsTextArea.setText( flight.toString() );
-        }else{
-            detailsTextArea.setText( "" );
-        }
-    }
-
-    /**
-     * deleting route from DB
+     deleting route from DB
      */
     @Override
     @FXML
@@ -118,7 +64,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
     /**
-     * deleting flight from DB
+     deleting flight from DB
      */
     @Override
     @FXML
@@ -135,27 +81,24 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
     /**
-     * Update flight list
+     Update flight list
      */
-    @Override
     @FXML
     public void handleUpdateFlightButton(){
         // TODO: put here request to server to update DB about routes
     }
 
     /**
-     * Update route list
+     Update route list
      */
-    @Override
     @FXML
     public void handleUpdateRouteButton(){
         // TODO: put here request to server to update DB about flights
     }
 
     /**
-     * Search for routes
+     Search for routes
      */
-    @Override
     @FXML
     public void handleSearchRouteButton(){
         // TODO: put here request to server to update DB about flights

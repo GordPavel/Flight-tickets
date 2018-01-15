@@ -31,60 +31,40 @@ public class Flight implements Serializable, Cloneable{
         return number;
     }
 
-    void setNumber( String number ){
-        this.number = number;
-    }
-
     /**
      Stores route that this flight connects
      */
-    private Route route;
+    Route route;
 
     public Route getRoute(){
         return route;
     }
 
-    void setRoute( Route route ){
-        this.route = route;
-    }
-
     /**
      Stores unique ID of plane that makes this flight
      */
-    private String planeID;
+    String planeID;
 
     public String getPlaneID(){
         return planeID;
     }
 
-    void setPlaneID( String planeID ){
-        this.planeID = planeID;
-    }
-
     /**
      Stores date and time, when plane have to take off
      */
-    private ZonedDateTime departureDateTime;
+     ZonedDateTime departureDateTime;
 
     public ZonedDateTime getDepartureDateTime(){
         return departureDateTime;
     }
 
-    void setDepartureDateTime( ZonedDateTime date ){
-        this.departureDateTime = date;
-    }
-
     /**
      Stores date and time, when plane have to launch
      */
-    private ZonedDateTime arriveDateTime;
+    ZonedDateTime arriveDateTime;
 
     public ZonedDateTime getArriveDateTime(){
         return arriveDateTime;
-    }
-
-    void setArriveDateTime( ZonedDateTime date ){
-        this.arriveDateTime = date;
     }
 
     /**

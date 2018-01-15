@@ -184,11 +184,11 @@ public class DataModel{
                 flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) )
                                       .findFirst().orElseThrow(
                         () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
-        editingFlight.setPlaneID( newPlaneId != null ? newPlaneId : flight.getPlaneID() );
-        editingFlight.setRoute( newRoute != null ? newRoute : flight.getRoute() );
-        editingFlight.setDepartureDateTime(
-                ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() ) );
-        editingFlight.setArriveDateTime( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() );
+        editingFlight.planeID = newPlaneId != null ? newPlaneId : flight.getPlaneID();
+        editingFlight.route = newRoute != null ? newRoute : flight.getRoute();
+        editingFlight.departureDateTime =
+                ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() );
+        editingFlight.arriveDateTime = newArriveDate != null ? newArriveDate : flight.getArriveDateTime();
     }
 
 
@@ -218,7 +218,7 @@ public class DataModel{
                 route1 -> route.getFrom().equals( route1.getFrom() ) && route.getTo().equals( route1.getTo() ) ) ){
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
-        route.setId( routesPrimaryKeysGenerator.next() );
+        route.id = routesPrimaryKeysGenerator.next();
         routes.add( route );
     }
 
@@ -266,8 +266,8 @@ public class DataModel{
                                                   route.getTo() ).equals( route1.getTo() ) ) ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
-        editingRoute.setFrom( newDepartureAirport != null ? newDepartureAirport : route.getFrom() );
-        editingRoute.setTo( newDestinationAirport != null ? newDestinationAirport : route.getTo() );
+        editingRoute.from = newDepartureAirport != null ? newDepartureAirport : route.getFrom();
+        editingRoute.to = newDestinationAirport != null ? newDestinationAirport : route.getTo();
     }
 
     /**
@@ -362,7 +362,7 @@ public class DataModel{
             }
         } );
         flights.removeAll( failedFlights );
-        routes.forEach( route -> route.setId( routesPrimaryKeysGenerator.next() ) );
+        routes.forEach( route -> route.id = routesPrimaryKeysGenerator.next() );
         this.routes.addAll( routes );
         this.flights.addAll( flights );
         return Stream.concat( Stream.concat( failedRoutes.stream() , failedFlights.stream() ) , failedData.stream() );

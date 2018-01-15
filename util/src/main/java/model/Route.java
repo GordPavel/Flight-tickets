@@ -17,40 +17,28 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
     }
 
 
-    private Integer id;
+    Integer id;
 
     Integer getId(){
         return id;
     }
 
-    void setId( Integer id ){
-        this.id = id;
-    }
-
     /**
      Stores unique id of arrival airport.
      */
-    private ZoneId from;
+    ZoneId from;
 
     public ZoneId getFrom(){
         return from;
     }
 
-    void setFrom( ZoneId from ){
-        this.from = from;
-    }
-
     /**
      Stores unique id of departure airport
      */
-    private ZoneId to;
+    ZoneId to;
 
     public ZoneId getTo(){
         return to;
-    }
-
-    void setTo( ZoneId to ){
-        this.to = to;
     }
 
     @Override
