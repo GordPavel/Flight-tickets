@@ -12,32 +12,32 @@ import java.util.function.Predicate;
 
 public class Data {
 
-    private ArrayList<Flight> flights;
-    private ArrayList<Route>  routes;
+    private Collection<Flight> flights;
+    private Collection<Route>  routes;
     public  Predicate<String> predicate;
 
-    public Data(ArrayList<Flight> flights, ArrayList<Route> routes) {
+    public Data(Collection<Flight> flights, Collection<Route> routes) {
 
         this.flights = flights;
         this.routes = routes;
     }
 
-    public ArrayList<Flight> getFlights() {
+    public Collection<Flight> getFlights() {
 
         return flights;
     }
 
-    public void setFlights(ArrayList<Flight> flights) {
+    public void setFlights(Collection<Flight> flights) {
 
         this.flights = flights;
     }
 
-    public ArrayList<Route> getRoutes() {
+    public Collection<Route> getRoutes() {
 
         return routes;
     }
 
-    public void setRoutes(ArrayList<Route> routes) {
+    public void setRoutes(Collection<Route> routes) {
         this.routes = routes;
     }
 }
