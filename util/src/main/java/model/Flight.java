@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
  Entity to store data about each flight.
 
  @author pavelgordeev email: pvgord@icloud.com */
-public class Flight implements Serializable, Cloneable{
+public class Flight implements FlightOrRoute, Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
@@ -52,7 +52,7 @@ public class Flight implements Serializable, Cloneable{
     /**
      Stores date and time, when plane have to take off
      */
-     ZonedDateTime departureDateTime;
+    ZonedDateTime departureDateTime;
 
     public ZonedDateTime getDepartureDateTime(){
         return departureDateTime;
@@ -74,7 +74,7 @@ public class Flight implements Serializable, Cloneable{
         return ChronoUnit.MILLIS.between( departureDateTime , arriveDateTime );
     }
 
-    public String getTravelTimeInHoursAndMinutes(){
+    public String getTravelTimeString(){
         long startMilli = getTravelTime();
         startMilli /= 1000; // sum of second
         long sumMinute = startMilli / 60; // sum of minute
@@ -131,7 +131,7 @@ public class Flight implements Serializable, Cloneable{
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
                 "plane" , number , departureDateTime.format( formatter ) , route.getFrom() ,
-                arriveDateTime.format( formatter ) , route.getTo() , getTravelTimeInHoursAndMinutes() , planeID );
+                arriveDateTime.format( formatter ) , route.getTo() , getTravelTimeString() , planeID );
     }
 
 }

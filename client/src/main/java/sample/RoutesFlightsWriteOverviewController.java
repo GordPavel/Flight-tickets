@@ -10,8 +10,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
-import model.Flight;
-import model.Route;
 
 import java.io.IOException;
 import java.util.Optional;

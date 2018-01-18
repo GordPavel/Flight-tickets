@@ -48,9 +48,9 @@ abstract class RoutesFlightsOverviewController{
     @FXML TextField                   departure;
     @FXML TextField                   destination;
 
-    @FXML TableView<Route>            routeTable;
-    @FXML TableColumn<Route, String>  departureColumn;
-    @FXML TableColumn<Route, String>  destinationColumn;
+    @FXML TableView<Route>           routeTable;
+    @FXML TableColumn<Route, String> departureColumn;
+    @FXML TableColumn<Route, String> destinationColumn;
 
     @FXML TableView<Flight>           flightTable;
     @FXML TableColumn<Flight, String> number;

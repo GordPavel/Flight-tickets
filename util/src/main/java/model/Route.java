@@ -7,7 +7,7 @@ import java.time.ZoneId;
  Entity to store data about route between two airports.
 
  @author pavelgordeev email: pvgord@iclod.com */
-public class Route implements Serializable, Cloneable, Comparable<Route>{
+public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +15,6 @@ public class Route implements Serializable, Cloneable, Comparable<Route>{
         this.from = from;
         this.to = to;
     }
-
 
     Integer id;
 

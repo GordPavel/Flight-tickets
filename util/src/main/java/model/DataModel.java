@@ -4,6 +4,7 @@ import exceptions.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import transport.Actions;
 
 import java.io.*;
 import java.time.ZoneId;
@@ -109,18 +110,21 @@ public class DataModel{
         if( flight.getTravelTime() <= 0 ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( flights.stream().anyMatch(
-                flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) ) ){
+        if( flights.stream()
+                   .anyMatch( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() ,
+                                                         flight.getNumber().toUpperCase() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone's number" );
         }
         if( routes.stream().noneMatch( route -> Objects.equals( route.getId() , flight.getRoute().getId() ) ) ){
             throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
         }
-        if( flights.stream().anyMatch(
-                flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() , flight.getPlaneID().toUpperCase() ) &&
-                           Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
-                           Objects.equals( flight1.getDepartureDateTime() , flight.getDepartureDateTime() ) &&
-                           Objects.equals( flight1.getArriveDateTime() , flight.getArriveDateTime() ) ) ){
+        if( flights.stream()
+                   .anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
+                                                         flight.getPlaneID().toUpperCase() ) &&
+                                         Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
+                                         Objects.equals( flight1.getDepartureDateTime() ,
+                                                         flight.getDepartureDateTime() ) &&
+                                         Objects.equals( flight1.getArriveDateTime() , flight.getArriveDateTime() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
         flights.add( flight );
@@ -136,7 +140,8 @@ public class DataModel{
         if( flights.stream().noneMatch( flight -> flight.getNumber().equals( number ) ) ){
             throw new FaRNotRelatedData( "Database doesn't contain flight " + number );
         }
-        flights.removeIf( flight -> Pattern.compile( number , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() )
+        flights.removeIf( flight -> Pattern.compile( number , Pattern.CASE_INSENSITIVE )
+                                           .matcher( flight.getNumber() )
                                            .matches() );
     }
 
@@ -163,27 +168,31 @@ public class DataModel{
                                        ( newArriveDate != null ? newArriveDate : flight.getArriveDateTime() ) ) <= 0 ){
             throw new FaRDateMismatchException( "Flight has incorrect dates" );
         }
-        if( routes.stream().noneMatch( route -> Objects
-                .equals( route.getId() , ( newRoute != null ? newRoute : flight.getRoute() ).getId() ) ) ){
+        if( routes.stream()
+                  .noneMatch( route -> Objects.equals( route.getId() , ( newRoute != null ? newRoute :
+                                                                         flight.getRoute() ).getId() ) ) ){
             throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
         }
-        if( flights.stream().anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
-                                                                  newPlaneId != null ? newPlaneId.toUpperCase() :
-                                                                  flight.getPlaneID().toUpperCase() ) &&
-                                                  Objects.equals( flight1.getRoute() ,
-                                                                  newRoute != null ? newRoute : flight.getRoute() ) &&
-                                                  Objects.equals( flight1.getDepartureDateTime() ,
-                                                                  newDepartureDate != null ? newDepartureDate :
-                                                                  flight.getDepartureDateTime() ) &&
-                                                  Objects.equals( flight1.getArriveDateTime() ,
-                                                                  newArriveDate != null ? newArriveDate :
-                                                                  flight.getArriveDateTime() ) ) ){
+        if( flights.stream()
+                   .anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
+                                                         newPlaneId != null ? newPlaneId.toUpperCase() :
+                                                         flight.getPlaneID().toUpperCase() ) &&
+                                         Objects.equals( flight1.getRoute() ,
+                                                         newRoute != null ? newRoute : flight.getRoute() ) &&
+                                         Objects.equals( flight1.getDepartureDateTime() ,
+                                                         newDepartureDate != null ? newDepartureDate :
+                                                         flight.getDepartureDateTime() ) &&
+                                         Objects.equals( flight1.getArriveDateTime() ,
+                                                         newArriveDate != null ? newArriveDate :
+                                                         flight.getArriveDateTime() ) ) ){
             throw new FaRSameNameException( "Flight duplicates someone from database" );
         }
-        Flight editingFlight = flights.stream().filter(
-                flight1 -> Objects.equals( flight1.getNumber().toUpperCase() , flight.getNumber().toUpperCase() ) )
-                                      .findFirst().orElseThrow(
-                        () -> new FaRIllegalEditedData( "Database doesn't contain previous version of flight" ) );
+        Flight editingFlight = flights.stream()
+                                      .filter( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() ,
+                                                                          flight.getNumber().toUpperCase() ) )
+                                      .findFirst()
+                                      .orElseThrow( () -> new FaRIllegalEditedData(
+                                              "Database doesn't contain previous version of flight" ) );
         editingFlight.planeID = newPlaneId != null ? newPlaneId : flight.getPlaneID();
         editingFlight.route = newRoute != null ? newRoute : flight.getRoute();
         editingFlight.departureDateTime =
@@ -214,8 +223,9 @@ public class DataModel{
         if( route.getFrom().equals( route.getTo() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
-        if( routes.stream().anyMatch(
-                route1 -> route.getFrom().equals( route1.getFrom() ) && route.getTo().equals( route1.getTo() ) ) ){
+        if( routes.stream()
+                  .anyMatch( route1 -> route.getFrom().equals( route1.getFrom() ) &&
+                                       route.getTo().equals( route1.getTo() ) ) ){
             throw new FaRSameNameException( "Route duplicates someone from current database" );
         }
         route.id = routesPrimaryKeysGenerator.next();
@@ -249,21 +259,23 @@ public class DataModel{
      @throws FaRSameNameException it duplicates someone another or same airports
      */
     public void editRoute( Route route , ZoneId newDepartureAirport , ZoneId newDestinationAirport ){
-        if( ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
-                .equals( newDestinationAirport != null ? newDestinationAirport : route.getTo() ) ){
+        if( ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() ).equals(
+                newDestinationAirport != null ? newDestinationAirport : route.getTo() ) ){
             throw new FaRSameNameException( "Same airports" );
         }
         if( route.getId() == null ){
             throw new FaRIllegalEditedData( "Database doesn't contain previous version of route" );
         }
-        Route editingRoute =
-                routes.stream().filter( route1 -> Objects.equals( route1.getId() , route.getId() ) ).findFirst()
-                      .orElseThrow(
-                              () -> new FaRIllegalEditedData( "Database doesn't contain previous version of route" ) );
-        if( routes.stream().anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() )
-                                                        .equals( route1.getFrom() ) &&
-                                                ( newDestinationAirport != null ? newDestinationAirport :
-                                                  route.getTo() ).equals( route1.getTo() ) ) ){
+        Route editingRoute = routes.stream()
+                                   .filter( route1 -> Objects.equals( route1.getId() , route.getId() ) )
+                                   .findFirst()
+                                   .orElseThrow( () -> new FaRIllegalEditedData(
+                                           "Database doesn't contain previous version of route" ) );
+        if( routes.stream()
+                  .anyMatch( route1 -> ( newDepartureAirport != null ? newDepartureAirport : route.getFrom() ).equals(
+                          route1.getFrom() ) &&
+                                       ( newDestinationAirport != null ? newDestinationAirport : route.getTo() ).equals(
+                                               route1.getTo() ) ) ){
             throw new FaRSameNameException( "New item duplicates someone" );
         }
         editingRoute.from = newDepartureAirport != null ? newDepartureAirport : route.getFrom();
@@ -283,9 +295,11 @@ public class DataModel{
      */
     public void importFromFile( File file ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( file );
-        if( !routesAndFlights.values().parallelStream().flatMap( Collection::stream ).allMatch(
-                serializable -> serializable.getClass().equals( Route.class ) ||
-                                serializable.getClass().equals( Flight.class ) ) ){
+        if( !routesAndFlights.values()
+                             .parallelStream()
+                             .flatMap( Collection::stream )
+                             .allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
+                                                        serializable.getClass().equals( Flight.class ) ) ){
             throw new FaRIllegalDataException( "One object neither Route, nor Flight class" );
         }
         List<Route> routes =
@@ -304,9 +318,9 @@ public class DataModel{
         if( !flights.stream().map( Flight::getRoute ).allMatch( routes::contains ) ){
             throw new FaRNotRelatedData( "One flight has route not from database" );
         }
-        routesPrimaryKeysGenerator = IntStream
-                .rangeClosed( routes.stream().mapToInt( Route::getId ).max().orElse( 0 ) + 1 , Integer.MAX_VALUE )
-                .iterator();
+        routesPrimaryKeysGenerator =
+                IntStream.rangeClosed( routes.stream().mapToInt( Route::getId ).max().orElse( 0 ) + 1 ,
+                                       Integer.MAX_VALUE ).iterator();
         this.routes.setAll( FXCollections.observableList( new CopyOnWriteArrayList<>( routes ) ) );
         this.flights.setAll( FXCollections.observableList( new CopyOnWriteArrayList<>( flights ) ) );
     }
@@ -343,8 +357,9 @@ public class DataModel{
         Set<Route>  routeSet  = new HashSet<>( this.routes );
         Set<Flight> flightSet = new HashSet<>( this.flights );
         routes.forEach( route -> {
-            if( routeSet.stream().anyMatch(
-                    route1 -> route.getFrom().equals( route1.getFrom() ) && route.getTo().equals( route1.getTo() ) ) ){
+            if( routeSet.stream()
+                        .anyMatch( route1 -> route.getFrom().equals( route1.getFrom() ) &&
+                                             route.getTo().equals( route1.getTo() ) ) ){
                 failedRoutes.add( route );
             }else{
                 routeSet.add( route );
@@ -352,8 +367,10 @@ public class DataModel{
         } );
         routes.removeAll( failedRoutes );
         flights.stream().filter( flight -> routeSet.contains( flight.getRoute() ) ).forEach( flight -> {
-            if( flightSet.stream().anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
-                                                               .matcher( flight1.getNumber() ).matches() ) ){
+            if( flightSet.stream()
+                         .anyMatch( flight1 -> Pattern.compile( flight.getNumber() , Pattern.CASE_INSENSITIVE )
+                                                      .matcher( flight1.getNumber() )
+                                                      .matches() ) ){
                 failedFlights.add( flight );
                 return;
             }
@@ -375,8 +392,9 @@ public class DataModel{
             while( i++ < size ){
                 data.add( ( Serializable ) input.readObject() );
             }
-            return data.stream().collect(
-                    Collectors.partitioningBy( serializable -> serializable.getClass().equals( Route.class ) ) );
+            return data.stream()
+                       .collect( Collectors.partitioningBy(
+                               serializable -> serializable.getClass().equals( Route.class ) ) );
         }catch( ClassNotFoundException e ){
             throw new IllegalArgumentException( "File contains illegal data" , e );
         }
@@ -402,8 +420,9 @@ public class DataModel{
      */
     @SuppressWarnings( "WeakerAccess" )
     public void exportSpecifiedData( Collection<Serializable> data , OutputStream outputStream ) throws IOException{
-        if( !data.parallelStream().allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
-                                                             serializable.getClass().equals( Flight.class ) ) ){
+        if( !data.parallelStream()
+                 .allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
+                                            serializable.getClass().equals( Flight.class ) ) ){
             throw new IllegalArgumentException( "Can't serialize not Flight or Route classes" );
         }
         try( ObjectOutput output = new ObjectOutputStream( outputStream ) ){

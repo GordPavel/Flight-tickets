@@ -1,52 +1,54 @@
 package transport;
 
-/**
- * Class for sending object for change and an action
- */
-
-import exceptions.FaRWrongActionException;
 import exceptions.FaRWrongClassException;
+import model.Flight;
+import model.FlightOrRoute;
+import model.Route;
 
+//Class for sending object for change and an action
+//If you what to specify exact classes, that allow in any generic, use interfaces
+public class Actions<T extends FlightOrRoute>{
 
-public class Actions<T> {
+    // If you have any set of arguments to use, write an enum
+    public enum ActionsType{
+        DELETE,
+        ADD,
+        EDIT,
+        UPDATE
+    }
 
-    // actions: "delete", "add", "edit", "update"
+    private T           objectForAction;
+    private ActionsType action;
+    private String      typeOfObject;
 
-    private T objectForChange;//
-    private String action;
+    public Actions( T objectForAction , ActionsType action ){
+        this.objectForAction = objectForAction;
+        this.action = action;
+        this.typeOfObject = objectForAction.getClass().getTypeName();
+    }
 
-    public Actions(T objectForChange, String action) {
+//    Use switch construction before unwrapping data object
+    public Route tryGetRoute(){
+        if( !typeOfObject.equals( Route.class.getTypeName() ) )
+            throw new FaRWrongClassException( "This POJO contains flight" );
+        return Route.class.cast( objectForAction );
+    }
 
-        this.objectForChange = objectForChange;
+    public Flight tryGetFlight(){
+        if( !typeOfObject.equals( Flight.class.getTypeName() ) )
+            throw new FaRWrongClassException( "This POJO contains route" );
+        return Flight.class.cast( objectForAction );
+    }
+
+    public void setObjectForAction( T objectForAction ){
+        this.objectForAction = objectForAction;
+    }
+
+    public void setAction( ActionsType action ){
         this.action = action;
     }
 
-    public T getObjectForChange() {
-
-        return objectForChange;
-    }
-
-    public void setObjectForChange(T objectForChange) {
-
-        if (objectForChange.getClass().getName().equals("Route") || objectForChange.getClass().getName().equals("Flight")) {
-
-            this.objectForChange = objectForChange;
-        }
-        else throw new FaRWrongClassException("Wrong class of object (neither Route nor Flight)!");
-    }
-
-    public void setAction(String action) {
-
-        if (action.equals("add") || action.equals("delete") || action.equals("edit") || action.equals("update")) {
-
-            this.action = action;
-        }
-        else throw new FaRWrongActionException("Wrong action for object sent to server!");
-
-    }
-
-    public String getAction() {
-
+    public ActionsType getAction(){
         return action;
     }
 }
