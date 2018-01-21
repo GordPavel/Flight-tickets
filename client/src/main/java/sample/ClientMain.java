@@ -26,14 +26,15 @@ public class ClientMain extends Application{
     @Override
     public void start( Stage primaryStage ) throws Exception{
 
-        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ConnectionOverview.fxml" ) );
-        ConnectionOverviewController controller = new ConnectionOverviewController( primaryStage );
+        Stage                   loginStage = new Stage();
+        FXMLLoader              loader     = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+        LoginOverviewController controller = new LoginOverviewController( loginStage );
         loader.setController( controller );
-        primaryStage.setTitle( "Connection to server" );
+        loginStage.setTitle( "Login" );
         Scene scene = new Scene( loader.load() );
-        primaryStage.setScene( scene );
-        primaryStage.setResizable( false );
-        primaryStage.show();
+        loginStage.setScene( scene );
+        loginStage.setResizable( false );
+        loginStage.show();
 
     }
 

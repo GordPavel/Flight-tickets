@@ -25,7 +25,7 @@ class ChoiceOverviewController{
     @FXML
     private void initialize(){
         System.out.println( "test" );
-        cancelButton.setOnAction( event -> handleSelectAction() );
+        selectButton.setOnAction( event -> handleSelectAction() );
         cancelButton.setOnAction( event -> closeWindow() );
     }
 

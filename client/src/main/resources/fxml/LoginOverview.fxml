@@ -6,14 +6,15 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="164.0" prefWidth="238.0" xmlns="http://javafx.com/javafx/8.0.121"
-            xmlns:fx="http://javafx.com/fxml/1">
-    <Label layoutX="23.0" layoutY="33.0" text="Login"/>
-    <Label layoutX="23.0" layoutY="76.0" text="Password"/>
-    <Button fx:id="logInButton" layoutX="28.0" layoutY="116.0" mnemonicParsing="false"
-            prefHeight="25.0" prefWidth="52.0" text="Log in"/>
-    <Button fx:id="cancelButton" layoutX="154.0" layoutY="116.0" mnemonicParsing="false"
-            text="Cancel"/>
-    <TextField fx:id="loginTextField" layoutX="79.0" layoutY="29.0" prefHeight="25.0" prefWidth="134.0"/>
-    <PasswordField fx:id="passwordField" layoutX="80.0" layoutY="70.0" prefHeight="25.0" prefWidth="134.0"/>
+<AnchorPane prefHeight="238.0" prefWidth="321.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+    <Label layoutX="25.0" layoutY="35.0" text="IP" />
+    <Label layoutX="25.0" layoutY="75.0" text="Port" />
+    <TextField fx:id="ipTextField" layoutX="125.0" layoutY="31.0" prefHeight="25.0" prefWidth="134.0" />
+    <TextField fx:id="portTextField" layoutX="124.0" layoutY="71.0" prefHeight="25.0" prefWidth="134.0" />
+    <Label layoutX="25.0" layoutY="115.0" text="Login" />
+    <Label layoutX="25.0" layoutY="155.0" text="Password" />
+    <Button fx:id="logInButton" layoutX="25.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleLogInAction" prefHeight="25.0" prefWidth="52.0" text="Log in" />
+    <Button fx:id="cancelButton" layoutX="244.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleCancelAction" text="Cancel" />
+    <TextField fx:id="loginTextField" layoutX="125.0" layoutY="111.0" prefHeight="25.0" prefWidth="134.0" />
+    <PasswordField fx:id="passwordField" layoutX="125.0" layoutY="151.0" prefHeight="25.0" prefWidth="134.0" />
 </AnchorPane>
