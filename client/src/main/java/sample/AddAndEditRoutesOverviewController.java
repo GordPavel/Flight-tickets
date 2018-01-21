@@ -29,12 +29,14 @@ import static java.util.stream.Collectors.toList;
 
 class AddAndEditRoutesOverviewController{
 
-    @FXML Label mainLabel;
+    @FXML Label             mainLabel;
     @FXML ChoiceBox<String> departureCountryChoice;
     @FXML ChoiceBox<String> destinationCountryChoice;
     @FXML ChoiceBox<ZoneId> departureCityChoice;
     @FXML ChoiceBox<ZoneId> destinationCityChoice;
     @FXML JFXButton         addAndEditRouteButton;
+    @FXML JFXButton         clearButton;
+    @FXML JFXButton         cancelButton;
 
     private Route editingRoute;
 
@@ -120,6 +122,8 @@ class AddAndEditRoutesOverviewController{
             addAndEditRouteButton.setText( "Edit" );
             mainLabel.setText( "Enter new data." );
         }
+        clearButton.setOnAction( event -> handleClearData() );
+        cancelButton.setOnAction( event -> closeWindow() );
     }
 
     private void addOrEdit( Boolean isAdd ){
@@ -158,19 +162,11 @@ class AddAndEditRoutesOverviewController{
     /**
      Clear Button. Clear all fields in GUI
      */
-    @FXML
     private void handleClearData(){
         departureCountryChoice.getSelectionModel().clearSelection();
         destinationCountryChoice.getSelectionModel().clearSelection();
         departureCityChoice.getSelectionModel().clearSelection();
         destinationCityChoice.getSelectionModel().clearSelection();
-    }
-
-    /**
-     */
-    @FXML
-    private void handleCancelAction(){
-        closeWindow();
     }
 
     private void closeWindow(){

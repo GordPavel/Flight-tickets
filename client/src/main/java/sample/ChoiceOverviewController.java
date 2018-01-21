@@ -16,9 +16,8 @@ class ChoiceOverviewController{
         this.thisStage = thisStage;
     }
 
-    @FXML Button connectButton;
+    @FXML Button cancelButton;
     @FXML Button selectButton;
-
 
     /**
      initializing of view
@@ -26,20 +25,10 @@ class ChoiceOverviewController{
     @FXML
     private void initialize(){
         System.out.println( "test" );
+        cancelButton.setOnAction( event -> handleSelectAction() );
+        cancelButton.setOnAction( event -> closeWindow() );
     }
 
-
-    /**
-     Cancel button action handler. Closes window, when button pushed
-
-     */
-    @FXML
-    private void handleCancelAction(){
-        closeWindow();
-    }
-
-
-    @FXML
     private void handleSelectAction(){
 
         /*
@@ -52,11 +41,9 @@ class ChoiceOverviewController{
 
         // if write
         try{
-            Stage                                primaryStage = new Stage();
-            FXMLLoader                           loader       =
-                    new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-            RoutesFlightsOverviewController controller   =
-                    new RoutesFlightsWriteOverviewController( primaryStage );
+            Stage primaryStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+            RoutesFlightsOverviewController controller = new RoutesFlightsWriteOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Information system about flights and routes" );
             Scene scene = new Scene( loader.load() , 700 , 500 );

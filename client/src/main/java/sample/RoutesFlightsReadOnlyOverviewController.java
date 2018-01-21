@@ -1,17 +1,8 @@
 package sample;
 
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Modality;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import model.DataModelInstanceSaver;
-
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 
 /**
@@ -20,13 +11,6 @@ import java.util.regex.Pattern;
  Shows the information about all routes and flights
  */
 class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
-
-    @FXML Menu                        fileMenu;
-    @FXML Button                      addRouteButton;
-    @FXML Button                      addFlightButton;
-    @FXML Button                      updateFlightButton;
-    @FXML Button                      updateRouteButton;
-    @FXML Button                      searchRouteButton;
 
     public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
         super( thisStage );
@@ -43,11 +27,11 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         super.initialize();
         fileMenu.setVisible( false );
         addRouteButton.setVisible( false );
-        editRoute.setVisible( false );
-        deleteRoute.setVisible( false );
+        editRouteButton.setVisible( false );
+        deleteRouteButton.setVisible( false );
         addFlightButton.setVisible( false );
-        editFlight.setVisible( false );
-        deleteFlight.setVisible( false );
+        editFlightButton.setVisible( false );
+        deleteFlightButton.setVisible( false );
         updateFlightButton.setVisible( false );
         updateRouteButton.setVisible( false );
         searchRouteButton.setVisible( false );
@@ -56,14 +40,13 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         Controller.getInstance().setThread( new ReadOnlyThread() );
         thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         Controller.getInstance().startThread();
+        infoMenuButton.setOnAction( event -> handleAboutAction() );
     }
 
     /**
-     * About menu handler, shows information about app to user.
+     About menu handler, shows information about app to user.
      */
-    @Override
-    @FXML
-    void handleAboutAction(){
+    private void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
         alert.setHeaderText( "This program is designed as reference system for flights and routes.\n" +

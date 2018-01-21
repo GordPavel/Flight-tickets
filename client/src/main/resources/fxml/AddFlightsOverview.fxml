@@ -43,15 +43,16 @@
             <Font name="PT Mono Bold" size="12.0"/>
         </font>
     </JFXButton>
-    <JFXButton buttonType="RAISED" layoutX="440.0" layoutY="390.0" mnemonicParsing="false"
-               onAction="#handleCancelAction" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee"
+    <JFXButton fx:id="cancelButton" buttonType="RAISED" layoutX="440.0" layoutY="390.0" mnemonicParsing="false"
+               prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee"
                style="-fx-background-color: #354a86;" text="Cancel" textFill="WHITE">
         <font>
             <Font name="PT Mono Bold" size="12.0"/>
         </font>
     </JFXButton>
-    <JFXButton buttonType="RAISED" focusTraversable="false" layoutX="440.0" layoutY="130.0" mnemonicParsing="false"
-               onAction="#clearData" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee"
+    <JFXButton fx:id="clearButton" buttonType="RAISED" focusTraversable="false" layoutX="440.0" layoutY="130.0"
+               mnemonicParsing="false"
+               prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee"
                style="-fx-background-color: #354a86;" text="Clear" textFill="WHITE">
         <font>
             <Font name="PT Mono Bold" size="12.0"/>

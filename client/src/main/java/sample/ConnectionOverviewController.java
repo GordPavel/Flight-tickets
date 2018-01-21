@@ -24,7 +24,6 @@ class ConnectionOverviewController{
     @FXML TextField ipTextField;
     @FXML TextField portTextField;
 
-
     /**
      initializing of view
      */
@@ -34,17 +33,16 @@ class ConnectionOverviewController{
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "1" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
+        connectButton.setOnAction( event -> handleConnectAction() );
+        cancelButton.setOnAction( event -> handleCancelAction() );
     }
 
     /**
      Connect button action handler. Establish connection to server, put socket to ClientMain.clientSocket and open login window,
      if connection successfully established. IP address and port - from TextFields on view.
      Button disabled, if IP or Port TextField has incorrect information
-
      */
-    @FXML
     private void handleConnectAction(){
-
         try{
             Socket socket = new Socket( ipTextField.getText() , Integer.parseInt( portTextField.getText() ) );
             ClientMain.setClientSocket( socket );
@@ -75,9 +73,7 @@ class ConnectionOverviewController{
 
     /**
      Cancel button action handler. Closes window, when button pushed
-
      */
-    @FXML
     private void handleCancelAction(){
         closeWindow();
     }

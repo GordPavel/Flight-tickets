@@ -30,32 +30,23 @@ class LoginOverviewController{
      */
     @FXML
     private void initialize(){
-        loginTextField.textProperty().addListener((observable) -> {
+        loginTextField.textProperty().addListener( ( observable ) -> {
             Pattern textPattern = Pattern.compile( "[\\w\\d\\-_]*" );
             Matcher matcher     = textPattern.matcher( loginTextField.getText() );
             if( !matcher.matches() ){
                 loginTextField.setStyle( "-fx-text-inner-color: red;" );
                 loginTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
-                logInButton.setDisable(true);
+                logInButton.setDisable( true );
             }else{
                 loginTextField.setStyle( "-fx-text-inner-color: black;" );
                 loginTextField.setTooltip( null );
-                logInButton.setDisable(false);
+                logInButton.setDisable( false );
             }
-        });
+        } );
+        logInButton.setOnAction( event -> handleLogInAction() );
+        cancelButton.setOnAction( event -> closeWindow() );
     }
 
-
-    /**
-     Cancel button action handler. Closes window, when button pushed
-     */
-    @FXML
-    private void handleCancelAction(){
-        closeWindow();
-    }
-
-
-    @FXML
     private void handleLogInAction(){
 
         Pattern pattern      = Pattern.compile( "^[\\w\\d]+$" );
@@ -81,9 +72,10 @@ class LoginOverviewController{
 
         // if ok
         try{
-            Stage primaryStage = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
+            Stage                    primaryStage = new Stage();
+            FXMLLoader               loader       =
+                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+            ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage );
             loader.setController( controller );
             primaryStage.setTitle( "Select DB" );
             Scene scene = new Scene( loader.load() );

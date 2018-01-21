@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
 import exceptions.FlightAndRouteException;
@@ -40,6 +41,8 @@ class AddAndEditFlightsOverviewController{
     @FXML Button           addAndEditFlightButton;
     @FXML Label            mainLabel;
     @FXML Label            flightTimeErrorLabel;
+    @FXML JFXButton        clearButton;
+    @FXML JFXButton        cancelButton;
 
     private Flight          editingFlight;
     private Stage           thisStage;
@@ -177,6 +180,8 @@ class AddAndEditFlightsOverviewController{
             mainLabel.setText( "Enter new data." );
         }
         addAndEditFlightButton.setOnAction( event -> addOrEdit( editingFlight == null ) );
+        clearButton.setOnAction( event -> clearData() );
+        cancelButton.setOnAction( event -> closeWindow() );
     }
 
     private void departureDateTimeMoved( String oldDate , String oldTime , String newDate , String newTime ){
@@ -195,13 +200,14 @@ class AddAndEditFlightsOverviewController{
     }
 
     private void checkFlightTime(){
-        ZonedDateTime
-                departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                                 .atZone( Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
-                                                                  .map( Route::getFrom ).orElse( ZoneId.systemDefault() ) ),
-                arrivalDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                               .atZone( Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
-                                                                .map( Route::getTo ).orElse( ZoneId.systemDefault() ) );
+        ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                       .atZone( Optional.ofNullable(
+                                                               routesBox.getSelectionModel().getSelectedItem() )
+                                                                        .map( Route::getFrom )
+                                                                        .orElse( ZoneId.systemDefault() ) ),
+                arrivalDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() ).atZone(
+                        Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() ).map( Route::getTo )
+                                .orElse( ZoneId.systemDefault() ) );
         ifFlightTimeRight.setValue( !departureDateTime.isAfter( arrivalDateTime ) );
     }
 
@@ -273,7 +279,6 @@ class AddAndEditFlightsOverviewController{
     /**
      Clear Button. Clear all fields in GUI
      */
-    @FXML
     private void clearData(){
         if( editingFlight != null ){
             setEditingFlightData();
@@ -286,13 +291,6 @@ class AddAndEditFlightsOverviewController{
             arrivingTime.setValue( LocalTime.MIDNIGHT );
             departureTime.setValue( LocalTime.MIDNIGHT );
         }
-    }
-
-    /**
-     */
-    @FXML
-    private void handleCancelAction(){
-        closeWindow();
     }
 
     private void closeWindow(){

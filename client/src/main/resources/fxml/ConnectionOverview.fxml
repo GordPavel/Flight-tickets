@@ -6,10 +6,8 @@
             xmlns:fx="http://javafx.com/fxml/1">
     <Label layoutX="23.0" layoutY="33.0" text="IP"/>
     <Label layoutX="23.0" layoutY="76.0" text="Port"/>
-    <Button fx:id="connectButton" layoutX="28.0" layoutY="116.0" mnemonicParsing="false"
-            onAction="#handleConnectAction" text="Connect"/>
-    <Button fx:id="cancelButton" layoutX="154.0" layoutY="116.0" mnemonicParsing="false"
-            onAction="#handleCancelAction" text="Cancel"/>
+    <Button fx:id="connectButton" layoutX="28.0" layoutY="116.0" mnemonicParsing="false" text="Connect"/>
+    <Button fx:id="cancelButton" layoutX="154.0" layoutY="116.0" mnemonicParsing="false" text="Cancel"/>
     <TextField fx:id="ipTextField" layoutX="64.0" layoutY="29.0" prefHeight="25.0" prefWidth="149.0"/>
     <TextField fx:id="portTextField" layoutX="64.0" layoutY="72.0"/>
 </AnchorPane>

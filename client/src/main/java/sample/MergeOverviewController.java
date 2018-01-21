@@ -1,5 +1,6 @@
 package sample;
 
+import com.jfoenix.controls.JFXButton;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -21,7 +22,10 @@ class MergeOverviewController{
     @FXML TableColumn<Flight, String> numberColumn;
     @FXML TextArea                    newTextArea;
     @FXML TextArea                    oldTextArea;
-
+    @FXML JFXButton                   acceptAllNew;
+    @FXML JFXButton                   acceptThisNew;
+    @FXML JFXButton                   acceptAllOld;
+    @FXML JFXButton                   acceptThisOld;
 
     private Controller controller = Controller.getInstance();
 
@@ -35,6 +39,10 @@ class MergeOverviewController{
         flightTable.getSelectionModel().selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
         flightTable.refresh();
+        acceptAllNew.setOnAction( event -> handleAcceptAllNew() );
+        acceptThisNew.setOnAction( event -> handleAcceptNew() );
+        acceptAllOld.setOnAction( event -> handleAcceptAllOld() );
+        acceptThisOld.setOnAction( event -> handleAcceptOld() );
     }
 
     /**
@@ -57,7 +65,6 @@ class MergeOverviewController{
     /**
      Accept New button. Selected flight from model changes for new one
      */
-    @FXML
     private void handleAcceptNew(){
         DataModelInstanceSaver.getInstance().editFlight( flightTable.getSelectionModel().getSelectedItem() ,
                                                          flightTable.getSelectionModel().getSelectedItem().getRoute() ,
@@ -79,7 +86,6 @@ class MergeOverviewController{
     /**
      Accept New button. Selected flight from model don`t changes for new one
      */
-    @FXML
     private void handleAcceptOld(){
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
@@ -93,7 +99,6 @@ class MergeOverviewController{
     /**
      Accept New button. All flights from model changes for new one
      */
-    @FXML
     private void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
             DataModelInstanceSaver.getInstance().editFlight( flight , flight.getRoute() , flight.getPlaneID() ,
@@ -112,7 +117,6 @@ class MergeOverviewController{
     /**
      Accept New button. None flight from model changes for new one
      */
-    @FXML
     private void handleAcceptAllOld(){
         flightTable.setItems( null );
         flightTable.refresh();
