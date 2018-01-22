@@ -5,6 +5,8 @@ import model.Flight;
 import model.FlightOrRoute;
 import model.Route;
 
+import java.util.function.Predicate;
+
 //Class for sending object for change and an action
 //If you what to specify exact classes, that allow in any generic, use interfaces
 public class Actions<T extends FlightOrRoute>{
@@ -20,6 +22,7 @@ public class Actions<T extends FlightOrRoute>{
     private T           objectForAction;
     private ActionsType action;
     private String      typeOfObject;
+    public Predicate<String> predicate;
 
     public Actions( T objectForAction , ActionsType action ){
         this.objectForAction = objectForAction;
@@ -50,6 +53,14 @@ public class Actions<T extends FlightOrRoute>{
 
     public ActionsType getAction(){
         return action;
+    }
+
+    public Predicate<String> getPredicate() {
+        return predicate;
+    }
+
+    public void setPredicate(Predicate<String> predicate) {
+        this.predicate = predicate;
     }
 }
 

@@ -141,6 +141,11 @@ class SearchFlightsOverviewController{
         if( !(mainController instanceof RoutesFlightsWriteOverviewController) ){
             searchButton.setVisible( false );
         }
+        if (mainController instanceof RoutesFlightsReadOnlyOverviewController){
+            /**
+             * TODO: add listners with tasks...
+             */
+        }
     }
 
     /**
