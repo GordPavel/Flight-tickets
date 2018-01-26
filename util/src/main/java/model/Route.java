@@ -11,6 +11,12 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
 
     private static final long serialVersionUID = 1L;
 
+    public Route( Integer id , ZoneId from , ZoneId to ){
+        this.id = id;
+        this.from = from;
+        this.to = to;
+    }
+
     public Route( ZoneId from , ZoneId to ){
         this.from = from;
         this.to = to;
@@ -18,7 +24,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
 
     Integer id;
 
-    Integer getId(){
+    public Integer getId(){
         return id;
     }
 

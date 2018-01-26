@@ -22,7 +22,7 @@ class DatabaseInterface implements ShellDependent{
     }
 
     @Command( description = "Lists all clients.", abbrev = "-l", name = "--list" )
-    public void listAllCLients(){
+    public void listAllClients(){
         base.listAllUsers().forEach( System.out::println );
     }
 

@@ -1,20 +1,19 @@
 package transport;
 
-import model.DataModel;
 import model.Flight;
 import model.Route;
-
-/**
- * Class for sending data range
- */
 
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ Class for sending data range
+ */
+
 public class Data{
 
-    private Collection<Flight> flights;
-    private Collection<Route>  routes;
+    private Collection<Flight>  flights;
+    private Collection<Route>   routes;
     private Map<String, String> bases;
 
 
@@ -43,11 +42,11 @@ public class Data{
         this.routes = routes;
     }
 
-    public Map<String, String> getBases() {
+    public Map<String, String> getBases(){
         return bases;
     }
 
-    public void setBases(Map<String, String> bases) {
+    public void setBases( Map<String, String> bases ){
         this.bases = bases;
     }
 

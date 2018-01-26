@@ -1,29 +1,21 @@
 package transport;
 
-public class UpdateData {
+import javafx.collections.ListChangeListener;
+import model.FlightOrRoute;
 
-    Data removed;
-    Data added;
+import java.util.List;
 
-    UpdateData (Data removed, Data added){
-        this.removed=removed;
-        this.added=added;
+public class UpdateData{
+    List<ListChangeListener<FlightOrRoute>> changes;
+
+    public UpdateData(){
     }
 
-    public Data getAdded() {
-        return added;
+    public List<ListChangeListener<FlightOrRoute>> getChanges(){
+        return changes;
     }
 
-    public void setAdded(Data added) {
-        this.added = added;
+    public void setChanges( List<ListChangeListener<FlightOrRoute>> changes ){
+        this.changes = changes;
     }
-
-    public Data getRemoved() {
-        return removed;
-    }
-
-    public void setRemoved(Data removed) {
-        this.removed = removed;
-    }
-
 }

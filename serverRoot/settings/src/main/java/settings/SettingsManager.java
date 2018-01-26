@@ -30,9 +30,9 @@ public class SettingsManager{
 
     static{
         try{
-            settingsFilePath =
-                    new File( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().toURI() )
-                            .getParent() + "/serverfiles/settings.xml";
+            settingsFilePath = new File(
+                    SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().toURI() ).getParent() +
+                               "/serverfiles/settings.xml";
         }catch( URISyntaxException e ){
             e.printStackTrace();
             System.exit( 1 );

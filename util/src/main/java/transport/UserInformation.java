@@ -6,9 +6,9 @@ package transport;
 
 public class UserInformation {
 
-    private String  name;
-    private String  password;
-    private String  dataBase;
+    private String name;
+    private String password;
+    private String dataBase;
 
 
     public String getName() {
@@ -16,7 +16,7 @@ public class UserInformation {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(String name ) {
 
         this.name = name;
     }
@@ -26,7 +26,7 @@ public class UserInformation {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(String password ) {
 
         this.password = password;
     }
@@ -36,7 +36,7 @@ public class UserInformation {
         return dataBase;
     }
 
-    public void setDataBase(String dataBase) {
+    public void setDataBase(String dataBase ) {
 
         this.dataBase = dataBase;
     }

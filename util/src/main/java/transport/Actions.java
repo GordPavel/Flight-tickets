@@ -1,15 +1,19 @@
 package transport;
 
-import exceptions.FaRWrongClassException;
-import model.Flight;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.FlightOrRoute;
-import model.Route;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 //Class for sending object for change and an action
 //If you what to specify exact classes, that allow in any generic, use interfaces
-public class Actions<T extends FlightOrRoute>{
+@JsonPropertyOrder( { "action" , "typeOfObject" , "objectForAction" , "predicate" } )
+public class Actions{
 
     // If you have any set of arguments to use, write an enum
     public enum ActionsType{
@@ -19,48 +23,56 @@ public class Actions<T extends FlightOrRoute>{
         UPDATE
     }
 
-    private T           objectForAction;
-    private ActionsType action;
-    private String      typeOfObject;
-    public Predicate<String> predicate;
+    @JsonDeserialize( using = ObjectDeserializer.class )
+    @JsonSerialize( using = ObjectSerializer.class )
+    private FlightOrRoute     objectForAction;
+    private ActionsType       action;
+    private String            typeOfObject;
+    private Predicate<String> predicate;
 
-    public Actions( T objectForAction , ActionsType action ){
+    @JsonCreator
+    public Actions(
+            @JsonProperty( "objectForAction" )
+                    FlightOrRoute objectForAction ,
+            @JsonProperty( "action" )
+                    ActionsType action ,
+            @JsonProperty( "predicate" )
+                    Predicate<String> predicate ){
         this.objectForAction = objectForAction;
         this.action = action;
         this.typeOfObject = objectForAction.getClass().getTypeName();
+        this.predicate = predicate;
     }
 
-//    Use switch construction before unwrapping data object
-    public Route tryGetRoute(){
-        if( !typeOfObject.equals( Route.class.getTypeName() ) )
-            throw new FaRWrongClassException( "This POJO contains flight" );
-        return Route.class.cast( objectForAction );
+    public FlightOrRoute getObjectForAction(){
+        return objectForAction;
     }
 
-    public Flight tryGetFlight(){
-        if( !typeOfObject.equals( Flight.class.getTypeName() ) )
-            throw new FaRWrongClassException( "This POJO contains route" );
-        return Flight.class.cast( objectForAction );
-    }
-
-    public void setObjectForAction( T objectForAction ){
-        this.objectForAction = objectForAction;
-    }
-
-    public void setAction( ActionsType action ){
-        this.action = action;
+    public String getTypeOfObject(){
+        return typeOfObject;
     }
 
     public ActionsType getAction(){
         return action;
     }
 
-    public Predicate<String> getPredicate() {
+    public Predicate<String> getPredicate(){
         return predicate;
     }
 
-    public void setPredicate(Predicate<String> predicate) {
-        this.predicate = predicate;
+    @Override
+    public int hashCode(){
+        return objectForAction.hashCode() ^ ( action.hashCode() + 31 ) ^ typeOfObject.hashCode() ^
+               Optional.ofNullable( predicate ).map( Predicate::hashCode ).orElse( 50 );
+    }
+
+    @Override
+    public boolean equals( Object obj ){
+        if( !( obj instanceof Actions ) ) return false;
+        Actions actions = ( Actions ) obj;
+        return objectForAction.equals( actions.objectForAction ) && action.equals( actions.action ) &&
+               typeOfObject.equals( actions.typeOfObject ) && predicate != null ?
+               predicate.equals( actions.predicate ) : actions.predicate == null;
     }
 }
 

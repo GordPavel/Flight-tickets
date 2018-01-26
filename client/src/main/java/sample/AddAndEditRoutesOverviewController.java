@@ -42,26 +42,39 @@ class AddAndEditRoutesOverviewController{
 
     private Stage thisStage;
     private Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
-    private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds().stream().sorted().filter(
-            Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate().and( pattern.asPredicate() ) ).collect(
-            Collector.of( HashMap::new , ( Map<String, List<ZoneId>> map , String zone ) -> {
-                Matcher matcher = pattern.matcher( zone );
-                //noinspection ResultOfMethodCallIgnored
-                matcher.find();
-                String       key    = matcher.group( 1 );
-                final ZoneId zoneId = ZoneId.of( zone );
-                if( map.containsKey( key ) ){
-                    map.get( key ).add( zoneId );
-                }else{
-                    map.put( key , new ArrayList<ZoneId>(){{
-                        add( zoneId );
-                    }} );
-                }
-            } , ( map1 , map2 ) -> {
-                map1.forEach(
-                        ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
-                return map2;
-            } ) );
+    private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds()
+                                                      .stream()
+                                                      .sorted()
+                                                      .filter( Pattern.compile( "(Etc|SystemV)/.+" )
+                                                                      .asPredicate()
+                                                                      .negate()
+                                                                      .and( pattern.asPredicate() ) )
+                                                      .collect( Collector.of( HashMap::new ,
+                                                                              ( Map<String, List<ZoneId>> map , String zone ) -> {
+                                                                                  Matcher matcher =
+                                                                                          pattern.matcher( zone );
+                                                                                  //noinspection ResultOfMethodCallIgnored
+                                                                                  matcher.find();
+                                                                                  String       key    =
+                                                                                          matcher.group( 1 );
+                                                                                  final ZoneId zoneId =
+                                                                                          ZoneId.of( zone );
+                                                                                  if( map.containsKey( key ) ){
+                                                                                      map.get( key ).add( zoneId );
+                                                                                  }else{
+                                                                                      map.put( key ,
+                                                                                               new ArrayList<ZoneId>(){{
+                                                                                                   add( zoneId );
+                                                                                               }} );
+                                                                                  }
+                                                                              } , ( map1 , map2 ) -> {
+                                                                  map1.forEach( ( key1 , value1 ) -> map2.merge( key1 ,
+                                                                                                                 value1 ,
+                                                                                                                 ( key2 , value2 ) -> key2 )
+                                                                                                         .addAll(
+                                                                                                                 value1 ) );
+                                                                  return map2;
+                                                              } ) );
 
     AddAndEditRoutesOverviewController( Route editingRoute , Stage thisStage ){
         this.editingRoute = editingRoute;
@@ -74,10 +87,14 @@ class AddAndEditRoutesOverviewController{
     @SuppressWarnings( "ResultOfMethodCallIgnored" )
     @FXML
     private void initialize(){
-        departureCountryChoice.setItems( zones.keySet().stream().collect(
-                Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
-        destinationCountryChoice.setItems( zones.keySet().stream().collect(
-                Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+        departureCountryChoice.setItems( zones.keySet()
+                                              .stream()
+                                              .collect( Collectors.collectingAndThen( toList() ,
+                                                                                      FXCollections::observableList ) ) );
+        destinationCountryChoice.setItems( zones.keySet()
+                                                .stream()
+                                                .collect( Collectors.collectingAndThen( toList() ,
+                                                                                        FXCollections::observableList ) ) );
         StringConverter<ZoneId> zoneIdStringConverter = new StringConverter<ZoneId>(){
             @Override
             public String toString( ZoneId zone ){
@@ -93,16 +110,23 @@ class AddAndEditRoutesOverviewController{
         };
         departureCityChoice.setConverter( zoneIdStringConverter );
         destinationCityChoice.setConverter( zoneIdStringConverter );
-        departureCountryChoice.getSelectionModel().selectedItemProperty().addListener(
-                ( observable , oldValue , newValue ) -> countrySelected( newValue , departureCityChoice ) );
-        destinationCountryChoice.getSelectionModel().selectedItemProperty().addListener(
-                ( observable , oldValue , newValue ) -> countrySelected( newValue , destinationCityChoice ) );
+        departureCountryChoice.getSelectionModel()
+                              .selectedItemProperty()
+                              .addListener( ( observable , oldValue , newValue ) -> countrySelected( newValue ,
+                                                                                                     departureCityChoice ) );
+        destinationCountryChoice.getSelectionModel()
+                                .selectedItemProperty()
+                                .addListener( ( observable , oldValue , newValue ) -> countrySelected( newValue ,
+                                                                                                       destinationCityChoice ) );
 
         BooleanProperty addAvailable = new SimpleBooleanProperty(
                 Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() ).isPresent() &&
                 Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() ).isPresent() );
-        addAvailable.bind( departureCityChoice.getSelectionModel().selectedItemProperty().isNotNull()
-                                              .and( destinationCityChoice.getSelectionModel().selectedItemProperty()
+        addAvailable.bind( departureCityChoice.getSelectionModel()
+                                              .selectedItemProperty()
+                                              .isNotNull()
+                                              .and( destinationCityChoice.getSelectionModel()
+                                                                         .selectedItemProperty()
                                                                          .isNotNull() ) );
         addAndEditRouteButton.setDisable( !addAvailable.getValue() );
         addAndEditRouteButton.disableProperty().bind( addAvailable.not() );
@@ -129,17 +153,22 @@ class AddAndEditRoutesOverviewController{
     private void addOrEdit( Boolean isAdd ){
         try{
             if( isAdd ){
-                DataModelInstanceSaver.getInstance().addRoute( new Route(
-                        Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
-                                .orElseThrow( IllegalStateException::new ) ,
-                        Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
-                                .orElseThrow( IllegalStateException::new ) ) );
-            }else {
-                DataModelInstanceSaver.getInstance().editRoute( editingRoute ,
-                                                                Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() )
-                                                                        .orElseThrow( IllegalStateException::new ) ,
-                                                                Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() )
-                                                                        .orElseThrow( IllegalStateException::new ) );
+                DataModelInstanceSaver.getInstance()
+                                      .addRoute( new Route( Optional.ofNullable(
+                                              departureCityChoice.getSelectionModel().getSelectedItem() )
+                                                                    .orElseThrow( IllegalStateException::new ) ,
+                                                            Optional.ofNullable(
+                                                                    destinationCityChoice.getSelectionModel()
+                                                                                         .getSelectedItem() )
+                                                                    .orElseThrow( IllegalStateException::new ) ) );
+            }else{
+                DataModelInstanceSaver.getInstance()
+                                      .editRoute( editingRoute , Optional.ofNullable(
+                                              departureCityChoice.getSelectionModel().getSelectedItem() )
+                                                                         .orElseThrow( IllegalStateException::new ) ,
+                                                  Optional.ofNullable(
+                                                          destinationCityChoice.getSelectionModel().getSelectedItem() )
+                                                          .orElseThrow( IllegalStateException::new ) );
             }
 //            TODO: put here request to server to add flight
             ClientMain.changed = true;
@@ -152,8 +181,10 @@ class AddAndEditRoutesOverviewController{
     private void countrySelected( String newValue , ChoiceBox<ZoneId> cityBox ){
         Optional<String> chosenCorty = Optional.ofNullable( newValue );
         if( chosenCorty.isPresent() ){
-            cityBox.setItems( zones.get( chosenCorty.get() ).stream().collect(
-                    Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+            cityBox.setItems( zones.get( chosenCorty.get() )
+                                   .stream()
+                                   .collect(
+                                           Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
         }else{
             cityBox.getItems().clear();
         }

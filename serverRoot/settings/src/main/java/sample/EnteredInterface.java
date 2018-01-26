@@ -66,8 +66,11 @@ class EnteredInterface implements ShellDependent{
                     String path ) throws IOException{
         ShellFactory.createSubshell( SettingsManager.settings.getAdminName() + "/" +
                                      path.substring( path.lastIndexOf( "/" ) , path.lastIndexOf( "." ) ) , shell ,
-                                     path , new DatabaseInterface( SettingsManager.getBase( path ).orElseThrow(
-                        () -> new IllegalArgumentException( "Server doesn't have database " + path ) ) ) )
+                                     path , new DatabaseInterface( SettingsManager.getBase( path )
+                                                                                  .orElseThrow(
+                                                                                          () -> new IllegalArgumentException(
+                                                                                                  "Server doesn't have database " +
+                                                                                                  path ) ) ) )
                     .commandLoop();
     }
 
