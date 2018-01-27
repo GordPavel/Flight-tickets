@@ -23,8 +23,8 @@ public class Actions{
         UPDATE
     }
 
-    @JsonDeserialize( using = ObjectDeserializer.class )
-    @JsonSerialize( using = ObjectSerializer.class )
+    @JsonDeserialize( using = ActionsDeserializer.class )
+    @JsonSerialize( using = ActionsSerializer.class )
     private FlightOrRoute     objectForAction;
     private ActionsType       action;
     private String            typeOfObject;

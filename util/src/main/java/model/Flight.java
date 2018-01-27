@@ -1,5 +1,9 @@
 package model;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,12 +13,23 @@ import java.time.temporal.ChronoUnit;
  Entity to store data about each flight.
 
  @author pavelgordeev email: pvgord@icloud.com */
+@JsonRootName( "Flight" )
 public class Flight implements FlightOrRoute, Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
 
-    public Flight( String number , Route route , String planeID , ZonedDateTime departureDateTime ,
-                   ZonedDateTime arriveDateTime ){
+    @JsonCreator
+    public Flight(
+            @JsonProperty( "number" )
+                    String number ,
+            @JsonProperty( "route" )
+                    Route route ,
+            @JsonProperty( "planeID" )
+                    String planeID ,
+            @JsonProperty( "departureDateTime" )
+                    ZonedDateTime departureDateTime ,
+            @JsonProperty( "arriveDateTime" )
+                    ZonedDateTime arriveDateTime ){
         this.number = number;
         this.route = route;
         this.planeID = planeID;
@@ -27,6 +42,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     private String number;
 
+    @JsonGetter( "number" )
     public String getNumber(){
         return number;
     }
@@ -36,6 +52,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     Route route;
 
+    @JsonGetter( "route" )
     public Route getRoute(){
         return route;
     }
@@ -45,6 +62,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     String planeID;
 
+    @JsonGetter( "planeID" )
     public String getPlaneID(){
         return planeID;
     }
@@ -52,8 +70,11 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores date and time, when plane have to take off
      */
+    @JsonSerialize( using = ZonedDateTimeSerializer.class )
+    @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
     ZonedDateTime departureDateTime;
 
+    @JsonGetter( "departureDateTime" )
     public ZonedDateTime getDepartureDateTime(){
         return departureDateTime;
     }
@@ -61,8 +82,11 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores date and time, when plane have to launch
      */
+    @JsonSerialize( using = ZonedDateTimeSerializer.class )
+    @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
     ZonedDateTime arriveDateTime;
 
+    @JsonGetter( "arriveDateTime" )
     public ZonedDateTime getArriveDateTime(){
         return arriveDateTime;
     }
@@ -70,10 +94,12 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      @return countable field, difference between departureDateTime and arriveDateTime in milliseconds
      */
+    @JsonIgnore
     public Long getTravelTime(){
         return ChronoUnit.MILLIS.between( departureDateTime , arriveDateTime );
     }
 
+    @JsonIgnore
     public String getTravelTimeString(){
         long startMilli = getTravelTime();
         startMilli /= 1000; // sum of second
@@ -94,8 +120,8 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
         if( !( obj instanceof Flight ) ) return false;
         Flight flight = ( Flight ) obj;
         return this.number.equals( flight.number ) && this.route.equals( flight.route ) &&
-               planeID.equals( flight.planeID ) && departureDateTime.equals( flight.departureDateTime ) &&
-               arriveDateTime.equals( flight.arriveDateTime );
+               planeID.equals( flight.planeID ) && departureDateTime.isEqual( flight.departureDateTime ) &&
+               arriveDateTime.isEqual( flight.arriveDateTime );
     }
 
     boolean pointsEquals( Object obj ){

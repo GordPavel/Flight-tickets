@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.Predicate;
 
 
 /**
@@ -20,13 +19,13 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         super( thisStage );
     }
 
-    Timer timer = new Timer();
-    TimerTask task = new TimerTask() {
+    Timer     timer = new Timer();
+    TimerTask task  = new TimerTask(){
         @Override
-        public void run() {
-            System.out.println("test");
+        public void run(){
+            System.out.println( "test" );
         }
-    };;
+    };
 
     /**
      initialization of view
@@ -50,28 +49,25 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
 
 
         Controller.getInstance().setThread( new ReadOnlyThread() );
-        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread());
-        thisStage.setOnHidden(event->timer.cancel());
+        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
+        thisStage.setOnHidden( event -> timer.cancel() );
         Controller.getInstance().startThread();
         infoMenuButton.setOnAction( event -> handleAboutAction() );
 
-        departure.textProperty().addListener(observable -> restartTask());
-        destination.textProperty().addListener(observable -> restartTask());
+        departure.textProperty().addListener( observable -> restartTask() );
+        destination.textProperty().addListener( observable -> restartTask() );
 
     }
 
     public void restartTask(){
         task.cancel();
-        task = new TimerTask() {
+        task = new TimerTask(){
             @Override
-            public void run() {
-                /**
-                 * TODO: Put here additional request to server
-                 */
-
+            public void run(){
+//                TODO: Put here additional request to server
             }
         };
-        timer.schedule(task,5000);
+        timer.schedule( task , 5000 );
     }
 
     /**

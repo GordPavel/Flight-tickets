@@ -1,5 +1,12 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 import java.time.ZoneId;
 
@@ -7,11 +14,19 @@ import java.time.ZoneId;
  Entity to store data about route between two airports.
 
  @author pavelgordeev email: pvgord@iclod.com */
+@JsonRootName( "Route" )
 public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
 
-    public Route( Integer id , ZoneId from , ZoneId to ){
+    @JsonCreator
+    public Route(
+            @JsonProperty( "id" )
+                    Integer id ,
+            @JsonProperty( "from" )
+                    ZoneId from ,
+            @JsonProperty( "to" )
+                    ZoneId to ){
         this.id = id;
         this.from = from;
         this.to = to;
@@ -24,6 +39,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
 
     Integer id;
 
+    @JsonGetter( "id" )
     public Integer getId(){
         return id;
     }
@@ -31,8 +47,11 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
     /**
      Stores unique id of arrival airport.
      */
+    @JsonSerialize( using = ZoneIdSerializer.class )
+    @JsonDeserialize( using = ZoneIdDeserializer.class )
     ZoneId from;
 
+    @JsonGetter( "from" )
     public ZoneId getFrom(){
         return from;
     }
@@ -40,8 +59,11 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
     /**
      Stores unique id of departure airport
      */
+    @JsonSerialize( using = ZoneIdSerializer.class )
+    @JsonDeserialize( using = ZoneIdDeserializer.class )
     ZoneId to;
 
+    @JsonGetter( "to" )
     public ZoneId getTo(){
         return to;
     }

@@ -16,14 +16,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ObjectDeserializer extends StdDeserializer<FlightOrRoute>{
+public class ActionsDeserializer extends StdDeserializer<FlightOrRoute>{
 
-    public ObjectDeserializer(){
-        this( null );
-    }
-
-    private ObjectDeserializer( Class<?> vc ){
-        super( vc );
+    public ActionsDeserializer(){
+        super( ( Class<?> ) null );
     }
 
     @Override

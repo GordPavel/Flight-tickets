@@ -11,14 +11,10 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-public class ObjectSerializer extends StdSerializer<FlightOrRoute>{
+public class ActionsSerializer extends StdSerializer<FlightOrRoute>{
 
-    public ObjectSerializer(){
-        this( null );
-    }
-
-    private ObjectSerializer( Class<FlightOrRoute> t ){
-        super( t );
+    public ActionsSerializer(){
+        super( ( Class<FlightOrRoute> ) null );
     }
 
     @Override

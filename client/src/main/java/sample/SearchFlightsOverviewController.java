@@ -87,13 +87,16 @@ class SearchFlightsOverviewController{
         planeIdTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         planeIdTextField.textProperty()
                         .addListener( ( observable , oldValue , newValue ) -> formatCheck( planeIdTextField ) );
-        departureFromDatePicker.getEditor().textProperty()
+        departureFromDatePicker.getEditor()
+                               .textProperty()
                                .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureFromDatePicker.getEditor().setDisable( true );
-        departureToDatePicker.getEditor().textProperty()
+        departureToDatePicker.getEditor()
+                             .textProperty()
                              .addListener( ( observable , oldValue , newValue ) -> changed() );
         departureToDatePicker.getEditor().setDisable( true );
-        arriveFromDatePicker.getEditor().textProperty()
+        arriveFromDatePicker.getEditor()
+                            .textProperty()
                             .addListener( ( observable , oldValue , newValue ) -> changed() );
         arriveFromDatePicker.getEditor().setDisable( true );
         arriveToDatePicker.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
@@ -117,7 +120,8 @@ class SearchFlightsOverviewController{
         flightTimeTo.setConverter( localTimeStringConverter );
         flightTimeFrom.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
         flightTimeTo.getEditor().textProperty().addListener( ( observable , oldValue , newValue ) -> changed() );
-        routesListView.getSelectionModel().selectedItemProperty()
+        routesListView.getSelectionModel()
+                      .selectedItemProperty()
                       .addListener( ( observable , oldValue , newValue ) -> changed() );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
             Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
@@ -138,13 +142,9 @@ class SearchFlightsOverviewController{
             mainController.flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
             Controller.getInstance().setFlightSearchActive( false );
         } );
-        if( !(mainController instanceof RoutesFlightsWriteOverviewController) ){
+        if( !( mainController instanceof RoutesFlightsWriteOverviewController ) ){
             searchButton.setVisible( false );
-        }
-        if (mainController instanceof RoutesFlightsReadOnlyOverviewController){
-            /**
-             * TODO: add listners with tasks...
-             */
+//            TODO: add listners with tasks...
         }
     }
 
@@ -159,7 +159,8 @@ class SearchFlightsOverviewController{
                 "^" + ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
                 "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
         Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
-                                                     routesListView.getSelectionModel().getSelectedItems()
+                                                     routesListView.getSelectionModel()
+                                                                   .getSelectedItems()
                                                                    .contains( flight.getRoute() );
         Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
@@ -184,9 +185,11 @@ class SearchFlightsOverviewController{
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if( correctSymbols ){
-            Predicate<Flight> v =
-                    numberPredicate.and( planePredicate ).and( routePredicate ).and( departureDatePredicate )
-                                   .and( arriveDatePredicate ).and( flightTimePredicate );
+            Predicate<Flight> v = numberPredicate.and( planePredicate )
+                                                 .and( routePredicate )
+                                                 .and( departureDatePredicate )
+                                                 .and( arriveDatePredicate )
+                                                 .and( flightTimePredicate );
             flightsPredicate.setValue( v );
         }
     }
@@ -243,8 +246,8 @@ class SearchFlightsOverviewController{
         departureFromDatePicker.setLayoutY( departureDateLabel.getLayoutY() );
 
         departureToDatePicker.setLayoutX( departureFromDatePicker.getLayoutX() );
-        departureToDatePicker
-                .setLayoutY( departureFromDatePicker.getLayoutY() + departureFromDatePicker.getHeight() + 30 );
+        departureToDatePicker.setLayoutY(
+                departureFromDatePicker.getLayoutY() + departureFromDatePicker.getHeight() + 30 );
 
         arriveFromDatePicker.setLayoutX( departureFromDatePicker.getLayoutX() );
         arriveFromDatePicker.setLayoutY( arriveDateLabel.getLayoutY() );
