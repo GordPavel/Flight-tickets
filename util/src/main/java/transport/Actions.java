@@ -28,7 +28,7 @@ public class Actions{
     private FlightOrRoute     objectForAction;
     private ActionsType       action;
     private String            typeOfObject;
-    private Predicate<String> predicate;
+    private Predicate predicate;
 
     @JsonCreator
     public Actions(
@@ -37,7 +37,7 @@ public class Actions{
             @JsonProperty( "action" )
                     ActionsType action ,
             @JsonProperty( "predicate" )
-                    Predicate<String> predicate ){
+                    Predicate predicate ){
         this.objectForAction = objectForAction;
         this.action = action;
         this.typeOfObject = objectForAction.getClass().getTypeName();
@@ -56,7 +56,7 @@ public class Actions{
         return action;
     }
 
-    public Predicate<String> getPredicate(){
+    public Predicate getPredicate(){
         return predicate;
     }
 

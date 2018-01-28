@@ -18,7 +18,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
-import model.FlightOrRoute;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import transport.Actions;
@@ -361,6 +360,30 @@ abstract class RoutesFlightsOverviewController{
      */
     private void handleUpdateFlightAction(){
         // TODO: put here request to server to update DB about flights
+       requestFlights(flight -> true);
+    }
+
+    public void requestFlights(Predicate<Flight> predicate)
+    {
+        Data data = new Data();
+        ObjectMapper mapper = new ObjectMapper();
+        Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
+        try {   //add FaR exceprions...
+            mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
+            data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+            for (Route route : data.getRoutes())
+            {
+                DataModelInstanceSaver.getInstance().addRoute(route);
+            }
+            for (Flight flight : data.getFlights())
+            {
+                DataModelInstanceSaver.getInstance().addFlight(flight);
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } catch (NullPointerException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     /**
@@ -368,6 +391,25 @@ abstract class RoutesFlightsOverviewController{
      */
     private void handleUpdateRouteAction(){
         // TODO: put here request to server to update DB about routes
+        requestRoutes(route -> true);
+    }
+
+    public void requestRoutes(Predicate<Route> predicate){
+        Data data = new Data();
+        ObjectMapper mapper = new ObjectMapper();
+        Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
+        try {   //add FaR exceprions...
+            mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
+            data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+            for (Route route : data.getRoutes())
+            {
+                DataModelInstanceSaver.getInstance().addRoute(route);
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } catch (NullPointerException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     /**
@@ -406,7 +448,12 @@ abstract class RoutesFlightsOverviewController{
      Search for routes
      */
     private void handleSearchRouteAction(){
-        // TODO: put here request to server to update DB about flights
+        // TODO: put here request to server to update DB about routes
+        requestRoutes(route ->
+                Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                        Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                        Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
     }
 }
 

@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 
 /**
@@ -54,20 +55,27 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         Controller.getInstance().startThread();
         infoMenuButton.setOnAction( event -> handleAboutAction() );
 
-        departure.textProperty().addListener( observable -> restartTask() );
-        destination.textProperty().addListener( observable -> restartTask() );
-
-    }
-
-    public void restartTask(){
-        task.cancel();
-        task = new TimerTask(){
+        departure.textProperty().addListener( observable -> restartTask(new TimerTask() {
             @Override
-            public void run(){
-//                TODO: Put here additional request to server
+            public void run() {
+                requestRoutes(route ->
+                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
             }
-        };
-        timer.schedule( task , 5000 );
+        }) );
+        destination.textProperty().addListener( observable -> restartTask(new TimerTask() {
+            @Override
+            public void run() {
+                requestRoutes(route ->
+                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
+            }
+        }) );
+
     }
 
     public void restartTask(TimerTask timerTask){
