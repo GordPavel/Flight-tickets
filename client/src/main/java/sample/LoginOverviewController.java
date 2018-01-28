@@ -5,9 +5,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.codehaus.jackson.map.ObjectMapper;
+import transport.Data;
+import transport.UserInformation;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,13 +38,10 @@ class LoginOverviewController{
     @FXML
     private void initialize(){
         loginTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-
         ipTextField.setText( "127.0.0.1" );
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "1" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-
-
     }
 
 
@@ -55,6 +57,8 @@ class LoginOverviewController{
     @FXML
     private void handleLogInAction(){
 
+        Data data = new Data();
+
         try{
             Socket socket = new Socket( ipTextField.getText() , Integer.parseInt( portTextField.getText() ) );
             ClientMain.setClientSocket( socket );
@@ -62,19 +66,19 @@ class LoginOverviewController{
             System.out.println( "Connection failed" );
         }
 
+        if (ClientMain.getClientSocket()!=null) {
 
+            Pattern pattern = Pattern.compile("^[\\w\\d-_\\.]+$");
+            Boolean userCanWrite = false;
 
-        Pattern pattern      = Pattern.compile( "^[\\w\\d]+$" );
-        Boolean userCanWrite = false;
-
-        if( !( pattern.matcher( loginTextField.getText() ).matches() &&
-               pattern.matcher( passwordField.getText() ).matches() ) ){
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Error while log in " );
-            alert.setHeaderText( "Login or pasword incorrect" );
-            alert.setContentText( "Please check them and try again." );
-            alert.showAndWait();
-        }
+            if (!(pattern.matcher(loginTextField.getText()).matches() &&
+                    pattern.matcher(passwordField.getText()).matches())) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Error while log in ");
+                alert.setHeaderText("Unacceptable symbols");
+                alert.setContentText("Please check login and try again.");
+                alert.showAndWait();
+            }
 
         /*
           TODO: Receiving list of DB
@@ -83,24 +87,62 @@ class LoginOverviewController{
           Add view with table of available DB...
           Load db to datamodel and execute code below
          */
+            if (!(ClientMain.getClientSocket() == null)&&
+                    pattern.matcher(loginTextField.getText()).matches() &&
+                            pattern.matcher(passwordField.getText()).matches()) {
+                ClientMain.getUserInformation().setName(loginTextField.getText());
+                ClientMain.getUserInformation().setPassword(passwordField.getText());
+                ObjectMapper mapper = new ObjectMapper();
+
+                try {
+                    mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
+                    data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                } catch (NullPointerException ex) {
+                    System.out.println(ex.getMessage());
+                }
 
 
-        // if ok
-        try{
-            Stage primaryStage = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage );
-            loader.setController( controller );
-            primaryStage.setTitle( "Select DB" );
-            Scene scene = new Scene( loader.load() );
-            primaryStage.setScene( scene );
-            primaryStage.setResizable( false );
-            primaryStage.show();
-            closeWindow();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
+                if (!data.hasException()) {
+                    try {
+                        Stage primaryStage = new Stage();
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+                        ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data);
+                        loader.setController(controller);
+                        primaryStage.setTitle("Select DB");
+                        Scene scene = new Scene(loader.load());
+                        primaryStage.setScene(scene);
+                        primaryStage.setResizable(false);
+                        primaryStage.show();
+                        closeWindow();
+                    } catch (IOException e) {
+                        System.out.println("load problem");
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
         }
+//        try {
+//            Map<String,String> map = new HashMap();
+//            map.put("1","2");
+//            map.put("2","3");
+//            Data data1 = new Data();
+//            data1.setBases(map);
+//            Stage primaryStage = new Stage();
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+//            ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
+//            loader.setController(controller);
+//            primaryStage.setTitle("Select DB");
+//            Scene scene = new Scene(loader.load());
+//            primaryStage.setScene(scene);
+//            primaryStage.setResizable(false);
+//            primaryStage.show();
+//            closeWindow();
+//        } catch (IOException e) {
+//            System.out.println("load problem");
+//            System.out.println(e.getMessage());
+//        }
     }
 
     private void fieldCheck(){

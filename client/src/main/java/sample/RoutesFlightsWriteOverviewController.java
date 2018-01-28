@@ -39,10 +39,12 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         addRouteButton.setOnAction( event -> handleAddRouteAction() );
         editRouteButton.setOnAction( event -> handleEditRouteAction() );
         deleteRouteButton.setOnAction( event -> handleDeleteRouteAction() );
+        updateRouteButton.setOnAction(event -> handleUpdateRouteAction());
 
         addFlightButton.setOnAction( event -> handleAddFlightAction() );
         editFlightButton.setOnAction( event -> handleEditFlightAction() );
         deleteFlightButton.setOnAction( event -> handleDeleteFlightAction() );
+        updateFlightButton.setOnAction(event -> handleUpdateFlightAction());
     }
 
     /**
@@ -110,6 +112,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 showModelAlert( e );
             }
         } );
+        /**
+         * TODO: set message to delete route to server
+         */
     }
 
     /**
@@ -166,9 +171,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         } );
     }
 
-    /**
-     Delete flight from local DB
-     */
+
     private void handleDeleteFlightAction(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
@@ -177,5 +180,22 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 showModelAlert( e );
             }
         } );
+        /**
+         * TODO: add message to server to delete flight
+         */
+    }
+
+    public void handleUpdateRouteAction(){
+
+        /**
+         * TODO: request all routes from server
+         */
+    }
+
+    public void handleUpdateFlightAction(){
+
+        /**
+         * TODO: request all flights from server
+         */
     }
 }

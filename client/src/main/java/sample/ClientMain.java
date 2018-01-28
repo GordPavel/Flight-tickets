@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import transport.UserInformation;
 
 import java.io.File;
 import java.net.Socket;
@@ -15,6 +16,7 @@ public class ClientMain extends Application{
     static File savingFile;
 
     private static Socket clientSocket;
+    private static UserInformation userInformation;
 
     public static Socket getClientSocket(){
         return clientSocket;
@@ -22,6 +24,14 @@ public class ClientMain extends Application{
 
     public static void setClientSocket( Socket clientSocket ){
         ClientMain.clientSocket = clientSocket;
+    }
+
+    public static void setUserInformation(UserInformation userInformation) {
+        ClientMain.userInformation = userInformation;
+    }
+
+    public static UserInformation getUserInformation() {
+        return userInformation;
     }
 
     @Override

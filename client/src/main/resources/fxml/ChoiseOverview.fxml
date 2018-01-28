@@ -11,10 +11,10 @@
             prefHeight="25.0" prefWidth="52.0" text="Select"/>
     <Button fx:id="cancelButton" layoutX="156.0" layoutY="210.0" mnemonicParsing="false"
             text="Cancel"/>
-    <TableView layoutX="19.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0">
+    <TableView fx:id="baseTable" layoutX="19.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0">
         <columns>
-            <TableColumn prefWidth="115.0" text="Name"/>
-            <TableColumn prefWidth="84.0" text="Rights"/>
+            <TableColumn fx:id="nameColumn" prefWidth="115.0" text="Name"/>
+            <TableColumn fx:id="rightsColumn" prefWidth="84.0" text="Rights"/>
         </columns>
     </TableView>
 </AnchorPane>

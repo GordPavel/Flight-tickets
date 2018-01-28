@@ -70,6 +70,12 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         timer.schedule( task , 5000 );
     }
 
+    public void restartTask(TimerTask timerTask){
+        task.cancel();
+        task = timerTask;
+        timer.schedule(task,5000);
+    }
+
     /**
      About menu handler, shows information about app to user.
      */

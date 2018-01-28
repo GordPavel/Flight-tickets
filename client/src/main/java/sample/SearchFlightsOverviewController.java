@@ -194,6 +194,49 @@ class SearchFlightsOverviewController{
         }
     }
 
+    Predicate<Flight> getCurrentFlightPredicate () {
+        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
+                "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
+                        "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
+        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
+                "^" + ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
+                        "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
+        Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
+                routesListView.getSelectionModel()
+                        .getSelectedItems()
+                        .contains( flight.getRoute() );
+        Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
+        SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
+        Predicate<Flight> departureDatePredicate = flight ->
+                getDateTimePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                        dateFormat , true ).test( flight.getDepartureDateTime() ) &&
+                        getDateTimePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                dateFormat , false ).test( flight.getDepartureDateTime() );
+        Predicate<Flight> arriveDatePredicate = flight ->
+                getDateTimePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                        dateFormat , true ).test( flight.getDepartureDateTime() ) &&
+                        getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
+                                dateFormat , false ).test( flight.getDepartureDateTime() );
+        Predicate<Flight> flightTimePredicate = flight -> {
+            Predicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
+                    flightTimeFrom.getValue().get( ChronoField.MILLI_OF_DAY ) <=
+                            flight.getTravelTime();
+            Predicate<Long> endTime = aLong -> flightTimeTo.getEditor().getText().isEmpty() ||
+                    flightTimeTo.getValue().get( ChronoField.MILLI_OF_DAY ) >=
+                            flight.getTravelTime();
+            return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
+        };
+        if( correctSymbols ){
+            Predicate<Flight> v = numberPredicate.and( planePredicate )
+                    .and( routePredicate )
+                    .and( departureDatePredicate )
+                    .and( arriveDatePredicate )
+                    .and( flightTimePredicate );
+            return v;
+        }
+        return flight -> false;
+    }
 
     /**
      @param field - text field to check for acceptable symbols

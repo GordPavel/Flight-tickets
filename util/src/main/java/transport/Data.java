@@ -1,5 +1,6 @@
 package transport;
 
+import exceptions.FlightAndRouteException;
 import model.Flight;
 import model.Route;
 
@@ -15,7 +16,11 @@ public class Data{
     private Collection<Flight>  flights;
     private Collection<Route>   routes;
     private Map<String, String> bases;
+    private FlightAndRouteException exception;
 
+    public Data(  ){
+
+    }
 
     public Data( Collection<Flight> flights , Collection<Route> routes ){
 
@@ -50,5 +55,16 @@ public class Data{
         this.bases = bases;
     }
 
+    public void setException( FlightAndRouteException exception)
+    {
+        this.exception=exception;
+    }
 
+    public FlightAndRouteException getException() {
+        return exception;
+    }
+
+    public boolean hasException(){
+        return (exception!=null);
+    }
 }

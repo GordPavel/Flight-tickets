@@ -18,7 +18,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
+import model.FlightOrRoute;
 import model.Route;
+import org.codehaus.jackson.map.ObjectMapper;
+import transport.Actions;
+import transport.Data;
+import transport.UserInformation;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -39,6 +44,7 @@ abstract class RoutesFlightsOverviewController{
     static final         String EDIT_ROUTE_WINDOW    = "Edit a route";
     static final         String EDIT_FLIGHT_WINDOW   = "Edit a flight";
     static final         String ADD_FLIGHT_WINDOW    = "Add a flight";
+    SearchFlightsOverviewController searchFlights;
 
     @FXML Menu     fileMenu;
     @FXML MenuItem openMenuButton;
@@ -232,8 +238,8 @@ abstract class RoutesFlightsOverviewController{
                 for( Serializable element : failedInMerge ){
                     errors.append( "-" ).append( element.toString() ).append( "\n" );
                     if( element instanceof Flight &&
-                        DataModelInstanceSaver.getInstance().listFlightsWithPredicate( flight -> true )
-                                              .noneMatch( flight -> flight.equals( element ) ) ){
+                        DataModelInstanceSaver.getInstance().listFlightsWithPredicate( flight -> true ).stream()
+                                .noneMatch( flight -> flight.equals( element ) )){
                         mergeFlights.add( ( Flight ) element );
                     }
                     if( element instanceof Route ){
@@ -281,32 +287,45 @@ abstract class RoutesFlightsOverviewController{
     }
 
     private void handleChangeDBAction(){
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
 
         /*
           TODO: selecting new DB
 
           put here code to open window, that will allow you to download new DB.
          */
+        Data data = new Data();
+        if (!(ClientMain.getClientSocket() == null)) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
+                data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            } catch (NullPointerException ex) {
+                System.out.println(ex.getMessage());
+            }
 
-        try{
-            Stage                    primaryStage = new Stage();
-            FXMLLoader               loader       =
-                    new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-            ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage );
-            loader.setController( controller );
-            primaryStage.setTitle( "Select DB" );
-            Scene scene = new Scene( loader.load() );
-            primaryStage.setScene( scene );
-            primaryStage.setResizable( false );
-            primaryStage.show();
-            thisStage.close();
-        }catch( IOException e ){
-            System.out.println( "load problem" );
-            System.out.println( e.getMessage() );
+            if (!data.hasException()) {
+                DataModelInstanceSaver.getInstance().clear();
+                Controller.getInstance().stopThread();
+                try {
+                    Stage primaryStage = new Stage();
+                    FXMLLoader loader =
+                            new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+                    ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage,data);
+                    loader.setController(controller);
+                    primaryStage.setTitle("Select DB");
+                    Scene scene = new Scene(loader.load());
+                    primaryStage.setScene(scene);
+                    primaryStage.setResizable(false);
+                    primaryStage.show();
+                    thisStage.close();
+                } catch (IOException e) {
+                    System.out.println("load problem");
+                    System.out.println(e.getMessage());
+                }
+            }
         }
-
     }
 
     private void handleLogOutAction(){
@@ -318,7 +337,7 @@ abstract class RoutesFlightsOverviewController{
 
           somehow let server know, that you change your login
          */
-
+        ClientMain.setUserInformation(new UserInformation());
         try{
             Stage                   loginStage      = new Stage();
             FXMLLoader              loader          =
@@ -341,14 +360,14 @@ abstract class RoutesFlightsOverviewController{
      Update flight list
      */
     private void handleUpdateFlightAction(){
-        // TODO: put here request to server to update DB about routes
+        // TODO: put here request to server to update DB about flights
     }
 
     /**
      Update route list
      */
     private void handleUpdateRouteAction(){
-        // TODO: put here request to server to update DB about flights
+        // TODO: put here request to server to update DB about routes
     }
 
     /**
@@ -361,7 +380,7 @@ abstract class RoutesFlightsOverviewController{
                 Stage                           popUp         = new Stage();
                 FXMLLoader                      loader        =
                         new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
-                SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
+                searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
 
