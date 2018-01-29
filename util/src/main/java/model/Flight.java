@@ -27,8 +27,12 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
             @JsonProperty( "planeID" )
                     String planeID ,
             @JsonProperty( "departureDateTime" )
+            @JsonSerialize( using = ZonedDateTimeSerializer.class )
+            @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
                     ZonedDateTime departureDateTime ,
             @JsonProperty( "arriveDateTime" )
+            @JsonSerialize( using = ZonedDateTimeSerializer.class )
+            @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
                     ZonedDateTime arriveDateTime ){
         this.number = number;
         this.route = route;
@@ -70,8 +74,6 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores date and time, when plane have to take off
      */
-    @JsonSerialize( using = ZonedDateTimeSerializer.class )
-    @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
     ZonedDateTime departureDateTime;
 
     @JsonGetter( "departureDateTime" )
@@ -82,8 +84,6 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores date and time, when plane have to launch
      */
-    @JsonSerialize( using = ZonedDateTimeSerializer.class )
-    @JsonDeserialize( using = ZonedDateTimeDeserializer.class )
     ZonedDateTime arriveDateTime;
 
     @JsonGetter( "arriveDateTime" )
@@ -153,7 +153,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     @Override
     public String toString(){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm z" );
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
                 "plane" , number , departureDateTime.format( formatter ) , route.getFrom() ,

@@ -1,8 +1,8 @@
 package settings.serverexceptions;
 
-public class CopyUser extends IllegalArgumentException{
+public class CopyUser extends SettingsException{
     /**
-     Constructs an <code>FlightAndRouteException</code> with no
+     Constructs an <code>SettingsException</code> with no
      detail message.
      */
     public CopyUser(){
@@ -10,7 +10,7 @@ public class CopyUser extends IllegalArgumentException{
     }
 
     /**
-     Constructs an <code>FlightAndRouteException</code> with the
+     Constructs an <code>SettingsException</code> with the
      specified detail message.
 
      @param s the detail message.

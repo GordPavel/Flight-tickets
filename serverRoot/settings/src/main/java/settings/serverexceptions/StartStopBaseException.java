@@ -1,6 +1,6 @@
 package settings.serverexceptions;
 
-public class StartStopBaseException extends IllegalStateException{
+public class StartStopBaseException extends SettingsException{
     /**
      Constructs an <code>FlightAndRouteException</code> with no
      detail message.

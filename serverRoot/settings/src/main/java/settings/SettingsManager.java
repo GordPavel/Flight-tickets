@@ -11,16 +11,16 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
-public class SettingsManager{
+public class SettingsManager {
     private final static String defaultSettingsFileString =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
 
@@ -30,12 +30,11 @@ public class SettingsManager{
 
     static{
         try{
-            settingsFilePath = new File(
-                    SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().toURI() ).getParent() +
-                               "/serverfiles/settings.xml";
-        }catch( URISyntaxException e ){
+            Properties properties = new Properties();
+            properties.load( SettingsManager.class.getResourceAsStream( "/folders.properties" ) );
+            settingsFilePath = properties.getProperty( "serverFilesFolder" ) + "settings.xml";
+        }catch( IOException e ){
             e.printStackTrace();
-            System.exit( 1 );
         }
         try{
             jaxbContext = JAXBContext.newInstance( Settings.class , Base.class , User.class );
@@ -109,139 +108,139 @@ public class SettingsManager{
     }
 
     public static Optional<Base> getBase( String path ){
-        return settings.getBase().stream().filter( base -> base.getPath().equals( path ) ).findAny();
+        return settings.getBase().stream().filter( base -> base.getName().equals( path ) ).findAny();
     }
 
-    public static void addNewBase( String path ){
-        if( settings.getBase().stream().noneMatch( getBaseEqualByPathPredicate( path ) ) ){
-            Base base = new Base( path );
+    public static void addNewBase( String name ){
+        if( settings.getBase().parallelStream().map( Base::getName ).noneMatch( Predicate.isEqual( name ) ) ){
+            Base base = new Base( name );
             base.setRunning( false );
             settings.getBase().add( base );
             saveSettings();
         }else{
-            throw new CopyBase( "Server already contains this base " + path );
+            throw new CopyBase( "Server already contains this base " + name );
         }
     }
 
-    public static void deleteBase( String path ){
-        settings.getBase().removeIf( getBaseEqualByPathPredicate( path ) );
+    public static void deleteBase( String name ){
+        settings.getBase().removeIf( Predicate.isEqual( name ) );
         saveSettings();
     }
 
-    public static void startStopBase( String path , Boolean start ){
+    public static void startStopBase( String name , Boolean start ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( path ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( name ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             if( editingBase.isRunning() && start ){
-                throw new StartStopBaseException( "Base " + path + " is already running. Stop it at first." );
+                throw new StartStopBaseException( "Base " + name + " is already running. Stop it at first." );
             }else if( !editingBase.isRunning() && !start ){
-                throw new StartStopBaseException( "Base " + path + " is already stopped. Start it at first." );
+                throw new StartStopBaseException( "Base " + name + " is already stopped. Start it at first." );
             }else{
                 editingBase.setRunning( start );
                 saveSettings();
             }
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + path );
+            throw new IllegalBasePath( "Server doesn't contain this base " + name );
         }
     }
 
-    public static void addNewClient( String basePath , String clientName , String clientPassword ,
+    public static void addNewClient( String baseName , String clientName , String clientPassword ,
                                      UserPrivileges privileges ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( basePath ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            if( editingBase.getUser().stream().noneMatch( getUserEqualByNamePredicate( clientName ) ) ){
+            if( editingBase.getUser()
+                           .parallelStream()
+                           .map( User::getName )
+                           .noneMatch( Predicate.isEqual( clientName ) ) ){
                 editingBase.getUser().add( new User( clientName , clientPassword , privileges ) );
                 saveSettings();
             }else{
-                throw new CopyUser( "Base " + basePath + " already has this client " + clientName );
+                throw new CopyUser( "Base " + baseName + " already has this client " + clientName );
             }
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + basePath );
+            throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
         }
     }
 
-    public static void deleteClient( String basePath , String clientName ){
+    public static void deleteClient( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( basePath ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            if( editingBase.getUser().stream().anyMatch( getUserEqualByNamePredicate( clientName ) ) ){
-                editingBase.getUser().removeIf( getUserEqualByNamePredicate( clientName ) );
-                saveSettings();
-            }else{
-                throw new CopyUser( "Base " + basePath + " doesn't have this client " + clientName );
-            }
+            editingBase.getUser().removeIf( user -> userNamesEqual( clientName , user ) );
+            saveSettings();
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + basePath );
+            throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
         }
     }
 
-    public static void changeClientName( String basePath , String oldName , String newName ){
+    public static void changeClientName( String baseName , String oldName , String newName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( basePath ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( getUserEqualByNamePredicate( oldName ) ).findFirst();
+                    editingBase.getUser().stream().filter( user -> userNamesEqual( oldName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setName( newName );
                 saveSettings();
             }else{
-                throw new CopyUser( "Base " + basePath + " doesn't have this client " + oldName );
+                throw new CopyUser( "Base " + baseName + " doesn't have this client " + oldName );
             }
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + basePath );
+            throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
         }
     }
 
-    public static void changeClientPassword( String basePath , String userName , String newPassword ){
+    public static void changeClientPassword( String baseName , String clientName , String newPassword ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( basePath ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( getUserEqualByNamePredicate( userName ) ).findFirst();
+                    editingBase.getUser().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setPassword( newPassword );
                 saveSettings();
             }else{
-                throw new CopyUser( "Base " + basePath + " doesn't have this client " + userName );
+                throw new CopyUser( "Base " + baseName + " doesn't have this client " + clientName );
             }
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + basePath );
+            throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
         }
     }
 
-    public static void changeClientPrivilege( String basePath , String userName ){
+    public static void changeClientPrivilege( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( getBaseEqualByPathPredicate( basePath ) ).findFirst();
+                settings.getBase().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( getUserEqualByNamePredicate( userName ) ).findFirst();
+                    editingBase.getUser().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 User user = optionalUser.get();
                 user.setPrivilege(
                         user.getPrivilege() == UserPrivileges.Read ? UserPrivileges.ReadWrite : UserPrivileges.Read );
                 saveSettings();
             }else{
-                throw new CopyUser( "Base " + basePath + " doesn't have this client " + userName );
+                throw new CopyUser( "Base " + baseName + " doesn't have this client " + clientName );
             }
         }else{
-            throw new IllegalBasePath( "Server doesn't contain this base " + basePath );
+            throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
         }
     }
 
-    private static Predicate<Base> getBaseEqualByPathPredicate( String path ){
-        return base -> base.getPath().equals( path );
+    private static boolean userNamesEqual( String clientName , User user ){
+        return user.getName().equals( clientName );
     }
 
-    private static Predicate<User> getUserEqualByNamePredicate( String clientName ){
-        return user -> user.getName().equals( clientName );
+    private static boolean baseNamesEqual( String baseName , Base base ){
+        return base.getName().equals( baseName );
     }
+
 }
 
 

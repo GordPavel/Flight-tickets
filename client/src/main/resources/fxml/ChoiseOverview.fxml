@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-
 <AnchorPane prefHeight="249.0" prefWidth="238.0" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
     <Button fx:id="selectButton" layoutX="30.0" layoutY="210.0" mnemonicParsing="false"

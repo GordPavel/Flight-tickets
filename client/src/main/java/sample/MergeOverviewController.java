@@ -36,7 +36,8 @@ class MergeOverviewController{
     private void initialize(){
         numberColumn.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
         flightTable.setItems( controller.getMergeFlights() );
-        flightTable.getSelectionModel().selectedItemProperty()
+        flightTable.getSelectionModel()
+                   .selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );
         flightTable.refresh();
         acceptAllNew.setOnAction( event -> handleAcceptAllNew() );
@@ -53,8 +54,12 @@ class MergeOverviewController{
             newTextArea.setWrapText( true );
             newTextArea.setText( flight.toString() );
             oldTextArea.setWrapText( true );
-            oldTextArea.setText( DataModelInstanceSaver.getInstance().getFlightObservableList().filtered(
-                    flight1 -> flight1.getNumber().equals( flight.getNumber() ) ).get( 0 ).toString() );
+            oldTextArea.setText( DataModelInstanceSaver.getInstance()
+                                                       .getFlightObservableList()
+                                                       .filtered( flight1 -> flight1.getNumber()
+                                                                                    .equals( flight.getNumber() ) )
+                                                       .get( 0 )
+                                                       .toString() );
         }else{
             newTextArea.setText( "" );
             oldTextArea.setText( "" );
@@ -66,14 +71,12 @@ class MergeOverviewController{
      Accept New button. Selected flight from model changes for new one
      */
     private void handleAcceptNew(){
-        DataModelInstanceSaver.getInstance().editFlight( flightTable.getSelectionModel().getSelectedItem() ,
-                                                         flightTable.getSelectionModel().getSelectedItem().getRoute() ,
-                                                         flightTable.getSelectionModel().getSelectedItem()
-                                                                    .getPlaneID() ,
-                                                         flightTable.getSelectionModel().getSelectedItem()
-                                                                    .getDepartureDateTime() ,
-                                                         flightTable.getSelectionModel().getSelectedItem()
-                                                                    .getArriveDateTime() );
+        DataModelInstanceSaver.getInstance()
+                              .editFlight( flightTable.getSelectionModel().getSelectedItem() ,
+                                           flightTable.getSelectionModel().getSelectedItem().getRoute() ,
+                                           flightTable.getSelectionModel().getSelectedItem().getPlaneID() ,
+                                           flightTable.getSelectionModel().getSelectedItem().getDepartureDateTime() ,
+                                           flightTable.getSelectionModel().getSelectedItem().getArriveDateTime() );
         flightTable.getItems().remove( flightTable.getSelectionModel().getSelectedItem() );
         flightTable.refresh();
         if( flightTable.getItems().isEmpty() ){
@@ -101,9 +104,9 @@ class MergeOverviewController{
      */
     private void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
-            DataModelInstanceSaver.getInstance().editFlight( flight , flight.getRoute() , flight.getPlaneID() ,
-                                                             flight.getDepartureDateTime() ,
-                                                             flight.getArriveDateTime() );
+            DataModelInstanceSaver.getInstance()
+                                  .editFlight( flight , flight.getRoute() , flight.getPlaneID() ,
+                                               flight.getDepartureDateTime() , flight.getArriveDateTime() );
         }
         flightTable.setItems( null );
         flightTable.refresh();

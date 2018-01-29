@@ -1,21 +1,21 @@
 package settings.serverexceptions;
 
-public class CopyBase extends SettingsException{
+public class SettingsException extends IllegalStateException{
     /**
-     Constructs an <code>SettingsException</code> with no
+     Constructs an <code>IllegalStateException</code> with no
      detail message.
      */
-    public CopyBase(){
+    public SettingsException(){
         super();
     }
 
     /**
-     Constructs an <code>SettingsException</code> with the
+     Constructs an <code>IllegalStateException</code> with the
      specified detail message.
 
      @param s the detail message.
      */
-    public CopyBase( String s ){
+    public SettingsException( String s ){
         super( s );
     }
 
@@ -36,7 +36,7 @@ public class CopyBase extends SettingsException{
 
      @since 1.5
      */
-    public CopyBase( String message , Throwable cause ){
+    public SettingsException( String message , Throwable cause ){
         super( message , cause );
     }
 
@@ -55,7 +55,7 @@ public class CopyBase extends SettingsException{
 
      @since 1.5
      */
-    public CopyBase( Throwable cause ){
+    public SettingsException( Throwable cause ){
         super( cause );
     }
 

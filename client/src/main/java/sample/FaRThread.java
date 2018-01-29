@@ -2,11 +2,11 @@ package sample;
 
 
 /**
- * Abstract patent thread for client application
+ Abstract patent thread for client application
  */
-abstract class FaRThread extends Thread {
+abstract class FaRThread extends Thread{
 
-    FaRThread() {
+    FaRThread(){
         super();
     }
 

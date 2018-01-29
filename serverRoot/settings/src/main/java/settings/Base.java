@@ -11,32 +11,32 @@ import java.util.stream.Stream;
 
 @XmlRootElement
 public class Base implements Cloneable{
-    private String     path;
+    private String     name;
     private Boolean    isRunning;
     private List<User> user;
 
     public Base(){
     }
 
-    Base( String path ){
-        this.path = path;
+    Base( String name ){
+        this.name = name;
         isRunning = false;
         user = new ArrayList<>();
     }
 
     Base( String path , Boolean isRunning , List<User> user ){
-        this.path = path;
+        this.name = path;
         this.isRunning = isRunning;
         this.user = user;
     }
 
-    public String getPath(){
-        return path;
+    public String getName(){
+        return name;
     }
 
     @XmlAttribute
-    void setPath( String path ){
-        this.path = path;
+    void setName( String name ){
+        this.name = name;
     }
 
     public Boolean isRunning(){
@@ -53,9 +53,10 @@ public class Base implements Cloneable{
     }
 
     public Stream<String> listAllUsers(){
-        return user.stream().map( user1 -> String
-                .format( "%-2s %10s password:%s" , user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
-                         user1.getName() , user1.getPassword() ) );
+        return user.stream()
+                   .map( user1 -> String.format( "%-2s %10s password:%s" ,
+                                                 user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
+                                                 user1.getName() , user1.getPassword() ) );
     }
 
     @XmlElement
@@ -65,7 +66,7 @@ public class Base implements Cloneable{
 
     @Override
     public String toString(){
-        StringBuilder stringBuilder = new StringBuilder( String.format( "   %s\n" , path ) );
+        StringBuilder stringBuilder = new StringBuilder( String.format( "   %s\n" , name ) );
         for( User user : user ){
             stringBuilder.append( user.toString() );
         }
@@ -74,7 +75,7 @@ public class Base implements Cloneable{
 
     @Override
     public int hashCode(){
-        Integer integer = path.hashCode();
+        Integer integer = name.hashCode();
         for( User user : this.user ){
             integer ^= user.hashCode();
         }
@@ -90,7 +91,7 @@ public class Base implements Cloneable{
         for( User user : this.user ){
             if( !user.equals( userIterator.next() ) ) return false;
         }
-        return this.path.equals( base.path );
+        return this.name.equals( base.name );
     }
 
     @Override

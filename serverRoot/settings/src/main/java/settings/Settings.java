@@ -40,7 +40,7 @@ public class Settings implements Cloneable{
 
     public Stream<String> listBases(){
         return base.stream()
-                   .map( base1 -> String.format( "%s %-7s\n" , base1.getPath() , base1.isRunning() ? "running" : "" ) );
+                   .map( base1 -> String.format( "%s %-7s\n" , base1.getName() , base1.isRunning() ? "running" : "" ) );
     }
 
     @XmlElement

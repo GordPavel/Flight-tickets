@@ -55,8 +55,7 @@ class AddAndEditRoutesOverviewController{
                                                                                           pattern.matcher( zone );
                                                                                   //noinspection ResultOfMethodCallIgnored
                                                                                   matcher.find();
-                                                                                  String       key    =
-                                                                                          matcher.group( 1 );
+                                                                                  String key = matcher.group( 1 );
                                                                                   final ZoneId zoneId =
                                                                                           ZoneId.of( zone );
                                                                                   if( map.containsKey( key ) ){

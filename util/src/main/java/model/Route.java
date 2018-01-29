@@ -83,13 +83,17 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
     @Override
     public boolean equals( Object obj ){
         if( !( obj instanceof Route ) ) return false;
-        Route route = ( Route ) obj;
-        return pointsEquals( obj ) && this.id == null ? route.id == null : this.id.equals( route.id );
+        Route   route = ( Route ) obj;
+        boolean test;
+        if( id == null ){
+            test = route.id == null;
+        }else{
+            test = this.id.equals( route.id );
+        }
+        return pointsEquals( route ) && test;
     }
 
-    boolean pointsEquals( Object obj ){
-        if( !( obj instanceof Route ) ) return false;
-        Route route = ( Route ) obj;
+    boolean pointsEquals( Route route ){
         return this.from.equals( route.from ) && this.to.equals( route.to );
     }
 

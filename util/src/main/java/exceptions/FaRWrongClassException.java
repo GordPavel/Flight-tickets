@@ -1,18 +1,18 @@
 package exceptions;
 
 /**
- * Exception for wrong defined class of object for change
+ Exception for wrong defined class of object for change
  */
 
-public class FaRWrongClassException extends FlightAndRouteException {
+public class FaRWrongClassException extends FlightAndRouteException{
 
-    public FaRWrongClassException () {
+    public FaRWrongClassException(){
 
         super();
     }
 
-    public FaRWrongClassException (String s){
+    public FaRWrongClassException( String s ){
 
-        super(s);
+        super( s );
     }
 }

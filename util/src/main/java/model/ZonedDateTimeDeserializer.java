@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 public class ZonedDateTimeDeserializer extends StdDeserializer<ZonedDateTime>{
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm z" );
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm Z" );
 
     public ZonedDateTimeDeserializer(){
         super( ( Class<?> ) null );

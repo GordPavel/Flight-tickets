@@ -1,8 +1,8 @@
 package settings.serverexceptions;
 
-public class IllegalBasePath extends IllegalArgumentException{
+public class IllegalBasePath extends SettingsException{
     /**
-     Constructs an <code>FlightAndRouteException</code> with no
+     Constructs an <code>SettingsException</code> with no
      detail message.
      */
     public IllegalBasePath(){
@@ -10,7 +10,7 @@ public class IllegalBasePath extends IllegalArgumentException{
     }
 
     /**
-     Constructs an <code>FlightAndRouteException</code> with the
+     Constructs an <code>SettingsException</code> with the
      specified detail message.
 
      @param s the detail message.

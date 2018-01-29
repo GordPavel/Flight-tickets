@@ -31,7 +31,7 @@ class DatabaseInterface implements ShellDependent{
         if( base.isRunning() ){
             System.out.println( "Database is already running." );
         }else{
-            SettingsManager.startStopBase( base.getPath() , true );
+            SettingsManager.startStopBase( base.getName() , true );
             System.out.println(
                     "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
         }
@@ -42,7 +42,7 @@ class DatabaseInterface implements ShellDependent{
         if( !base.isRunning() ){
             System.out.println( "Database is already stopped." );
         }else{
-            SettingsManager.startStopBase( base.getPath() , false );
+            SettingsManager.startStopBase( base.getName() , false );
             System.out.println(
                     "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
         }
@@ -59,7 +59,7 @@ class DatabaseInterface implements ShellDependent{
         if( !privilege.equals( "rw" ) && !privilege.equals( "r" ) ){
             throw new IllegalArgumentException( "User privilege must be just r (read) or rw (read & write)." );
         }
-        SettingsManager.addNewClient( base.getPath() , name , password ,
+        SettingsManager.addNewClient( base.getName() , name , password ,
                                       privilege.equals( "r" ) ? UserPrivileges.Read : UserPrivileges.ReadWrite );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
@@ -69,7 +69,7 @@ class DatabaseInterface implements ShellDependent{
     public void deleteClient(
             @Param( description = "Name of user", name = "name" )
                     String name ){
-        SettingsManager.deleteClient( base.getPath() , name );
+        SettingsManager.deleteClient( base.getName() , name );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
     }
@@ -80,7 +80,7 @@ class DatabaseInterface implements ShellDependent{
                     String oldName ,
             @Param( description = "New name of user", name = "new name" )
                     String newName ){
-        SettingsManager.changeClientName( base.getPath() , oldName , newName );
+        SettingsManager.changeClientName( base.getName() , oldName , newName );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
     }
@@ -91,7 +91,7 @@ class DatabaseInterface implements ShellDependent{
                     String userName ,
             @Param( description = "Password of user", name = "pass" )
                     String newPassword ){
-        SettingsManager.changeClientPassword( base.getPath() , userName , newPassword );
+        SettingsManager.changeClientPassword( base.getName() , userName , newPassword );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
     }
@@ -101,7 +101,7 @@ class DatabaseInterface implements ShellDependent{
     public void changeClientPrivilege(
             @Param( description = "Name of user", name = "name" )
                     String userName ){
-        SettingsManager.changeClientPrivilege( base.getPath() , userName );
+        SettingsManager.changeClientPrivilege( base.getName() , userName );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
     }

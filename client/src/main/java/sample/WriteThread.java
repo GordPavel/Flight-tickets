@@ -27,7 +27,7 @@ public class WriteThread extends FaRThread{
         super.start();
     }
 
-    public void run() {
+    public void run(){
         while( !stop ){
             /*
               TODO: updating data from server

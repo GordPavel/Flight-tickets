@@ -7,12 +7,9 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
-import transport.UserInformation;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,17 +63,17 @@ class LoginOverviewController{
             System.out.println( "Connection failed" );
         }
 
-        if (ClientMain.getClientSocket()!=null) {
+        if( ClientMain.getClientSocket() != null ){
 
-            Pattern pattern = Pattern.compile("^[\\w\\d-_\\.]+$");
+            Pattern pattern      = Pattern.compile( "^[\\w\\d-_.]+$" );
             Boolean userCanWrite = false;
 
-            if (!(pattern.matcher(loginTextField.getText()).matches() &&
-                    pattern.matcher(passwordField.getText()).matches())) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Error while log in ");
-                alert.setHeaderText("Unacceptable symbols");
-                alert.setContentText("Please check login and try again.");
+            if( !( pattern.matcher( loginTextField.getText() ).matches() &&
+                   pattern.matcher( passwordField.getText() ).matches() ) ){
+                Alert alert = new Alert( Alert.AlertType.WARNING );
+                alert.setTitle( "Error while log in " );
+                alert.setHeaderText( "Unacceptable symbols" );
+                alert.setContentText( "Please check login and try again." );
                 alert.showAndWait();
             }
 
@@ -87,38 +84,37 @@ class LoginOverviewController{
           Add view with table of available DB...
           Load db to datamodel and execute code below
          */
-            if (!(ClientMain.getClientSocket() == null)&&
-                    pattern.matcher(loginTextField.getText()).matches() &&
-                            pattern.matcher(passwordField.getText()).matches()) {
-                ClientMain.getUserInformation().setName(loginTextField.getText());
-                ClientMain.getUserInformation().setPassword(passwordField.getText());
+            if( !( ClientMain.getClientSocket() == null ) && pattern.matcher( loginTextField.getText() ).matches() &&
+                pattern.matcher( passwordField.getText() ).matches() ){
+                ClientMain.getUserInformation().setName( loginTextField.getText() );
+                ClientMain.getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
-                try {
-                    mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-                    data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
-                } catch (IOException ex) {
-                    System.out.println(ex.getMessage());
-                } catch (NullPointerException ex) {
-                    System.out.println(ex.getMessage());
+                try{
+                    mapper.writeValue( ClientMain.getClientSocket().getOutputStream() ,
+                                       ClientMain.getUserInformation() );
+                    data = ( Data ) mapper.readValue( ClientMain.getClientSocket().getInputStream() , Data.class );
+                }catch( IOException | NullPointerException ex ){
+                    System.out.println( ex.getMessage() );
                 }
 
 
-                if (!data.hasException()) {
-                    try {
-                        Stage primaryStage = new Stage();
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
-                        ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data);
-                        loader.setController(controller);
-                        primaryStage.setTitle("Select DB");
-                        Scene scene = new Scene(loader.load());
-                        primaryStage.setScene(scene);
-                        primaryStage.setResizable(false);
+                if( data.notHasException() ){
+                    try{
+                        Stage                    primaryStage = new Stage();
+                        FXMLLoader               loader       =
+                                new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+                        ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data );
+                        loader.setController( controller );
+                        primaryStage.setTitle( "Select DB" );
+                        Scene scene = new Scene( loader.load() );
+                        primaryStage.setScene( scene );
+                        primaryStage.setResizable( false );
                         primaryStage.show();
                         closeWindow();
-                    } catch (IOException e) {
-                        System.out.println("load problem");
-                        System.out.println(e.getMessage());
+                    }catch( IOException e ){
+                        System.out.println( "load problem" );
+                        System.out.println( e.getMessage() );
                     }
                 }
             }
@@ -148,7 +144,7 @@ class LoginOverviewController{
     private void fieldCheck(){
         Pattern ipPattern = Pattern.compile(
                 "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
+                "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
         Pattern portPattern = Pattern.compile( "[0-9]{1,5}" );
 
         Pattern textPattern = Pattern.compile( "[\\w\\d\\-_]*" );
@@ -156,7 +152,7 @@ class LoginOverviewController{
         if( !matcher.matches() ){
             loginTextField.setStyle( "-fx-text-inner-color: red;" );
             loginTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
-            logInButton.setDisable(true);
+            logInButton.setDisable( true );
         }else{
             loginTextField.setStyle( "-fx-text-inner-color: black;" );
             loginTextField.setTooltip( null );
@@ -177,8 +173,7 @@ class LoginOverviewController{
         }
 
         if( ipPattern.matcher( ipTextField.getText() ).matches() &&
-                portPattern.matcher( portTextField.getText() ).matches() &&
-                matcher.matches()){
+            portPattern.matcher( portTextField.getText() ).matches() && matcher.matches() ){
             logInButton.setDisable( false );
         }
     }

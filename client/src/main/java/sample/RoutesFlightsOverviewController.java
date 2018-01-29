@@ -298,13 +298,11 @@ abstract class RoutesFlightsOverviewController{
             try {
                 mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
                 data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            } catch (NullPointerException ex) {
+            } catch (IOException | NullPointerException ex) {
                 System.out.println(ex.getMessage());
             }
 
-            if (!data.hasException()) {
+            if ( data.notHasException() ) {
                 DataModelInstanceSaver.getInstance().clear();
                 Controller.getInstance().stopThread();
                 try {
@@ -379,9 +377,7 @@ abstract class RoutesFlightsOverviewController{
             {
                 DataModelInstanceSaver.getInstance().addFlight(flight);
             }
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        } catch (NullPointerException ex) {
+        } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
     }
@@ -405,9 +401,7 @@ abstract class RoutesFlightsOverviewController{
             {
                 DataModelInstanceSaver.getInstance().addRoute(route);
             }
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        } catch (NullPointerException ex) {
+        } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
     }

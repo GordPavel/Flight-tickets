@@ -84,9 +84,7 @@ class ChoiceOverviewController{
                     for (Flight flight: data.getFlights()) {
                         DataModelInstanceSaver.getInstance().addFlight(flight);
                     }
-                } catch (IOException ex) {
-                    System.out.println(ex.getMessage());
-                } catch (NullPointerException ex) {
+                } catch (IOException | NullPointerException ex) {
                     System.out.println(ex.getMessage());
                 }
                 try{

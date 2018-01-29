@@ -1,19 +1,19 @@
 package exceptions;
 
 /**
- * Exception for wrong defined action sent to server
+ Exception for wrong defined action sent to server
  */
 
 
-public class FaRWrongActionException extends FlightAndRouteException {
+public class FaRWrongActionException extends FlightAndRouteException{
 
-    public FaRWrongActionException () {
+    public FaRWrongActionException(){
 
         super();
     }
 
-    public FaRWrongActionException (String s){
+    public FaRWrongActionException( String s ){
 
-        super(s);
+        super( s );
     }
 }

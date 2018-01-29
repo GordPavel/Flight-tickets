@@ -120,29 +120,58 @@ class AddAndEditFlightsOverviewController{
         } );
 
 //        set minimal offset between departure and arrival ( 0 seconds flight )
-        routesBox.getSelectionModel().selectedItemProperty().addListener(
-                ( observable , oldValue , newValue ) -> Optional.ofNullable( newValue ).ifPresent( newRoute -> {
-                    ZonedDateTime arriveTimeWithOffset;
-                    long flightTimeInMinutes = Optional.ofNullable( oldValue ).map( oldRoute -> ChronoUnit.MINUTES
-                            .between( LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                                   .atZone( oldRoute.getFrom() ) ,
-                                      LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                                   .atZone( oldRoute.getTo() ) ) ).orElse( 60L );
-                    arriveTimeWithOffset = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                                        .atZone( newRoute.getFrom() )
-                                                        .withZoneSameInstant( newRoute.getTo() )
-                                                        .plusMinutes( flightTimeInMinutes );
-                    arrivingDate.setValue( arriveTimeWithOffset.toLocalDate() );
-                    arrivingTime.setValue( arriveTimeWithOffset.toLocalTime() );
-                } ) );
+        routesBox.getSelectionModel()
+                 .selectedItemProperty()
+                 .addListener( ( observable , oldValue , newValue ) -> Optional.ofNullable( newValue )
+                                                                               .ifPresent( newRoute -> {
+                                                                                   ZonedDateTime arriveTimeWithOffset;
+                                                                                   long flightTimeInMinutes =
+                                                                                           Optional.ofNullable(
+                                                                                                   oldValue )
+                                                                                                   .map( oldRoute -> ChronoUnit.MINUTES
+                                                                                                           .between(
+                                                                                                                   LocalDateTime
+                                                                                                                           .of( departureDate
+                                                                                                                                        .getValue() ,
+                                                                                                                                departureTime
+                                                                                                                                        .getValue() )
+                                                                                                                           .atZone(
+                                                                                                                                   oldRoute.getFrom() ) ,
+                                                                                                                   LocalDateTime
+                                                                                                                           .of( arrivingDate
+                                                                                                                                        .getValue() ,
+                                                                                                                                arrivingTime
+                                                                                                                                        .getValue() )
+                                                                                                                           .atZone(
+                                                                                                                                   oldRoute.getTo() ) ) )
+                                                                                                   .orElse( 60L );
+                                                                                   arriveTimeWithOffset =
+                                                                                           LocalDateTime.of(
+                                                                                                   departureDate.getValue() ,
+                                                                                                   departureTime.getValue() )
+                                                                                                        .atZone(
+                                                                                                                newRoute.getFrom() )
+                                                                                                        .withZoneSameInstant(
+                                                                                                                newRoute.getTo() )
+                                                                                                        .plusMinutes(
+                                                                                                                flightTimeInMinutes );
+                                                                                   arrivingDate.setValue(
+                                                                                           arriveTimeWithOffset.toLocalDate() );
+                                                                                   arrivingTime.setValue(
+                                                                                           arriveTimeWithOffset.toLocalTime() );
+                                                                               } ) );
 
-        departureDate.getEditor().textProperty()
+        departureDate.getEditor()
+                     .textProperty()
                      .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
-        arrivingDate.getEditor().textProperty()
+        arrivingDate.getEditor()
+                    .textProperty()
                     .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
-        departureTime.getEditor().textProperty()
+        departureTime.getEditor()
+                     .textProperty()
                      .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
-        arrivingTime.getEditor().textProperty()
+        arrivingTime.getEditor()
+                    .textProperty()
                     .addListener( ( observable , oldValue , newValue ) -> checkFlightTime() );
         addAndEditFlightButton.disableProperty().bind( ifFlightTimeRight.not() );
         flightTimeErrorLabel.visibleProperty().bind( ifFlightTimeRight.not() );
@@ -158,8 +187,9 @@ class AddAndEditFlightsOverviewController{
                 number.textProperty().setValue( oldValue );
             }
         } );
-        number.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> setErrorLabel( newValue , errorNumberLabel , number ) );
+        number.textProperty()
+              .addListener(
+                      ( observable , oldValue , newValue ) -> setErrorLabel( newValue , errorNumberLabel , number ) );
 
         planeID.setFont( PT_Mono );
         errorPlaneIdLabel.setVisible( false );
@@ -170,8 +200,9 @@ class AddAndEditFlightsOverviewController{
                 planeID.textProperty().setValue( oldValue );
             }
         } );
-        planeID.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> setErrorLabel( newValue , errorPlaneIdLabel , planeID ) );
+        planeID.textProperty()
+               .addListener( ( observable , oldValue , newValue ) -> setErrorLabel( newValue , errorPlaneIdLabel ,
+                                                                                    planeID ) );
 
         if( editingFlight != null ){
             setEditingFlightData();
@@ -205,15 +236,18 @@ class AddAndEditFlightsOverviewController{
                                                                routesBox.getSelectionModel().getSelectedItem() )
                                                                         .map( Route::getFrom )
                                                                         .orElse( ZoneId.systemDefault() ) ),
-                arrivalDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() ).atZone(
-                        Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() ).map( Route::getTo )
-                                .orElse( ZoneId.systemDefault() ) );
+                arrivalDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                                               .atZone( Optional.ofNullable(
+                                                       routesBox.getSelectionModel().getSelectedItem() )
+                                                                .map( Route::getTo )
+                                                                .orElse( ZoneId.systemDefault() ) );
         ifFlightTimeRight.setValue( !departureDateTime.isAfter( arrivalDateTime ) );
     }
 
     private void addOrEdit( Boolean isAdd ){
         ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                                       .atZone( routesBox.getSelectionModel().getSelectedItem()
+                                                       .atZone( routesBox.getSelectionModel()
+                                                                         .getSelectedItem()
                                                                          .getFrom() ), arriveDateTime =
                 LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
                              .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
@@ -232,9 +266,11 @@ class AddAndEditFlightsOverviewController{
         }else{
             try{
                 if( isAdd ){
-                    DataModelInstanceSaver.getInstance().addFlight(
-                            new Flight( number.getText() , routesBox.getSelectionModel().getSelectedItem() ,
-                                        planeID.getText() , departureDateTime , arriveDateTime ) );
+                    DataModelInstanceSaver.getInstance()
+                                          .addFlight( new Flight( number.getText() ,
+                                                                  routesBox.getSelectionModel().getSelectedItem() ,
+                                                                  planeID.getText() , departureDateTime ,
+                                                                  arriveDateTime ) );
                 }else{
                     DataModelInstanceSaver.getInstance()
                                           .editFlight( editingFlight , routesBox.getSelectionModel().getSelectedItem() ,

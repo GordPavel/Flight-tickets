@@ -89,9 +89,10 @@ public class DataModel{
     private Pattern legalSymbolsChecker = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
 
     /**
-     Add new flight in current database, if it's correct, and immediately saves all changes
+     Add new flight in current database in specified index, if it's correct, and immediately saves all changes
 
      @param flight create new flight, which has unique number, instead it won't be added
+     @param index  future index of adding flight
 
      @throws FaRUnacceptableSymbolException if flight has illegal symbols
      @throws FaRDateMismatchException       if flight has incorrect dates
@@ -100,7 +101,7 @@ public class DataModel{
      <p>
      duplicates number
      */
-    public void addFlight( Flight flight ) throws FlightAndRouteException{
+    public void addFlight( Integer index , Flight flight ) throws FlightAndRouteException{
         if( !( legalSymbolsChecker.matcher( flight.getNumber() ).matches() &&
                legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
@@ -131,8 +132,24 @@ public class DataModel{
             flightsLock.readLock().unlock();
         }
         flightsLock.writeLock().lock();
-        flights.add( flight );
+        flights.add( index , flight );
         flightsLock.writeLock().unlock();
+    }
+
+    /**
+     Add new flight in current database, if it's correct, and immediately saves all changes
+
+     @param flight create new flight, which has unique number, instead it won't be added
+
+     @throws FaRUnacceptableSymbolException if flight has illegal symbols
+     @throws FaRDateMismatchException       if flight has incorrect dates
+     @throws FaRNotRelatedData              it has route, that doesn't exist in database
+     @throws FaRSameNameException           it duplicates in (planeID && route && ( departure date || arrive date ) ) or
+     <p>
+     duplicates number
+     */
+    public void addFlight( Flight flight ) throws FlightAndRouteException{
+        addFlight( flights.size() , flight );
     }
 
 
@@ -243,15 +260,16 @@ public class DataModel{
     }
 
     /**
-     Add new route in current database, if it's correct, and immediately saves all changes
+     Add new route in current database in specified index, if it's correct, and immediately saves all changes
 
      @param route unique route to be added
+     @param index future index of route
 
      @throws FaRSameNameException           if new route's arrival and departure points duplicate someone another in database
      @throws IllegalArgumentException       if departure and destination airports are similar
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
-    public void addRoute( Route route ){
+    public void addRoute( Integer index , Route route ){
         if( route.getFrom().equals( route.getTo() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
@@ -267,8 +285,21 @@ public class DataModel{
         }
         setId( route );
         routesLock.writeLock().lock();
-        routes.add( route );
+        routes.add( index , route );
         routesLock.writeLock().unlock();
+    }
+
+    /**
+     Add new route in current database, if it's correct, and immediately saves all changes
+
+     @param route unique route to be added
+
+     @throws FaRSameNameException           if new route's arrival and departure points duplicate someone another in database
+     @throws IllegalArgumentException       if departure and destination airports are similar
+     @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
+     */
+    public void addRoute( Route route ){
+        addRoute( routes.size() , route );
     }
 
     private void setId( Route route ){

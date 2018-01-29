@@ -70,6 +70,9 @@ class DataModelTest{
     @BeforeEach
     void setUp(){
         dataModel = new DataModel();
+        airports = Stream.concat( routes.stream().map( Route::getFrom ) , routes.stream().map( Route::getTo ) )
+                         .distinct()
+                         .collect( Collectors.toSet() );
         routes = new ArrayList<Route>(){{
             Iterator<Integer> iterator =
                     random.ints( 20 , 0 , zones.values().stream().mapToInt( Collection::size ).sum() )
@@ -82,14 +85,10 @@ class DataModelTest{
                 }
             }
         }};
-        airports = Stream.concat( routes.stream().map( Route::getFrom ) , routes.stream().map( Route::getTo ) )
-                         .distinct()
-                         .collect( Collectors.toSet() );
         routes.forEach( dataModel::addRoute );
         flights = IntStream.rangeClosed( 1 , 10 ).mapToObj( i -> {
-            Route         flightRoute = routes.get( random.nextInt( routes.size() ) );
-            ZonedDateTime departure   =
-                    LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( flightRoute.getFrom() );
+            Route flightRoute = routes.get( random.nextInt( routes.size() ) );
+            ZonedDateTime departure = LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( flightRoute.getFrom() );
             return new Flight( String.format( "number%d" , i ) , flightRoute , String.format( "planeId%d" , i + 1 ) ,
                                departure , departure.withZoneSameInstant( flightRoute.getTo() )
                                                     .plusHours( Math.abs( random.nextLong() ) % 9 + 1 ) );

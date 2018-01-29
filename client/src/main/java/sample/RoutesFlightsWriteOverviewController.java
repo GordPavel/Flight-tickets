@@ -52,9 +52,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddRouteAction(){
         try{
-            Stage                              popUp      = new Stage();
-            FXMLLoader                         loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            Stage popUp = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
             loader.setController( controller );
             popUp.initModality( Modality.APPLICATION_MODAL );
@@ -122,8 +121,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddFlightAction(){
         try{
-            FXMLLoader                          loader     =
-                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
             Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );

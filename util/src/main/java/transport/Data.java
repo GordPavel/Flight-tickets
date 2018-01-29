@@ -12,14 +12,12 @@ import java.util.Map;
  */
 
 public class Data{
-
-    private Collection<Flight>  flights;
-    private Collection<Route>   routes;
-    private Map<String, String> bases;
+    private Collection<Flight>      flights;
+    private Collection<Route>       routes;
+    private Map<String, String>     bases;
     private FlightAndRouteException exception;
 
-    public Data(  ){
-
+    public Data(){
     }
 
     public Data( Collection<Flight> flights , Collection<Route> routes ){
@@ -55,16 +53,15 @@ public class Data{
         this.bases = bases;
     }
 
-    public void setException( FlightAndRouteException exception)
-    {
-        this.exception=exception;
+    public void setException( FlightAndRouteException exception ){
+        this.exception = exception;
     }
 
-    public FlightAndRouteException getException() {
+    public FlightAndRouteException getException(){
         return exception;
     }
 
-    public boolean hasException(){
-        return (exception!=null);
+    public boolean notHasException(){
+        return ( exception == null );
     }
 }
