@@ -7,10 +7,7 @@ import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
@@ -73,73 +70,66 @@ class ChoiceOverviewController{
          */
         Optional.ofNullable( baseTable.getSelectionModel().getSelectedItem() ).ifPresent(selectedBase -> {
             ClientMain.getUserInformation().setDataBase(((Map.Entry<String,String>)selectedBase).getKey());
-            if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("READONLY")) {
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-                    Data data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
-                    for (Route route: data.getRoutes()) {
+            Stage primaryStage = new Stage();
+            RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController(primaryStage);
+            if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("WRITE")) {
+                controller = new RoutesFlightsWriteOverviewController(primaryStage);
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
+                Data data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+                if (data.notHasException()) {
+                    for (Route route : data.getRoutes()) {
                         DataModelInstanceSaver.getInstance().addRoute(route);
                     }
-                    for (Flight flight: data.getFlights()) {
+                    for (Flight flight : data.getFlights()) {
                         DataModelInstanceSaver.getInstance().addFlight(flight);
                     }
-                } catch (IOException | NullPointerException ex) {
-                    System.out.println(ex.getMessage());
                 }
-                try{
-                    Stage primaryStage = new Stage();
-                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-                    RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController( primaryStage );
-                    loader.setController( controller );
-                    primaryStage.setTitle( "Information system about flights and routes" );
-                    Scene scene = new Scene( loader.load() , 700 , 500 );
-                    primaryStage.setScene( scene );
-                    primaryStage.setResizable( false );
-                    primaryStage.show();
-                    closeWindow();
-                }catch( IOException e ){
-                    System.out.println( "load problem" );
-                    System.out.println( e.getMessage() );
+                else {
+                    Alert alert = new Alert( Alert.AlertType.WARNING );
+                    alert.setTitle( "Error" );
+                    alert.setHeaderText( "Server error" );
+                    alert.setContentText( data.getException().getMessage() );
+                    alert.showAndWait();
                 }
+            } catch (IOException | NullPointerException ex) {
+                System.out.println(ex.getMessage());
             }
-            if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("WRITE"))
-            {
-                try{
-                    Stage primaryStage = new Stage();
-                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-                    RoutesFlightsOverviewController controller = new RoutesFlightsWriteOverviewController( primaryStage );
-                    loader.setController( controller );
-                    primaryStage.setTitle( "Information system about flights and routes" );
-                    Scene scene = new Scene( loader.load() , 700 , 500 );
-                    primaryStage.setScene( scene );
-                    primaryStage.setResizable( false );
-                    primaryStage.show();
-                    closeWindow();
-                }catch( IOException e ){
-                    System.out.println( "load problem" );
-                    System.out.println( e.getMessage() );
-                }
+            try{
+
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+                loader.setController( controller );
+                primaryStage.setTitle( "Information system about flights and routes" );
+                Scene scene = new Scene( loader.load() , 700 , 500 );
+                primaryStage.setScene( scene );
+                primaryStage.setResizable( false );
+                primaryStage.show();
+                closeWindow();
+            }catch( IOException e ){
+                System.out.println( "load problem" );
+                System.out.println( e.getMessage() );
             }
     } );
 
 
         // if write
-//        try{
-//            Stage primaryStage = new Stage();
-//            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-//            RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController( primaryStage );
-//            loader.setController( controller );
-//            primaryStage.setTitle( "Information system about flights and routes" );
-//            Scene scene = new Scene( loader.load() , 700 , 500 );
-//            primaryStage.setScene( scene );
-//            primaryStage.setResizable( false );
-//            primaryStage.show();
-//            closeWindow();
-//        }catch( IOException e ){
-//            System.out.println( "load problem" );
-//            System.out.println( e.getMessage() );
-//        }
+        try{
+            Stage primaryStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+            RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController( primaryStage );
+            loader.setController( controller );
+            primaryStage.setTitle( "Information system about flights and routes" );
+            Scene scene = new Scene( loader.load() , 700 , 500 );
+            primaryStage.setScene( scene );
+            primaryStage.setResizable( false );
+            primaryStage.show();
+            closeWindow();
+        }catch( IOException e ){
+            System.out.println( "load problem" );
+            System.out.println( e.getMessage() );
+        }
 
 
     }

@@ -193,15 +193,14 @@ class SearchFlightsOverviewController{
                                                  .and( flightTimePredicate );
             flightsPredicate.setValue( v );
             searchPredecate=v;
-        }
-
-        if( ( mainController instanceof RoutesFlightsReadOnlyOverviewController ) ){
-            ((RoutesFlightsReadOnlyOverviewController) mainController).restartTask(new TimerTask() {
-                @Override
-                public void run() {
-                    mainController.requestFlights(searchPredecate);
-                }
-            });
+            if( ( mainController instanceof RoutesFlightsReadOnlyOverviewController ) ){
+                ((RoutesFlightsReadOnlyOverviewController) mainController).restartTask(new TimerTask() {
+                    @Override
+                    public void run() {
+                        mainController.requestFlights(searchPredecate);
+                    }
+                });
+            }
         }
     }
 

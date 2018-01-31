@@ -96,9 +96,6 @@ abstract class RoutesFlightsOverviewController{
      */
     @FXML
     void initialize(){
-        routeTable.setPrefWidth( 600 );
-        departureColumn.setPrefWidth( 300 );
-        destinationColumn.setPrefWidth( 300 );
 
         FilteredList<Route> routeFilteredList =
                 DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );

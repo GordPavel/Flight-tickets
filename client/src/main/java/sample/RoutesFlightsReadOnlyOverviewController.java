@@ -47,6 +47,9 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         updateFlightButton.setVisible( false );
         updateRouteButton.setVisible( false );
         searchRouteButton.setVisible( false );
+        routeTable.setPrefWidth( 600 );
+        departureColumn.setPrefWidth( 300 );
+        destinationColumn.setPrefWidth( 300 );
 
 
         Controller.getInstance().setThread( new ReadOnlyThread() );
@@ -55,27 +58,21 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         Controller.getInstance().startThread();
         infoMenuButton.setOnAction( event -> handleAboutAction() );
 
-        departure.textProperty().addListener( observable -> restartTask(new TimerTask() {
-            @Override
-            public void run() {
-                requestRoutes(route ->
-                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
-            }
-        }) );
-        destination.textProperty().addListener( observable -> restartTask(new TimerTask() {
-            @Override
-            public void run() {
-                requestRoutes(route ->
-                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
-            }
-        }) );
+        departure.textProperty().addListener( observable -> restartTask());
+        destination.textProperty().addListener( observable -> restartTask());
+    }
 
+    public void restartTask(){
+        restartTask(new TimerTask() {
+            @Override
+            public void run() {
+                requestRoutes(route ->
+                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
+            }
+        });
     }
 
     public void restartTask(TimerTask timerTask){

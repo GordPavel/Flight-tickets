@@ -10,6 +10,8 @@ import transport.Data;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,7 +67,7 @@ class LoginOverviewController{
 
         if( ClientMain.getClientSocket() != null ){
 
-            Pattern pattern      = Pattern.compile( "^[\\w\\d-_.]+$" );
+            Pattern pattern      = Pattern.compile( "^[\\.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
             if( !( pattern.matcher( loginTextField.getText() ).matches() &&
@@ -84,7 +86,7 @@ class LoginOverviewController{
           Add view with table of available DB...
           Load db to datamodel and execute code below
          */
-            if( !( ClientMain.getClientSocket() == null ) && pattern.matcher( loginTextField.getText() ).matches() &&
+            if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
                 ClientMain.getUserInformation().setName( loginTextField.getText() );
                 ClientMain.getUserInformation().setPassword( passwordField.getText() );
@@ -116,29 +118,47 @@ class LoginOverviewController{
                         System.out.println( "load problem" );
                         System.out.println( e.getMessage() );
                     }
+                } else {
+                    Alert alert = new Alert( Alert.AlertType.WARNING );
+                    alert.setTitle( "Error" );
+                    alert.setHeaderText( "Server error" );
+                    alert.setContentText( data.getException().getMessage() );
+                    alert.showAndWait();
                 }
+            } else {
+                Alert alert = new Alert( Alert.AlertType.WARNING );
+                alert.setTitle( "Error" );
+                alert.setHeaderText( "Unacceptable symbols" );
+                alert.setContentText( "Check your login, password" );
+                alert.showAndWait();
             }
-        }
-//        try {
-//            Map<String,String> map = new HashMap();
+        } else {
+            Alert alert = new Alert( Alert.AlertType.WARNING );
+            alert.setTitle( "Error" );
+            alert.setHeaderText( "Network error" );
+            alert.setContentText( "Can`t connect to server" );
+            alert.showAndWait();
+                    try {
+            Map<String,String> map = new HashMap();
 //            map.put("1","2");
 //            map.put("2","3");
-//            Data data1 = new Data();
-//            data1.setBases(map);
-//            Stage primaryStage = new Stage();
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
-//            ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
-//            loader.setController(controller);
-//            primaryStage.setTitle("Select DB");
-//            Scene scene = new Scene(loader.load());
-//            primaryStage.setScene(scene);
-//            primaryStage.setResizable(false);
-//            primaryStage.show();
-//            closeWindow();
-//        } catch (IOException e) {
-//            System.out.println("load problem");
-//            System.out.println(e.getMessage());
-//        }
+            Data data1 = new Data();
+            data1.setBases(map);
+            Stage primaryStage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+            ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
+            loader.setController(controller);
+            primaryStage.setTitle("Select DB");
+            Scene scene = new Scene(loader.load());
+            primaryStage.setScene(scene);
+            primaryStage.setResizable(false);
+            primaryStage.show();
+            closeWindow();
+        } catch (IOException e) {
+            System.out.println("load problem");
+            System.out.println(e.getMessage());
+        }
+        }
     }
 
     private void fieldCheck(){
@@ -147,7 +167,7 @@ class LoginOverviewController{
                 "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
         Pattern portPattern = Pattern.compile( "[0-9]{1,5}" );
 
-        Pattern textPattern = Pattern.compile( "[\\w\\d\\-_]*" );
+        Pattern textPattern = Pattern.compile( "[\\.\\w\\d\\-_]*" );
         Matcher matcher     = textPattern.matcher( loginTextField.getText() );
         if( !matcher.matches() ){
             loginTextField.setStyle( "-fx-text-inner-color: red;" );
