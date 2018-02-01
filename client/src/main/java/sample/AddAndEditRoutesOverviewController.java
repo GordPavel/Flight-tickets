@@ -170,7 +170,7 @@ class AddAndEditRoutesOverviewController{
                                                           .orElseThrow( IllegalStateException::new ) );
             }
 //            TODO: put here request to server to add flight
-            ClientMain.changed = true;
+            Controller.changed = true;
             closeWindow();
         }catch( FlightAndRouteException e ){
             RoutesFlightsOverviewController.showModelAlert( e );

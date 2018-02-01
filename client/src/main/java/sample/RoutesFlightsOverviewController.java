@@ -174,8 +174,8 @@ abstract class RoutesFlightsOverviewController{
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
                 DataModelInstanceSaver.getInstance().importFromFile( file );
-                ClientMain.changed = false;
-                ClientMain.savingFile = file;
+                Controller.getInstance().changed = false;
+                Controller.getInstance().savingFile = file;
                 thisStage.setTitle( file.getName() );
             }catch( IOException | FlightAndRouteException e ){
                 e.printStackTrace();
@@ -187,15 +187,15 @@ abstract class RoutesFlightsOverviewController{
      Save local DB to file
      */
     private void handleSaveAction(){
-        if( ClientMain.savingFile == null ){
+        if( Controller.getInstance().savingFile == null ){
             Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
-                ClientMain.savingFile = file;
+                Controller.getInstance().savingFile = file;
                 thisStage.setTitle( file.getName() );
             } );
         }
         try{
-            DataModelInstanceSaver.getInstance().saveToFile( ClientMain.savingFile );
-            ClientMain.changed = false;
+            DataModelInstanceSaver.getInstance().saveToFile( Controller.getInstance().savingFile );
+            Controller.getInstance().changed = false;
         }catch( IOException | FlightAndRouteException e ){
             new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
         }
@@ -223,7 +223,7 @@ abstract class RoutesFlightsOverviewController{
                 ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance().mergeData( file )
                                                                               .collect( ArrayList::new , List::add ,
                                                                                         List::addAll );
-                ClientMain.changed = true;
+                Controller.getInstance().changed = true;
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
@@ -290,11 +290,11 @@ abstract class RoutesFlightsOverviewController{
           put here code to open window, that will allow you to download new DB.
          */
         Data data = new Data();
-        if (!(ClientMain.getClientSocket() == null)) {
+        if (!(Controller.getInstance().getClientSocket() == null)) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-                data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+                data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
             } catch (IOException | NullPointerException ex) {
                 System.out.println(ex.getMessage());
             }
@@ -331,7 +331,7 @@ abstract class RoutesFlightsOverviewController{
 
           somehow let server know, that you change your login
          */
-        ClientMain.setUserInformation(new UserInformation());
+        Controller.getInstance().setUserInformation(new UserInformation());
         try{
             Stage                   loginStage      = new Stage();
             FXMLLoader              loader          =
@@ -364,8 +364,8 @@ abstract class RoutesFlightsOverviewController{
         ObjectMapper mapper = new ObjectMapper();
         Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
         try {   //add FaR exceprions...
-            mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-            data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
             for (Route route : data.getRoutes())
             {
                 DataModelInstanceSaver.getInstance().addRoute(route);
@@ -392,8 +392,8 @@ abstract class RoutesFlightsOverviewController{
         ObjectMapper mapper = new ObjectMapper();
         Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
         try {   //add FaR exceprions...
-            mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-            data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
             for (Route route : data.getRoutes())
             {
                 DataModelInstanceSaver.getInstance().addRoute(route);

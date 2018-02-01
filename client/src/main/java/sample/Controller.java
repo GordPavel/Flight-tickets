@@ -3,6 +3,10 @@ package sample;
 import javafx.collections.ObservableList;
 import model.Flight;
 import model.Route;
+import transport.UserInformation;
+
+import java.io.File;
+import java.net.Socket;
 
 /**
  Support class for controllers
@@ -23,6 +27,27 @@ class Controller{
     private ObservableList<Flight> mergeFlights;
     private ObservableList<Route>  mergeRoutes;
     private FaRThread              thread;
+    static Boolean changed = false;
+    static File savingFile;
+
+    private static Socket clientSocket;
+    private static UserInformation userInformation;
+
+    public Socket getClientSocket(){
+        return clientSocket;
+    }
+
+    public void setClientSocket( Socket clientSocket ){
+        this.clientSocket = clientSocket;
+    }
+
+    public void setUserInformation(UserInformation userInformation) {
+        this.userInformation = userInformation;
+    }
+
+    public UserInformation getUserInformation() {
+        return userInformation;
+    }
 
     void setThread( FaRThread thread ){
         this.thread = thread;

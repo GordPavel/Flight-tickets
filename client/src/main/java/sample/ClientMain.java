@@ -12,27 +12,7 @@ import java.net.Socket;
 
 public class ClientMain extends Application{
 
-    static Boolean changed = false;
-    static File savingFile;
 
-    private static Socket clientSocket;
-    private static UserInformation userInformation;
-
-    public static Socket getClientSocket(){
-        return clientSocket;
-    }
-
-    public static void setClientSocket( Socket clientSocket ){
-        ClientMain.clientSocket = clientSocket;
-    }
-
-    public static void setUserInformation(UserInformation userInformation) {
-        ClientMain.userInformation = userInformation;
-    }
-
-    public static UserInformation getUserInformation() {
-        return userInformation;
-    }
 
     @Override
     public void start( Stage primaryStage ) throws Exception{

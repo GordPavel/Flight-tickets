@@ -23,7 +23,7 @@ class ReadOnlyThread extends FaRThread{
     }
 
     public void start(){
-        clientSocket = ClientMain.getClientSocket();
+        clientSocket = Controller.getInstance().getClientSocket();
         super.start();
     }
 

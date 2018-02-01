@@ -5,6 +5,7 @@ import model.Flight;
 import model.Route;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +16,7 @@ public class Data{
     private Collection<Flight>      flights;
     private Collection<Route>       routes;
     private Map<String, String>     bases;
+    private List<ListChangeAdapter> listChangeAdapters;
     private FlightAndRouteException exception;
 
     public Data(){
@@ -64,4 +66,13 @@ public class Data{
     public boolean notHasException(){
         return ( exception == null );
     }
+
+    public List<ListChangeAdapter> getListChangeAdapters() {
+        return listChangeAdapters;
+    }
+
+    public void setListChangeAdapters(List<ListChangeAdapter> listChangeAdapters) {
+        this.listChangeAdapters = listChangeAdapters;
+    }
+
 }

@@ -60,12 +60,12 @@ class LoginOverviewController{
 
         try{
             Socket socket = new Socket( ipTextField.getText() , Integer.parseInt( portTextField.getText() ) );
-            ClientMain.setClientSocket( socket );
+            Controller.getInstance().setClientSocket( socket );
         }catch( IOException ioex ){
             System.out.println( "Connection failed" );
         }
 
-        if( ClientMain.getClientSocket() != null ){
+        if( Controller.getInstance().getClientSocket() != null ){
 
             Pattern pattern      = Pattern.compile( "^[\\.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
@@ -88,14 +88,14 @@ class LoginOverviewController{
          */
             if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
-                ClientMain.getUserInformation().setName( loginTextField.getText() );
-                ClientMain.getUserInformation().setPassword( passwordField.getText() );
+                Controller.getInstance().getUserInformation().setName( loginTextField.getText() );
+                Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
                 try{
-                    mapper.writeValue( ClientMain.getClientSocket().getOutputStream() ,
-                                       ClientMain.getUserInformation() );
-                    data = ( Data ) mapper.readValue( ClientMain.getClientSocket().getInputStream() , Data.class );
+                    mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
+                            Controller.getInstance().getUserInformation() );
+                    data = ( Data ) mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }

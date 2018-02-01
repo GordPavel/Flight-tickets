@@ -69,7 +69,7 @@ class ChoiceOverviewController{
           Load db to dataModel and execute code below
          */
         Optional.ofNullable( baseTable.getSelectionModel().getSelectedItem() ).ifPresent(selectedBase -> {
-            ClientMain.getUserInformation().setDataBase(((Map.Entry<String,String>)selectedBase).getKey());
+            Controller.getInstance().getUserInformation().setDataBase(((Map.Entry<String,String>)selectedBase).getKey());
             Stage primaryStage = new Stage();
             RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController(primaryStage);
             if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("WRITE")) {
@@ -77,8 +77,8 @@ class ChoiceOverviewController{
             }
             ObjectMapper mapper = new ObjectMapper();
             try {
-                mapper.writeValue(ClientMain.getClientSocket().getOutputStream(), ClientMain.getUserInformation());
-                Data data = (Data) mapper.readValue(ClientMain.getClientSocket().getInputStream(), Data.class);
+                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+                Data data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
                 if (data.notHasException()) {
                     for (Route route : data.getRoutes()) {
                         DataModelInstanceSaver.getInstance().addRoute(route);

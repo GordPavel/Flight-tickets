@@ -106,7 +106,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataModelInstanceSaver.getInstance().removeRoute( selectedRoute );
-                ClientMain.changed = true;
+                Controller.getInstance().changed = true;
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
             }
