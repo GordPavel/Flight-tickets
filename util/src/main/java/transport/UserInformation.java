@@ -18,7 +18,7 @@ public class UserInformation{
     private Predicate<Route> routePredicate;
     private ListChangeAdapter listChangeAdapter;
 
-    UserInformation(){
+    public UserInformation(){
 
     }
 

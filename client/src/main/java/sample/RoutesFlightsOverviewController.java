@@ -20,7 +20,6 @@ import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
-import transport.Actions;
 import transport.Data;
 import transport.UserInformation;
 
@@ -362,7 +361,7 @@ abstract class RoutesFlightsOverviewController{
     {
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
-        Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
+        Controller.getInstance().getUserInformation().setFlightPredicate(predicate);
         try {   //add FaR exceprions...
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
@@ -377,6 +376,7 @@ abstract class RoutesFlightsOverviewController{
         } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
+        Controller.getInstance().getUserInformation().setFlightPredicate(null);
     }
 
     /**
@@ -390,8 +390,8 @@ abstract class RoutesFlightsOverviewController{
     public void requestRoutes(Predicate<Route> predicate){
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
-        Actions actions = new Actions(null, Actions.ActionsType.UPDATE, predicate);
-        try {   //add FaR exceprions...
+        Controller.getInstance().getUserInformation().setRoutePredicate(predicate);
+        try {   //TODO: add FaR exceprions...
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
             for (Route route : data.getRoutes())
@@ -401,6 +401,7 @@ abstract class RoutesFlightsOverviewController{
         } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
+        Controller.getInstance().getUserInformation().setRoutePredicate(null);
     }
 
     /**
