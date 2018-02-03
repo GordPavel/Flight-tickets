@@ -48,7 +48,7 @@ public class Base implements Cloneable{
         isRunning = running;
     }
 
-    List<User> getUser(){
+    public List<User> getUser(){
         return user;
     }
 

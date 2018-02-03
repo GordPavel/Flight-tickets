@@ -25,6 +25,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.danekja</groupId>
+            <artifactId>jdk-serializable-functional</artifactId>
+            <version>1.8.5</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.1.0-M1</version>

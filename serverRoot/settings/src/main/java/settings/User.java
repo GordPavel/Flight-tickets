@@ -20,7 +20,7 @@ public class User implements Cloneable{
         this.privilege = privilege;
     }
 
-    String getName(){
+    public String getName(){
         return name;
     }
 
@@ -29,7 +29,7 @@ public class User implements Cloneable{
         this.name = name;
     }
 
-    String getPassword(){
+    public String getPassword(){
         return password;
     }
 
@@ -38,7 +38,7 @@ public class User implements Cloneable{
         this.password = password;
     }
 
-    UserPrivileges getPrivilege(){
+    public UserPrivileges getPrivilege(){
         return privilege;
     }
 

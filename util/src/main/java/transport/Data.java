@@ -23,23 +23,19 @@ public class Data{
     }
 
     public Data( Collection<Flight> flights , Collection<Route> routes ){
-
         this.flights = flights;
         this.routes = routes;
     }
 
     public Collection<Flight> getFlights(){
-
         return flights;
     }
 
     public void setFlights( Collection<Flight> flights ){
-
         this.flights = flights;
     }
 
     public Collection<Route> getRoutes(){
-
         return routes;
     }
 
@@ -67,11 +63,11 @@ public class Data{
         return ( exception == null );
     }
 
-    public List<ListChangeAdapter> getListChangeAdapters() {
+    public List<ListChangeAdapter> getListChangeAdapters(){
         return listChangeAdapters;
     }
 
-    public void setListChangeAdapters(List<ListChangeAdapter> listChangeAdapters) {
+    public void setListChangeAdapters( List<ListChangeAdapter> listChangeAdapters ){
         this.listChangeAdapters = listChangeAdapters;
     }
 

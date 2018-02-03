@@ -56,6 +56,10 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     Route route;
 
+    public void setRoute( Route route ){
+        this.route = route;
+    }
+
     @JsonGetter( "route" )
     public Route getRoute(){
         return route;

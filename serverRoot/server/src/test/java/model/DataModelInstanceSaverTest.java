@@ -1,7 +1,6 @@
 package model;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import transport.ListChangeAdapter;
 
@@ -83,6 +82,11 @@ class DataModelInstanceSaverTest{
 
         routes.get( false ).forEach( dataModel1::addRoute );
         flights.get( false ).forEach( dataModel1::addFlight );
+        dataModel1.getFlightObservableList().removeIf( flight -> random.nextBoolean() );
+        dataModel1.editRoute( dataModel1.getRouteObservableList()
+                                        .get( random.nextInt( dataModel1.getRouteObservableList().size() ) ) ,
+                              allZones.get( random.nextInt( allZones.size() ) ) , null );
+        dataModel1.getFlightObservableList().sort( Comparator.comparing( Flight::getNumber ).reversed() );
 
         Files.list( Paths.get( DataModelInstanceSaver.basesCacheFiles ) )
              .filter( path -> !Files.isDirectory( path ) )
@@ -104,14 +108,10 @@ class DataModelInstanceSaverTest{
                  }
              } );
 
-        try{
-            assertIterableEquals( dataModel1.getRouteObservableList() , dataModel2.getRouteObservableList() ,
-                                  "All routes were added" );
-            assertIterableEquals( dataModel1.getFlightObservableList() , dataModel2.getFlightObservableList() ,
-                                  "All flights were added" );
-        }catch( Throwable e ){
-            e.printStackTrace();
-        }
+        assertIterableEquals( dataModel1.getRouteObservableList() , dataModel2.getRouteObservableList() ,
+                              "All routes were added" );
+        assertIterableEquals( dataModel1.getFlightObservableList() , dataModel2.getFlightObservableList() ,
+                              "All flights were added" );
     }
 
     @Test

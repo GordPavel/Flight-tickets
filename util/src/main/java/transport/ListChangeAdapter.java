@@ -1,8 +1,13 @@
 package transport;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.FaRNotRelatedData;
 import javafx.collections.ListChangeListener;
+import javafx.util.Pair;
 import model.DataModel;
 import model.Flight;
 import model.FlightOrRoute;
@@ -10,17 +15,27 @@ import model.Route;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-// todo: Закончить
 public class ListChangeAdapter{
     private String update;
     private static ObjectMapper mapper = new ObjectMapper();
 
-    public ListChangeAdapter( String update ){
+    @JsonCreator
+    public ListChangeAdapter(
+            @JsonProperty( "update" )
+                    String update ){
         this.update = update;
+    }
+
+    @JsonGetter( "update" )
+    public String getUpdate(){
+        return update;
     }
 
     @SuppressWarnings( "ResultOfMethodCallIgnored" )
@@ -33,11 +48,14 @@ public class ListChangeAdapter{
             switch( matcher.group( 1 ) ){
                 case "route":
                     Route updateRoute = mapper.readerFor( Route.class ).readValue( matcher.group( 2 ) );
-                    dataModel.getRouteObservableList().set( index , updateRoute );
+                    dataModel.editRoute( dataModel.getRouteObservableList().get( index ) , updateRoute.getFrom() ,
+                                         updateRoute.getTo() );
                     break;
                 case "flight":
                     Flight updateFlight = mapper.readerFor( Flight.class ).readValue( matcher.group( 2 ) );
-                    dataModel.getFlightObservableList().set( index , updateFlight );
+                    dataModel.editFlight( dataModel.getFlightObservableList().get( index ) , updateFlight.getRoute() ,
+                                          updateFlight.getPlaneID() , updateFlight.getDepartureDateTime() ,
+                                          updateFlight.getArriveDateTime() );
                     break;
             }
         }else if( removePattern.matcher( update ).matches() ){
@@ -47,10 +65,13 @@ public class ListChangeAdapter{
             int to   = Integer.parseInt( matcher.group( 3 ) );
             switch( matcher.group( 1 ) ){
                 case "route":
-                    dataModel.getRouteObservableList().remove( from , to );
+                    IntStream.range( from , to )
+                             .forEach( i -> dataModel.removeRoute( dataModel.getRouteObservableList().get( i ) ) );
                     break;
                 case "flight":
-                    dataModel.getFlightObservableList().remove( from , to );
+                    IntStream.range( from , to )
+                             .forEach( i -> dataModel.removeFlight(
+                                     dataModel.getFlightObservableList().get( i ).getNumber() ) );
                     break;
             }
         }else if( addPattern.matcher( update ).matches() ){
@@ -65,29 +86,44 @@ public class ListChangeAdapter{
                     addRoutes.forEach( route -> dataModel.addRoute( index , route ) );
                     break;
                 case "flight":
-                    List<Flight> addFLights = mapper.readerFor(
+                    List<Flight> addFlights = mapper.readerFor(
                             mapper.getTypeFactory().constructCollectionType( List.class , Flight.class ) )
                                                     .readValue( matcher.group( 2 ) );
-                    addFLights.forEach( flight -> dataModel.addFlight( index , flight ) );
+                    addFlights.forEach( flight -> {
+                        flight.setRoute( dataModel.getRouteObservableList()
+                                                  .stream()
+                                                  .filter( route -> route.getId().equals( flight.getRoute().getId() ) )
+                                                  .findFirst()
+                                                  .orElseThrow( () -> new FaRNotRelatedData(
+                                                          "Route not exists in database" ) ) );
+                        dataModel.addFlight( index , flight );
+                    } );
                     break;
             }
         }else if( permutationPattern.matcher( update ).matches() ){
             matcher = permutationPattern.matcher( update );
             matcher.find();
-            List<Integer> permutation =
-                    mapper.readerFor( mapper.getTypeFactory().constructCollectionType( List.class , Integer.class ) )
-                          .readValue( matcher.group( 2 ) );
-
+            Iterator<Integer> permutation = ( ( List<Integer> ) mapper.readerFor(
+                    mapper.getTypeFactory().constructCollectionType( List.class , Integer.class ) )
+                                                                      .readValue( matcher.group( 2 ) ) ).iterator();
             switch( matcher.group( 1 ) ){
                 case "route":
                     dataModel.getRouteObservableList()
-                             .sort( Comparator.comparingInt( value -> permutation.indexOf(
-                                     dataModel.getRouteObservableList().indexOf( value ) ) ) );
+                             .setAll( dataModel.getRouteObservableList()
+                                               .stream()
+                                               .map( route -> new Pair<>( route , permutation.next() ) )
+                                               .sorted( Comparator.comparingInt( Pair::getValue ) )
+                                               .map( Pair::getKey )
+                                               .collect( Collectors.toList() ) );
                     break;
                 case "flight":
                     dataModel.getFlightObservableList()
-                             .sort( Comparator.comparingInt( value -> permutation.indexOf(
-                                     dataModel.getFlightObservableList().indexOf( value ) ) ) );
+                             .setAll( dataModel.getFlightObservableList()
+                                               .stream()
+                                               .map( route -> new Pair<>( route , permutation.next() ) )
+                                               .sorted( Comparator.comparingInt( Pair::getValue ) )
+                                               .map( Pair::getKey )
+                                               .collect( Collectors.toList() ) );
                     break;
             }
         }else{
@@ -126,5 +162,15 @@ public class ListChangeAdapter{
             stringBuilder.append( "\n" );
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public int hashCode(){
+        return update.hashCode();
+    }
+
+    @Override
+    public boolean equals( Object obj ){
+        return obj instanceof ListChangeAdapter && update.equals( ( ( ListChangeAdapter ) obj ).update );
     }
 }
