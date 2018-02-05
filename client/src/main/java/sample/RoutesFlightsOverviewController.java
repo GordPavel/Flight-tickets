@@ -22,6 +22,7 @@ import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
+import transport.ListChangeAdapter;
 import transport.UserInformation;
 
 import java.io.IOException;
@@ -284,14 +285,10 @@ abstract class RoutesFlightsOverviewController{
 
     private void handleChangeDBAction(){
 
-        /*
-          TODO: selecting new DB
-
-          put here code to open window, that will allow you to download new DB.
-         */
         Data data = new Data();
         if (!(Controller.getInstance().getClientSocket() == null)) {
             ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setDataBase(null);
             try {
                 mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
                 data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
@@ -318,6 +315,12 @@ abstract class RoutesFlightsOverviewController{
                     System.out.println("load problem");
                     System.out.println(e.getMessage());
                 }
+            } else {
+                Alert alert = new Alert( Alert.AlertType.WARNING );
+                alert.setTitle( "Error" );
+                alert.setHeaderText( "Server error" );
+                alert.setContentText( data.getException().getMessage() );
+                alert.showAndWait();
             }
         }
     }
@@ -325,12 +328,6 @@ abstract class RoutesFlightsOverviewController{
     private void handleLogOutAction(){
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
-
-        /*
-          TODO: server logout
-
-          somehow let server know, that you change your login
-         */
         Controller.getInstance().setUserInformation(new UserInformation());
         try{
             Stage                   loginStage      = new Stage();
@@ -354,50 +351,43 @@ abstract class RoutesFlightsOverviewController{
      Update flight list
      */
     private void handleUpdateFlightAction(){
-        // TODO: put here request to server to update DB about flights
        requestFlights(flight -> true);
     }
 
     public void requestFlights(Predicate<Flight> predicate)
     {
-        Data data = new Data();
-        ObjectMapper mapper = new ObjectMapper();
-        Controller.getInstance().getUserInformation().setPredicate( (SerializablePredicate)predicate);
-        try {   //add FaR exceprions...
-            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-            for (Route route : data.getRoutes())
-            {
-                DataModelInstanceSaver.getInstance().addRoute(route);
-            }
-            for (Flight flight : data.getFlights())
-            {
-                DataModelInstanceSaver.getInstance().addFlight(flight);
-            }
-        } catch (IOException | NullPointerException ex) {
-            System.out.println(ex.getMessage());
-        }
-        Controller.getInstance().getUserInformation().setPredicate(null);
+        requestUpdate(predicate);
     }
 
     /**
      Update route list
      */
     private void handleUpdateRouteAction(){
-        // TODO: put here request to server to update DB about routes
         requestRoutes(route -> true);
     }
 
     public void requestRoutes(Predicate<Route> predicate){
+        requestUpdate(predicate);
+    }
+
+    public void requestUpdate(Predicate predicate)
+    {
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
         Controller.getInstance().getUserInformation().setPredicate( (SerializablePredicate)predicate);
-        try {   //TODO: add FaR exceprions...
+        try {
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-            for (Route route : data.getRoutes())
-            {
-                DataModelInstanceSaver.getInstance().addRoute(route);
+            if (data.notHasException()) {
+                for (ListChangeAdapter update : data.getListChangeAdapters()) {
+                    update.apply(DataModelInstanceSaver.getInstance());
+                }
+            }else {
+                Alert alert = new Alert( Alert.AlertType.WARNING );
+                alert.setTitle( "Error" );
+                alert.setHeaderText( "Server error" );
+                alert.setContentText( data.getException().getMessage() );
+                alert.showAndWait();
             }
         } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
@@ -441,13 +431,13 @@ abstract class RoutesFlightsOverviewController{
      Search for routes
      */
     private void handleSearchRouteAction(){
-        // TODO: put here request to server to update DB about routes
         requestRoutes(route ->
                 Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
                         Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
                         Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
                                 Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
     }
+
 }
 
 

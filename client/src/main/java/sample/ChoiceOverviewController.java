@@ -42,7 +42,6 @@ class ChoiceOverviewController{
      */
     @FXML
     private void initialize(){
-        System.out.println( "test" );
         selectButton.setOnAction( event -> handleSelectAction() );
         cancelButton.setOnAction( event -> closeWindow() );
         baseTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

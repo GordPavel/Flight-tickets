@@ -296,7 +296,6 @@ class SearchFlightsOverviewController{
      */
     @FXML
     private void handleSearchAction(){
-        // TODO: send predicate to server to request specified flights
         mainController.requestFlights(searchPredecate);
     }
 

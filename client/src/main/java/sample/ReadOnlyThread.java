@@ -1,5 +1,13 @@
 package sample;
 
+import javafx.scene.control.Alert;
+import model.DataModelInstanceSaver;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.danekja.java.util.function.serializable.SerializablePredicate;
+import transport.Data;
+import transport.ListChangeAdapter;
+
+import java.io.IOException;
 import java.net.Socket;
 
 
@@ -29,7 +37,6 @@ class ReadOnlyThread extends FaRThread{
 
     public void run(){
         while( !stop ){
-            // TODO: updating data from server
             updateData();
             System.out.println( test++ );
             try{
@@ -43,6 +50,24 @@ class ReadOnlyThread extends FaRThread{
     }
 
     synchronized void updateData(){
-//        todo : Закончить
+        Data data = new Data();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
+            if (data.notHasException()) {
+                for (ListChangeAdapter update : data.getListChangeAdapters()) {
+                    update.apply(DataModelInstanceSaver.getInstance());
+                }
+            } else {
+                Alert alert = new Alert( Alert.AlertType.WARNING );
+                alert.setTitle( "Error" );
+                alert.setHeaderText( "Server error" );
+                alert.setContentText( data.getException().getMessage() );
+                alert.showAndWait();
+            }
+        } catch (IOException | NullPointerException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }
