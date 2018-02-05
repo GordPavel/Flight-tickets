@@ -2,6 +2,7 @@ package transport;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.FlightOrRoute;
@@ -25,6 +26,8 @@ public class UserInformation{
     @JsonDeserialize( using = PredicateDeserializer.class )
     private SerializablePredicate<? super FlightOrRoute> predicate;
     private List<ListChangeAdapter>                      changes;
+
+    public UserInformation(){}
 
     //    @JsonCreator
     UserInformation(
@@ -50,25 +53,50 @@ public class UserInformation{
         return name;
     }
 
+    @JsonSetter( "name" )
+
+    public void setName(String name) {this.name=name;}
+
     @JsonGetter( "password" )
     public String getPassword(){
         return password;
     }
 
-    @JsonProperty( "dataBase" )
+    @JsonSetter( "password" )
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @JsonGetter( "dataBase" )
     public String getDataBase(){
         return dataBase;
     }
 
-    @JsonProperty( "predicate" )
+    @JsonSetter( "dataBase" )
+    public void setDataBase(String dataBase) {
+        this.dataBase = dataBase;
+    }
+
+    @JsonGetter( "predicate" )
     public Predicate<? super FlightOrRoute> getPredicate(){
         return predicate;
     }
 
-    @JsonProperty( "changes" )
+    @JsonSetter( "predicate" )
+    public void setPredicate(SerializablePredicate<? super FlightOrRoute> predicate) {
+        this.predicate = predicate;
+    }
+
+    @JsonGetter( "changes" )
     public List<ListChangeAdapter> getChanges(){
         return changes;
     }
+
+    @JsonSetter( "changes" )
+    public void setChanges(List<ListChangeAdapter> changes) {
+        this.changes = changes;
+    }
+
 
     @Override
     public int hashCode(){

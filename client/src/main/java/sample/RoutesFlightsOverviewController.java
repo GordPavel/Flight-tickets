@@ -20,6 +20,7 @@ import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.UserInformation;
 
@@ -361,7 +362,7 @@ abstract class RoutesFlightsOverviewController{
     {
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
-        Controller.getInstance().getUserInformation().setFlightPredicate(predicate);
+        Controller.getInstance().getUserInformation().setPredicate( (SerializablePredicate)predicate);
         try {   //add FaR exceprions...
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
@@ -376,7 +377,7 @@ abstract class RoutesFlightsOverviewController{
         } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
-        Controller.getInstance().getUserInformation().setFlightPredicate(null);
+        Controller.getInstance().getUserInformation().setPredicate(null);
     }
 
     /**
@@ -390,7 +391,7 @@ abstract class RoutesFlightsOverviewController{
     public void requestRoutes(Predicate<Route> predicate){
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
-        Controller.getInstance().getUserInformation().setRoutePredicate(predicate);
+        Controller.getInstance().getUserInformation().setPredicate( (SerializablePredicate)predicate);
         try {   //TODO: add FaR exceprions...
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
@@ -401,7 +402,7 @@ abstract class RoutesFlightsOverviewController{
         } catch (IOException | NullPointerException ex) {
             System.out.println(ex.getMessage());
         }
-        Controller.getInstance().getUserInformation().setRoutePredicate(null);
+        Controller.getInstance().getUserInformation().setPredicate(null);
     }
 
     /**

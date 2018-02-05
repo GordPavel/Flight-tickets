@@ -24,7 +24,6 @@ public class PredicateSerializer extends StdSerializer<SerializablePredicate<?>>
              PipedInputStream pipedInputStream = new PipedInputStream( pipedOutputStream ) ;
              ObjectOutputStream outputStream = new ObjectOutputStream( pipedOutputStream ) ){
             outputStream.writeObject( serializablePredicate );
-            jsonGenerator.writeBinary( IOUtils.readNBytes( pipedInputStream , pipedInputStream.available() ) );
         }
     }
 }

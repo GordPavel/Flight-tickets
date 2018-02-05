@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
+import transport.UserInformation;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -88,6 +89,7 @@ class LoginOverviewController{
          */
             if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
+                Controller.getInstance().setUserInformation(new UserInformation());
                 Controller.getInstance().getUserInformation().setName( loginTextField.getText() );
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
