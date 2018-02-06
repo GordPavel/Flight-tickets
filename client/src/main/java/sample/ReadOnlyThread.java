@@ -3,7 +3,6 @@ package sample;
 import javafx.scene.control.Alert;
 import model.DataModelInstanceSaver;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.ListChangeAdapter;
 

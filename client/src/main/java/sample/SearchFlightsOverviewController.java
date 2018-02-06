@@ -14,6 +14,7 @@ import javafx.util.StringConverter;
 import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
+import org.danekja.java.util.function.serializable.SerializablePredicate;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -55,14 +56,14 @@ class SearchFlightsOverviewController{
 
     @FXML JFXButton searchButton;
 
-    private RoutesFlightsOverviewController mainController;
-    private Stage                           thisStage;
-    private boolean                         correctSymbols;
-    private ObjectProperty<Predicate<Flight>> flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
-    private FilteredList<Route>               routeFilteredList =
+    private RoutesFlightsOverviewController                 mainController;
+    private Stage                                           thisStage;
+    private boolean                                         correctSymbols;
+    private ObjectProperty<SerializablePredicate<Flight>>   flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
+    private FilteredList<Route>                             routeFilteredList =
             DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
-    private ObjectProperty<Predicate<Route>>  routesPredicate   = new SimpleObjectProperty<>( route -> true );
-    private Predicate<Flight>               searchPredecate = flight -> true;
+    private ObjectProperty<SerializablePredicate<Route>>    routesPredicate   = new SimpleObjectProperty<>( route -> true );
+    private SerializablePredicate<Flight>                   searchPredecate = flight -> true;
 
     SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
@@ -126,10 +127,10 @@ class SearchFlightsOverviewController{
                       .selectedItemProperty()
                       .addListener( ( observable , oldValue , newValue ) -> changed() );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
-            Predicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
+            SerializablePredicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches();
-            Predicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
+            SerializablePredicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
                     "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
                     ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
             routesPredicate.setValue( fromPredicate.and( toPredicate ) );
@@ -153,40 +154,40 @@ class SearchFlightsOverviewController{
      Flight search method, used in listeners
      */
     private void changed(){
-        Predicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
+        SerializablePredicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
                 "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
                 "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
-        Predicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
+        SerializablePredicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
                 "^" + ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
                 "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
-        Predicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
+        SerializablePredicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
                                                      routesListView.getSelectionModel()
                                                                    .getSelectedItems()
                                                                    .contains( flight.getRoute() );
         Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
         SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
-        Predicate<Flight> departureDatePredicate = flight ->
+        SerializablePredicate<Flight> departureDatePredicate = flight ->
                 getDateTimePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , true ).test( flight.getDepartureDateTime() ) &&
                 getDateTimePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , false ).test( flight.getDepartureDateTime() );
-        Predicate<Flight> arriveDatePredicate = flight ->
+        SerializablePredicate<Flight> arriveDatePredicate = flight ->
                 getDateTimePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , true ).test( flight.getDepartureDateTime() ) &&
                 getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
                                       dateFormat , false ).test( flight.getDepartureDateTime() );
-        Predicate<Flight> flightTimePredicate = flight -> {
-            Predicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
+        SerializablePredicate<Flight> flightTimePredicate = flight -> {
+            SerializablePredicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
                                                  flightTimeFrom.getValue().get( ChronoField.MILLI_OF_DAY ) <=
                                                  flight.getTravelTime();
-            Predicate<Long> endTime = aLong -> flightTimeTo.getEditor().getText().isEmpty() ||
+            SerializablePredicate<Long> endTime = aLong -> flightTimeTo.getEditor().getText().isEmpty() ||
                                                flightTimeTo.getValue().get( ChronoField.MILLI_OF_DAY ) >=
                                                flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if( correctSymbols ){
-            Predicate<Flight> v = numberPredicate.and( planePredicate )
+            SerializablePredicate<Flight> v = numberPredicate.and( planePredicate )
                                                  .and( routePredicate )
                                                  .and( departureDatePredicate )
                                                  .and( arriveDatePredicate )
@@ -229,10 +230,10 @@ class SearchFlightsOverviewController{
 
     }
 
-    private Predicate<ZonedDateTime> getDateTimePredicate( String inputDate , Pattern datePattern ,
-                                                           DateTimeFormatter dateFormatter ,
-                                                           SimpleDateFormat dateFormat , Boolean before ){
-        Predicate<ZonedDateTime> datePredicate;
+    private SerializablePredicate<ZonedDateTime> getDateTimePredicate(String inputDate , Pattern datePattern ,
+                                                                      DateTimeFormatter dateFormatter ,
+                                                                      SimpleDateFormat dateFormat , Boolean before ){
+        SerializablePredicate<ZonedDateTime> datePredicate;
         if( datePattern.matcher( inputDate ).matches() ){
             datePredicate = date -> {
                 LocalDate inputLocalDate  = LocalDate.parse( inputDate , dateFormatter );

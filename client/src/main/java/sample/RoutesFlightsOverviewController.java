@@ -354,9 +354,11 @@ abstract class RoutesFlightsOverviewController{
        requestFlights(flight -> true);
     }
 
-    public void requestFlights(Predicate<Flight> predicate)
+    public void requestFlights(SerializablePredicate<Flight> predicate)
     {
+        flightTable.setDisable(true);
         requestUpdate(predicate);
+        flightTable.setDisable(false);
     }
 
     /**
@@ -366,15 +368,17 @@ abstract class RoutesFlightsOverviewController{
         requestRoutes(route -> true);
     }
 
-    public void requestRoutes(Predicate<Route> predicate){
+    public void requestRoutes(SerializablePredicate<Route> predicate){
+        routeTable.setDisable(true);
         requestUpdate(predicate);
+        routeTable.setDisable(false);
     }
 
-    public void requestUpdate(Predicate predicate)
+    public void requestUpdate(SerializablePredicate predicate)
     {
         Data data = new Data();
         ObjectMapper mapper = new ObjectMapper();
-        Controller.getInstance().getUserInformation().setPredicate( (SerializablePredicate)predicate);
+        Controller.getInstance().getUserInformation().setPredicate(predicate);
         try {
             mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
             data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);

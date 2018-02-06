@@ -14,6 +14,7 @@ import model.Flight;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
+import transport.UserInformation;
 
 import java.io.IOException;
 import java.util.Map;
@@ -115,6 +116,8 @@ class ChoiceOverviewController{
 
         // if write
         try{
+
+            Controller.getInstance().setUserInformation(new UserInformation());
             Stage primaryStage = new Stage();
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
             RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController( primaryStage );
