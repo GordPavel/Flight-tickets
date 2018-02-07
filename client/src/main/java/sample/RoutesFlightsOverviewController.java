@@ -285,8 +285,13 @@ abstract class RoutesFlightsOverviewController{
 
     private void handleChangeDBAction(){
 
+        if (!Controller.getInstance().getClientSocket().isConnected())
+        {
+            Controller.getInstance().reconnect();
+        }
+
         Data data = new Data();
-        if (!(Controller.getInstance().getClientSocket() == null)) {
+        if (!(Controller.getInstance().getClientSocket() == null)&&Controller.getInstance().getClientSocket().isConnected()) {
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setDataBase(null);
             try {
@@ -376,27 +381,32 @@ abstract class RoutesFlightsOverviewController{
 
     public void requestUpdate(SerializablePredicate predicate)
     {
-        Data data = new Data();
-        ObjectMapper mapper = new ObjectMapper();
-        Controller.getInstance().getUserInformation().setPredicate(predicate);
-        try {
-            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-            if (data.notHasException()) {
-                for (ListChangeAdapter update : data.getListChangeAdapters()) {
-                    update.apply(DataModelInstanceSaver.getInstance());
-                }
-            }else {
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Error" );
-                alert.setHeaderText( "Server error" );
-                alert.setContentText( data.getException().getMessage() );
-                alert.showAndWait();
-            }
-        } catch (IOException | NullPointerException ex) {
-            System.out.println(ex.getMessage());
+        if (!Controller.getInstance().getClientSocket().isConnected()) {
+            Controller.getInstance().reconnect();
         }
-        Controller.getInstance().getUserInformation().setPredicate(null);
+        if (Controller.getInstance().getClientSocket().isConnected()) {
+            Data data = new Data();
+            ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setPredicate(predicate);
+            try {
+                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
+                data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
+                if (data.notHasException()) {
+                    for (ListChangeAdapter update : data.getListChangeAdapters()) {
+                        update.apply(DataModelInstanceSaver.getInstance());
+                    }
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Server error");
+                    alert.setContentText(data.getException().getMessage());
+                    alert.showAndWait();
+                }
+            } catch (IOException | NullPointerException ex) {
+                System.out.println(ex.getMessage());
+            }
+            Controller.getInstance().getUserInformation().setPredicate(null);
+        }
     }
 
     /**

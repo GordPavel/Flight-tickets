@@ -20,6 +20,7 @@ class ReadOnlyThread extends FaRThread{
     private Socket clientSocket;
     public  int     test = 0;
     private boolean stop = false;
+    RoutesFlightsOverviewController parentController;
 
     public void setStop(){
         this.stop = true;
@@ -27,6 +28,11 @@ class ReadOnlyThread extends FaRThread{
 
     public ReadOnlyThread(){
         super();
+    }
+
+    public ReadOnlyThread(RoutesFlightsOverviewController parentController){
+        super();
+        this.parentController = parentController;
     }
 
     public void start(){
@@ -48,25 +54,8 @@ class ReadOnlyThread extends FaRThread{
 
     }
 
-    synchronized void updateData(){
-        Data data = new Data();
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-            data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-            if (data.notHasException()) {
-                for (ListChangeAdapter update : data.getListChangeAdapters()) {
-                    update.apply(DataModelInstanceSaver.getInstance());
-                }
-            } else {
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Error" );
-                alert.setHeaderText( "Server error" );
-                alert.setContentText( data.getException().getMessage() );
-                alert.showAndWait();
-            }
-        } catch (IOException | NullPointerException ex) {
-            System.out.println(ex.getMessage());
-        }
+    synchronized void updateData() {
+
+        parentController.requestUpdate(null);
     }
 }

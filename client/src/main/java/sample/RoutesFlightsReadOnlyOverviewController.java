@@ -52,7 +52,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         destinationColumn.setPrefWidth( 300 );
 
 
-        Controller.getInstance().setThread( new ReadOnlyThread() );
+        Controller.getInstance().setThread( new ReadOnlyThread(this) );
         thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         thisStage.setOnHidden( event -> timer.cancel() );
         Controller.getInstance().startThread();

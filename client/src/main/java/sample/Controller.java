@@ -6,6 +6,7 @@ import model.Route;
 import transport.UserInformation;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -29,6 +30,8 @@ class Controller{
     private FaRThread              thread;
     static Boolean changed = false;
     static File savingFile;
+    static String ip;
+    static int port;
 
     private static Socket clientSocket;
     private static UserInformation userInformation;
@@ -83,6 +86,37 @@ class Controller{
 
     boolean isFlightSearchActive(){
         return flightSearchActive;
+    }
+
+    public void setIp(String ip) {
+        Controller.ip = ip;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setPort(int port) {
+        Controller.port = port;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void connectToServer(String ip, int port) {
+        try{
+            Socket socket = new Socket( ip , port );
+            setIp(ip);
+            setPort(port);
+            Controller.getInstance().setClientSocket( socket );
+        }catch( IOException ioex ){
+            System.out.println( "Connection failed" );
+        }
+    }
+
+    public void reconnect(){
+        connectToServer(ip,port);
     }
 }
 
