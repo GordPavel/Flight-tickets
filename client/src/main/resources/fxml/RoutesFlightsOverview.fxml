@@ -1,140 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTabPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0"
-            prefWidth="700.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.121"
-            xmlns:fx="http://javafx.com/fxml/1">
 
-    <JFXTabPane layoutY="25.0" prefHeight="376.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE"
-                AnchorPane.bottomAnchor="-1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                AnchorPane.topAnchor="25.0">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" style="caspian" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+
+    <JFXTabPane layoutY="25.0" prefHeight="376.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="-1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
         <Tab text="Routes">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="750.0">
-                <TableView fx:id="routeTable" layoutX="50.0" layoutY="93.0" prefHeight="315.0" prefWidth="340.0"
-                           style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
+                <TableView fx:id="routeTable" layoutX="50.0" layoutY="93.0" prefHeight="315.0" prefWidth="340.0" style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
                     <columns>
-                        <TableColumn fx:id="departureColumn" prefWidth="170.0" text="Departure"/>
-                        <TableColumn fx:id="destinationColumn" prefWidth="170.0" text="Destination"/>
+                        <TableColumn fx:id="departureColumn" prefWidth="170.0" text="Departure" />
+                        <TableColumn fx:id="destinationColumn" prefWidth="170.0" text="Destination" />
                     </columns>
                 </TableView>
-                <TextField fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0"/>
-                <TextField fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0" prefWidth="154.0"/>
+                <TextField fx:id="departure" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="155.0" />
+                <TextField fx:id="destination" layoutX="240.0" layoutY="41.0" prefHeight="25.0" prefWidth="154.0" />
                 <Label layoutX="50.0" layoutY="24.0" prefHeight="17.0" prefWidth="78.0" text="Departure:">
                     <font>
-                        <Font name="PT Mono" size="12.0"/>
+                        <Font name="PT Mono" size="12.0" />
                     </font>
                 </Label>
                 <Label layoutX="240.0" layoutY="24.0" text="Destination:">
                     <font>
-                        <Font name="PT Mono" size="12.0"/>
+                        <Font name="PT Mono" size="12.0" />
                     </font>
                 </Label>
-                <JFXButton fx:id="searchRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0"
-                           layoutY="130.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Search" textFill="WHITE"/>
-                <JFXButton fx:id="updateRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0"
-                           layoutY="190.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Update" textFill="WHITE"/>
-                <JFXButton fx:id="addRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0"
-                           layoutY="250.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Add" textFill="WHITE"/>
-                <JFXButton fx:id="editRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0"
-                           layoutY="310.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Edit" textFill="WHITE"/>
-                <JFXButton fx:id="deleteRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0"
-                           layoutY="370.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Delete" textFill="WHITE"/>
+                <JFXButton fx:id="searchRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="130.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Search" textFill="WHITE" />
+                <JFXButton fx:id="updateRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="190.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Update" textFill="WHITE" />
+                <JFXButton fx:id="addRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="250.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Add" textFill="WHITE" />
+                <JFXButton fx:id="editRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="310.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Edit" textFill="WHITE" />
+                <JFXButton fx:id="deleteRouteButton" buttonType="RAISED" focusTraversable="false" layoutX="500.0" layoutY="370.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Delete" textFill="WHITE" />
+            <Label fx:id="routeConnectLabel" layoutX="641.0" layoutY="419.0" prefHeight="17.0" prefWidth="54.0" />
             </AnchorPane>
         </Tab>
         <Tab text="Flights">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <TableView fx:id="flightTable" layoutX="24.0" layoutY="24.0" prefHeight="380.0" prefWidth="380.0"
-                           style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
+                <TableView fx:id="flightTable" layoutX="24.0" layoutY="24.0" prefHeight="380.0" prefWidth="380.0" style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0">
                     <columns>
-                        <TableColumn fx:id="number" prefWidth="141.0" text="Number"/>
-                        <TableColumn fx:id="routeColumnFlight" prefWidth="238.0" text="Route"/>
+                        <TableColumn fx:id="number" prefWidth="141.0" text="Number" />
+                        <TableColumn fx:id="routeColumnFlight" prefWidth="238.0" text="Route" />
                     </columns>
                 </TableView>
 
-                <JFXButton fx:id="addFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0"
-                           layoutY="260.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Add" textFill="WHITE"/>
-                <JFXButton fx:id="editFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0"
-                           layoutY="310.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Edit" textFill="WHITE"/>
-                <JFXButton fx:id="deleteFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0"
-                           layoutY="360.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Delete" textFill="WHITE"/>
-                <JFXButton fx:id="searchFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0"
-                           layoutY="195.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Search" textFill="WHITE"/>
-                <JFXButton fx:id="updateFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="600.0"
-                           layoutY="195.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0"
-                           ripplerFill="#dfe3ee"
-                           style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0"
-                           text="Update" textFill="WHITE"/>
-                <TextArea fx:id="detailsTextArea" editable="false" layoutX="444.0" layoutY="24.0" prefHeight="148.0"
-                          prefWidth="224.0"/>
+                <JFXButton fx:id="addFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="260.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Add" textFill="WHITE" />
+                <JFXButton fx:id="editFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="310.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Edit" textFill="WHITE" />
+                <JFXButton fx:id="deleteFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="360.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Delete" textFill="WHITE" />
+                <JFXButton fx:id="searchFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="520.0" layoutY="195.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Search" textFill="WHITE" />
+                <JFXButton fx:id="updateFlightButton" buttonType="RAISED" focusTraversable="false" layoutX="600.0" layoutY="195.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" ripplerFill="#dfe3ee" style="-fx-background-color: #11a9ba; -fx-font-family: 'PT Mono'; -fx-font-size : 12.0" text="Update" textFill="WHITE" />
+                <TextArea fx:id="detailsTextArea" editable="false" layoutX="444.0" layoutY="24.0" prefHeight="148.0" prefWidth="224.0" />
+                <Label fx:id="flightConnectLabel" layoutX="641.0" layoutY="419.0" prefHeight="17.0" prefWidth="54.0" />
             </AnchorPane>
         </Tab>
     </JFXTabPane>
-    <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="700.0"
-             style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0" AnchorPane.leftAnchor="0.0"
-             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="700.0" style="-fx-font-family: 'PT Mono'; -fx-font-size : 12.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
             <MenuItem fx:id="openMenuButton" mnemonicParsing="false" text="Open">
                 <accelerator>
-                    <KeyCodeCombination alt="UP" code="O" control="UP" meta="DOWN" shift="UP" shortcut="UP"/>
+                    <KeyCodeCombination alt="UP" code="O" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" text="Save">
                 <accelerator>
-                    <KeyCodeCombination alt="UP" code="S" control="UP" meta="DOWN" shift="UP" shortcut="UP"/>
+                    <KeyCodeCombination alt="UP" code="S" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="saveAsMenuButton" mnemonicParsing="false" text="Save as..">
                 <accelerator>
-                    <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="DOWN" shift="UP" shortcut="UP"/>
+                    <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
             <MenuItem fx:id="mergeMenuButton" mnemonicParsing="false" text="Merge">
                 <accelerator>
-                    <KeyCodeCombination alt="UP" code="M" control="UP" meta="DOWN" shift="UP" shortcut="UP"/>
+                    <KeyCodeCombination alt="UP" code="M" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
         </Menu>
         <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
             <MenuItem fx:id="infoMenuButton" mnemonicParsing="false" text="About">
                 <accelerator>
-                    <KeyCodeCombination alt="UP" code="I" control="UP" meta="DOWN" shift="UP" shortcut="UP"/>
+                    <KeyCodeCombination alt="UP" code="I" control="UP" meta="DOWN" shift="UP" shortcut="UP" />
                 </accelerator>
             </MenuItem>
         </Menu>
         <Menu fx:id="userMenu" mnemonicParsing="false" text="User">
-            <MenuItem fx:id="logoutMenuButton" mnemonicParsing="false" text="Log out"/>
-            <MenuItem fx:id="changeMenuButton" mnemonicParsing="false" text="Change DB"/>
+            <MenuItem fx:id="logoutMenuButton" mnemonicParsing="false" text="Log out" />
+            <MenuItem fx:id="changeMenuButton" mnemonicParsing="false" text="Change DB" />
         </Menu>
     </MenuBar>
 </AnchorPane>

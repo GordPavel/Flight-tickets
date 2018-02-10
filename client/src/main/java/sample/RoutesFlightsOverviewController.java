@@ -82,6 +82,9 @@ abstract class RoutesFlightsOverviewController{
     @FXML Button    updateRouteButton;
     @FXML Button    searchRouteButton;
 
+    @FXML Label     routeConnectLabel;
+    @FXML Label     flightConnectLabel;
+
 
     protected Stage thisStage;
     private ObjectProperty<Predicate<Route>> routesPredicate = new SimpleObjectProperty<>( route -> true );
@@ -382,9 +385,13 @@ abstract class RoutesFlightsOverviewController{
     public void requestUpdate(SerializablePredicate predicate)
     {
         if (!Controller.getInstance().getClientSocket().isConnected()) {
+            routeConnectLabel.setText("Offline");
+            flightConnectLabel.setText("Offline");
             Controller.getInstance().reconnect();
         }
         if (Controller.getInstance().getClientSocket().isConnected()) {
+            routeConnectLabel.setText("Online");
+            flightConnectLabel.setText("Online");
             Data data = new Data();
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setPredicate(predicate);

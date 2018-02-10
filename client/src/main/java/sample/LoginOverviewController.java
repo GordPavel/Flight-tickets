@@ -75,11 +75,6 @@ class LoginOverviewController{
             }
 
         /*
-          TODO: Receiving list of DB
-
-          Send your login and password to server. true? go below : retry message
-          Add view with table of available DB...
-          Load db to datamodel and execute code below
          */
             if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
@@ -134,27 +129,27 @@ class LoginOverviewController{
             alert.setHeaderText( "Network error" );
             alert.setContentText( "Can`t connect to server" );
             alert.showAndWait();
-                    try {
-                        Map<String,String> map = new HashMap();
+            try {
+                Map<String,String> map = new HashMap();
 //                      map.put("1","2");
 //                      map.put("2","3");
-                        Controller.getInstance().setClientSocket(new Socket());
-                        Data data1 = new Data();
-                        data1.setBases(map);
-                        Stage primaryStage = new Stage();
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
-                        ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
-                        loader.setController(controller);
-                        primaryStage.setTitle("Select DB");
-                        Scene scene = new Scene(loader.load());
-                        primaryStage.setScene(scene);
-                        primaryStage.setResizable(false);
-                        primaryStage.show();
-                        closeWindow();
-        } catch (IOException e) {
-            System.out.println("load problem");
-            System.out.println(e.getMessage());
-        }
+                Controller.getInstance().setClientSocket(new Socket());
+                Data data1 = new Data();
+                data1.setBases(map);
+                Stage primaryStage = new Stage();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+                ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
+                loader.setController(controller);
+                primaryStage.setTitle("Select DB");
+                Scene scene = new Scene(loader.load());
+                primaryStage.setScene(scene);
+                primaryStage.setResizable(false);
+                primaryStage.show();
+                closeWindow();
+            } catch (IOException e) {
+                System.out.println("load problem");
+                System.out.println(e.getMessage());
+            }
         }
     }
 

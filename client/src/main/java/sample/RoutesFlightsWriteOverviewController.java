@@ -32,6 +32,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         updateFlightButton.setLayoutX( updateFlightButton.getLayoutX() - 37 );
         searchFlightButton.setLayoutX( searchFlightButton.getLayoutX() - 37 );
 
+        routeConnectLabel.setVisible(false);
+        flightConnectLabel.setVisible(false);
+
         Controller.getInstance().setThread( new WriteThread() );
         thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         Controller.getInstance().startThread();
