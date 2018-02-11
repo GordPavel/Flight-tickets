@@ -34,7 +34,7 @@ public class Settings implements Cloneable{
         this.rootPassword = rootPassword;
     }
 
-    public List<Base> getBase(){
+    public List<Base> getBases(){
         return base;
     }
 

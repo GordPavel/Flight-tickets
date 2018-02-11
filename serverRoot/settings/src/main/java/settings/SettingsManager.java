@@ -108,14 +108,14 @@ public class SettingsManager {
     }
 
     public static Optional<Base> getBase( String path ){
-        return settings.getBase().stream().filter( base -> base.getName().equals( path ) ).findAny();
+        return settings.getBases().stream().filter( base -> base.getName().equals( path ) ).findAny();
     }
 
     public static void addNewBase( String name ){
-        if( settings.getBase().parallelStream().map( Base::getName ).noneMatch( Predicate.isEqual( name ) ) ){
+        if( settings.getBases().parallelStream().map( Base::getName ).noneMatch( Predicate.isEqual( name ) ) ){
             Base base = new Base( name );
             base.setRunning( false );
-            settings.getBase().add( base );
+            settings.getBases().add( base );
             saveSettings();
         }else{
             throw new CopyBase( "Server already contains this base " + name );
@@ -123,13 +123,13 @@ public class SettingsManager {
     }
 
     public static void deleteBase( String name ){
-        settings.getBase().removeIf( Predicate.isEqual( name ) );
+        settings.getBases().removeIf( Predicate.isEqual( name ) );
         saveSettings();
     }
 
     public static void startStopBase( String name , Boolean start ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> base.getName().equals( name ) ).findFirst();
+                settings.getBases().stream().filter( base -> base.getName().equals( name ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             if( editingBase.isRunning() && start ){
@@ -148,14 +148,14 @@ public class SettingsManager {
     public static void addNewClient( String baseName , String clientName , String clientPassword ,
                                      UserPrivileges privileges ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            if( editingBase.getUser()
+            if( editingBase.getUsers()
                            .parallelStream()
-                           .map( User::getName )
+                           .map( User::getLogin )
                            .noneMatch( Predicate.isEqual( clientName ) ) ){
-                editingBase.getUser().add( new User( clientName , clientPassword , privileges ) );
+                editingBase.getUsers().add( new User( clientName , clientPassword , privileges ) );
                 saveSettings();
             }else{
                 throw new CopyUser( "Base " + baseName + " already has this client " + clientName );
@@ -167,10 +167,10 @@ public class SettingsManager {
 
     public static void deleteClient( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            editingBase.getUser().removeIf( user -> userNamesEqual( clientName , user ) );
+            editingBase.getUsers().removeIf( user -> userNamesEqual( clientName , user ) );
             saveSettings();
         }else{
             throw new IllegalBasePath( "Server doesn't contain this base " + baseName );
@@ -179,11 +179,11 @@ public class SettingsManager {
 
     public static void changeClientName( String baseName , String oldName , String newName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( user -> userNamesEqual( oldName , user ) ).findFirst();
+                    editingBase.getUsers().stream().filter( user -> userNamesEqual( oldName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setName( newName );
                 saveSettings();
@@ -197,11 +197,11 @@ public class SettingsManager {
 
     public static void changeClientPassword( String baseName , String clientName , String newPassword ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
+                    editingBase.getUsers().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setPassword( newPassword );
                 saveSettings();
@@ -215,11 +215,11 @@ public class SettingsManager {
 
     public static void changeClientPrivilege( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBase().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
+                settings.getBases().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
-                    editingBase.getUser().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
+                    editingBase.getUsers().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 User user = optionalUser.get();
                 user.setPrivilege(
@@ -234,7 +234,7 @@ public class SettingsManager {
     }
 
     private static boolean userNamesEqual( String clientName , User user ){
-        return user.getName().equals( clientName );
+        return user.getLogin().equals( clientName );
     }
 
     private static boolean baseNamesEqual( String baseName , Base base ){

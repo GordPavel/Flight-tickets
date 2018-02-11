@@ -38,7 +38,7 @@ public abstract class DataModelInstanceSaver{
         }catch( IOException e ){
             e.printStackTrace();
         }
-        bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
+        bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBases().stream().filter( Base::isRunning ).count() ,
                                          0.75f , 32 );
         ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor( Thread::new );
         cleaner.scheduleAtFixedRate( () -> {
@@ -48,8 +48,8 @@ public abstract class DataModelInstanceSaver{
                      .peek( dataModel -> {
                          try{
                              dataModel.getValue().lock.writeLock().lock();
-                             dataModel.getValue().model.saveToFile(
-                                     Paths.get( basesFolder + dataModel.getKey().key + ".far" ).toFile() );
+                             dataModel.getValue().model.saveTo( Files.newOutputStream(
+                                     Paths.get( basesFolder + dataModel.getKey().key + ".far" ) ) );
                              dataModel.getValue().lock.writeLock().unlock();
                          }catch( IOException e ){
                              System.err.println( "Database " + dataModel.getKey().key + " has problems" );
@@ -85,7 +85,7 @@ public abstract class DataModelInstanceSaver{
             optionalEntity.map( Map.Entry::getKey ).get().resetTimeStamp();
             return optionalEntity.map( Map.Entry::getValue );
         }else{
-            Optional<Base> optionalBase = Server.settings.getBase()
+            Optional<Base> optionalBase = Server.settings.getBases()
                                                          .parallelStream()
                                                          .filter( base -> base.getName().equals( baseName ) )
                                                          .filter( Base::isRunning )
@@ -93,7 +93,7 @@ public abstract class DataModelInstanceSaver{
             if( optionalBase.isPresent() ){
                 try{
                     DataModel dataModel = new DataModel();
-                    dataModel.importFromFile( Paths.get( basesFolder + baseName + ".far" ).toFile() );
+                    dataModel.importFrom( Files.newInputStream( Paths.get( basesFolder + baseName + ".far" ) ) );
 //                    Save all changes to file of this base
                     dataModel.addRoutesListener( change -> cacheChanges( baseName , change ) );
                     dataModel.addFlightsListener( change -> cacheChanges( baseName , change ) );

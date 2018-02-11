@@ -27,6 +27,7 @@ import transport.UserInformation;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,8 +83,8 @@ abstract class RoutesFlightsOverviewController{
     @FXML Button    updateRouteButton;
     @FXML Button    searchRouteButton;
 
-    @FXML Label     routeConnectLabel;
-    @FXML Label     flightConnectLabel;
+    @FXML Label routeConnectLabel;
+    @FXML Label flightConnectLabel;
 
 
     protected Stage thisStage;
@@ -130,12 +131,12 @@ abstract class RoutesFlightsOverviewController{
             }
         } );
 
-        departure.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
-                                                                         destination.getText() ) );
-        destination.textProperty().addListener(
-                ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
-                                                                         destination.getText() ) );
+        departure.textProperty()
+                 .addListener( ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
+                                                                                        destination.getText() ) );
+        destination.textProperty()
+                   .addListener( ( observable , oldValue , newValue ) -> searchListeners( departure.getText() ,
+                                                                                          destination.getText() ) );
         openMenuButton.setOnAction( event -> handleOpenAction() );
         saveMenuButton.setOnAction( event -> handleSaveAction() );
         saveAsMenuButton.setOnAction( event -> handleSaveAsAction() );
@@ -177,9 +178,9 @@ abstract class RoutesFlightsOverviewController{
     private void handleOpenAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                DataModelInstanceSaver.getInstance().importFromFile( file );
-                Controller.getInstance().changed = false;
-                Controller.getInstance().savingFile = file;
+                DataModelInstanceSaver.getInstance().importFrom( Files.newInputStream( file.toPath() ) );
+                Controller.changed = false;
+                Controller.savingFile = file;
                 thisStage.setTitle( file.getName() );
             }catch( IOException | FlightAndRouteException e ){
                 e.printStackTrace();
@@ -191,15 +192,15 @@ abstract class RoutesFlightsOverviewController{
      Save local DB to file
      */
     private void handleSaveAction(){
-        if( Controller.getInstance().savingFile == null ){
+        if( Controller.savingFile == null ){
             Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
-                Controller.getInstance().savingFile = file;
+                Controller.savingFile = file;
                 thisStage.setTitle( file.getName() );
             } );
         }
         try{
-            DataModelInstanceSaver.getInstance().saveToFile( Controller.getInstance().savingFile );
-            Controller.getInstance().changed = false;
+            DataModelInstanceSaver.getInstance().saveTo( Files.newOutputStream( Controller.savingFile.toPath() ) );
+            Controller.changed = false;
         }catch( IOException | FlightAndRouteException e ){
             new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
         }
@@ -211,7 +212,7 @@ abstract class RoutesFlightsOverviewController{
     private void handleSaveAsAction(){
         Optional.ofNullable( fileChooser.showSaveDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                DataModelInstanceSaver.getInstance().saveToFile( file );
+                DataModelInstanceSaver.getInstance().saveTo( Files.newOutputStream( file.toPath() ) );
             }catch( IOException | FlightAndRouteException e ){
                 new Alert( Alert.AlertType.ERROR , e.getMessage() ).show();
             }
@@ -224,22 +225,26 @@ abstract class RoutesFlightsOverviewController{
     private void handleMergeAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance().mergeData( file )
+                ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance()
+                                                                              .mergeData( Files.newInputStream(
+                                                                                      file.toPath() ) )
                                                                               .collect( ArrayList::new , List::add ,
                                                                                         List::addAll );
-                Controller.getInstance().changed = true;
+                Controller.changed = true;
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Merge results" );
                 alert.setHeaderText( "Model have this problems with merge:" );
                 StringBuilder errors = new StringBuilder();
 
                 ArrayList<Flight> mergeFlights = new ArrayList<>();
-                ArrayList<Route>  mergeRoutes  = new ArrayList<>();
+                ArrayList<Route> mergeRoutes = new ArrayList<>();
                 for( Serializable element : failedInMerge ){
                     errors.append( "-" ).append( element.toString() ).append( "\n" );
-                    if( element instanceof Flight &&
-                        DataModelInstanceSaver.getInstance().listFlightsWithPredicate( flight -> true ).stream()
-                                .noneMatch( flight -> flight.equals( element ) )){
+                    if( element instanceof Flight && DataModelInstanceSaver.getInstance()
+                                                                           .listFlightsWithPredicate( flight -> true )
+                                                                           .stream()
+                                                                           .noneMatch( flight -> flight.equals(
+                                                                                   element ) ) ){
                         mergeFlights.add( ( Flight ) element );
                     }
                     if( element instanceof Route ){
@@ -256,9 +261,8 @@ abstract class RoutesFlightsOverviewController{
                 }
 
                 if( !mergeFlights.isEmpty() ){
-                    Stage                   popUp                   = new Stage();
-                    FXMLLoader              loader                  =
-                            new FXMLLoader( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
+                    Stage popUp = new Stage();
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/mergeOverview.fxml" ) );
                     MergeOverviewController mergeOverviewController = new MergeOverviewController( popUp );
                     loader.setController( mergeOverviewController );
                     Scene scene = new Scene( loader.load() );
@@ -288,42 +292,42 @@ abstract class RoutesFlightsOverviewController{
 
     private void handleChangeDBAction(){
 
-        if (!Controller.getInstance().getClientSocket().isConnected())
-        {
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
             Controller.getInstance().reconnect();
         }
 
         Data data = new Data();
-        if (!(Controller.getInstance().getClientSocket() == null)&&Controller.getInstance().getClientSocket().isConnected()) {
+        if( !( Controller.getInstance().getClientSocket() == null ) &&
+            Controller.getInstance().getClientSocket().isConnected() ){
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setDataBase(null);
-            try {
-                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-                data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-            } catch (IOException | NullPointerException ex) {
-                System.out.println(ex.getMessage());
+            Controller.getInstance().getUserInformation().setDataBase( null );
+            try{
+                mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
+                                   Controller.getInstance().getUserInformation() );
+                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
             }
 
-            if ( data.notHasException() ) {
+            if( data.notHasException() ){
                 DataModelInstanceSaver.getInstance().clear();
                 Controller.getInstance().stopThread();
-                try {
+                try{
                     Stage primaryStage = new Stage();
-                    FXMLLoader loader =
-                            new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
-                    ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage,data);
-                    loader.setController(controller);
-                    primaryStage.setTitle("Select DB");
-                    Scene scene = new Scene(loader.load());
-                    primaryStage.setScene(scene);
-                    primaryStage.setResizable(false);
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
+                    ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage , data );
+                    loader.setController( controller );
+                    primaryStage.setTitle( "Select DB" );
+                    Scene scene = new Scene( loader.load() );
+                    primaryStage.setScene( scene );
+                    primaryStage.setResizable( false );
                     primaryStage.show();
                     thisStage.close();
-                } catch (IOException e) {
-                    System.out.println("load problem");
-                    System.out.println(e.getMessage());
+                }catch( IOException e ){
+                    System.out.println( "load problem" );
+                    System.out.println( e.getMessage() );
                 }
-            } else {
+            }else{
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Error" );
                 alert.setHeaderText( "Server error" );
@@ -336,11 +340,10 @@ abstract class RoutesFlightsOverviewController{
     private void handleLogOutAction(){
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
-        Controller.getInstance().setUserInformation(new UserInformation());
+        Controller.getInstance().setUserInformation( new UserInformation() );
         try{
-            Stage                   loginStage      = new Stage();
-            FXMLLoader              loader          =
-                    new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+            Stage loginStage = new Stage();
+            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
             LoginOverviewController logInController = new LoginOverviewController( loginStage );
             loader.setController( logInController );
             loginStage.setTitle( "Login" );
@@ -359,60 +362,59 @@ abstract class RoutesFlightsOverviewController{
      Update flight list
      */
     private void handleUpdateFlightAction(){
-       requestFlights(flight -> true);
+        requestFlights( flight -> true );
     }
 
-    public void requestFlights(SerializablePredicate<Flight> predicate)
-    {
-        flightTable.setDisable(true);
-        requestUpdate(predicate);
-        flightTable.setDisable(false);
+    public void requestFlights( SerializablePredicate<Flight> predicate ){
+        flightTable.setDisable( true );
+        requestUpdate( predicate );
+        flightTable.setDisable( false );
     }
 
     /**
      Update route list
      */
     private void handleUpdateRouteAction(){
-        requestRoutes(route -> true);
+        requestRoutes( route -> true );
     }
 
-    public void requestRoutes(SerializablePredicate<Route> predicate){
-        routeTable.setDisable(true);
-        requestUpdate(predicate);
-        routeTable.setDisable(false);
+    public void requestRoutes( SerializablePredicate<Route> predicate ){
+        routeTable.setDisable( true );
+        requestUpdate( predicate );
+        routeTable.setDisable( false );
     }
 
-    public void requestUpdate(SerializablePredicate predicate)
-    {
-        if (!Controller.getInstance().getClientSocket().isConnected()) {
-            routeConnectLabel.setText("Offline");
-            flightConnectLabel.setText("Offline");
+    public void requestUpdate( SerializablePredicate predicate ){
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Offline" );
+            flightConnectLabel.setText( "Offline" );
             Controller.getInstance().reconnect();
         }
-        if (Controller.getInstance().getClientSocket().isConnected()) {
-            routeConnectLabel.setText("Online");
-            flightConnectLabel.setText("Online");
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Online" );
+            flightConnectLabel.setText( "Online" );
             Data data = new Data();
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate(predicate);
-            try {
-                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-                data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
-                if (data.notHasException()) {
-                    for (ListChangeAdapter update : data.getListChangeAdapters()) {
-                        update.apply(DataModelInstanceSaver.getInstance());
+            Controller.getInstance().getUserInformation().setPredicate( predicate );
+            try{
+                mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
+                                   Controller.getInstance().getUserInformation() );
+                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                if( data.notHasException() ){
+                    for( ListChangeAdapter update : data.getChanges() ){
+                        update.apply( DataModelInstanceSaver.getInstance() );
                     }
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Server error");
-                    alert.setContentText(data.getException().getMessage());
+                }else{
+                    Alert alert = new Alert( Alert.AlertType.WARNING );
+                    alert.setTitle( "Error" );
+                    alert.setHeaderText( "Server error" );
+                    alert.setContentText( data.getException().getMessage() );
                     alert.showAndWait();
                 }
-            } catch (IOException | NullPointerException ex) {
-                System.out.println(ex.getMessage());
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
             }
-            Controller.getInstance().getUserInformation().setPredicate(null);
+            Controller.getInstance().getUserInformation().setPredicate( null );
         }
     }
 
@@ -423,9 +425,8 @@ abstract class RoutesFlightsOverviewController{
         if( !Controller.getInstance().isFlightSearchActive() ){
             Controller.getInstance().setFlightSearchActive( true );
             try{
-                Stage                           popUp         = new Stage();
-                FXMLLoader                      loader        =
-                        new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+                Stage popUp = new Stage();
+                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
                 searchFlights = new SearchFlightsOverviewController( this , popUp );
                 loader.setController( searchFlights );
                 Scene scene = new Scene( loader.load() );
@@ -452,11 +453,11 @@ abstract class RoutesFlightsOverviewController{
      Search for routes
      */
     private void handleSearchRouteAction(){
-        requestRoutes(route ->
-                Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                        Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                        Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
+        requestRoutes( route -> Pattern.compile(
+                ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() && Pattern.compile(
+                ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches() );
     }
 
 }

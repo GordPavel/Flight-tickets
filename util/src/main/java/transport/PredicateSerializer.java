@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
-import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -24,6 +23,7 @@ public class PredicateSerializer extends StdSerializer<SerializablePredicate<?>>
              PipedInputStream pipedInputStream = new PipedInputStream( pipedOutputStream ) ;
              ObjectOutputStream outputStream = new ObjectOutputStream( pipedOutputStream ) ){
             outputStream.writeObject( serializablePredicate );
+            jsonGenerator.writeBinary( pipedInputStream , pipedInputStream.available() );
         }
     }
 }

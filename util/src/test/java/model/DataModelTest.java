@@ -8,10 +8,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -24,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -42,6 +42,7 @@ class DataModelTest{
     private List<Route>  routes;
     private List<Flight> flights;
     private Pattern                   pattern  = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private Random                    random   = new Random( System.currentTimeMillis() );
     private Map<String, List<String>> zones    = ZoneId.getAvailableZoneIds()
                                                        .stream()
                                                        .sorted()
@@ -60,7 +61,6 @@ class DataModelTest{
                                                            matcher.find();
                                                            return matcher.group( 1 );
                                                        } ) );
-    private Random                    random   = new Random( System.currentTimeMillis() );
     private List<ZoneId>              allZones = zones.values()
                                                       .stream()
                                                       .flatMap( Collection::stream )
@@ -70,21 +70,25 @@ class DataModelTest{
     @BeforeEach
     void setUp(){
         dataModel = new DataModel();
+        routes = new ArrayList<Route>(){{
+            addAll( Flux.zip( Flux.fromStream( random.ints( 10 , 0 , allZones.size() ).mapToObj( allZones::get ) ) ,
+                              Flux.fromStream( random.ints( 10 , 0 , allZones.size() ).mapToObj( allZones::get ) ) ,
+                              ( BiFunction<ZoneId, ZoneId, Optional<Route>> ) ( zoneId , zoneId2 ) -> {
+                                  if( zoneId.equals( zoneId2 ) ){
+                                      return Optional.empty();
+                                  }else{
+                                      return Optional.of( new Route( zoneId , zoneId2 ) );
+                                  }
+                              } )
+                        .filter( Optional::isPresent )
+                        .map( Optional::get )
+                        .distinct()
+                        .collect( Collectors.toList() )
+                        .block() );
+        }};
         airports = Stream.concat( routes.stream().map( Route::getFrom ) , routes.stream().map( Route::getTo ) )
                          .distinct()
                          .collect( Collectors.toSet() );
-        routes = new ArrayList<Route>(){{
-            Iterator<Integer> iterator =
-                    random.ints( 20 , 0 , zones.values().stream().mapToInt( Collection::size ).sum() )
-                          .distinct()
-                          .iterator();
-            while( iterator.hasNext() ){
-                try{
-                    add( new Route( allZones.get( iterator.next() ) , allZones.get( iterator.next() ) ) );
-                }catch( NoSuchElementException ignored ){
-                }
-            }
-        }};
         routes.forEach( dataModel::addRoute );
         flights = IntStream.rangeClosed( 1 , 10 ).mapToObj( i -> {
             Route flightRoute = routes.get( random.nextInt( routes.size() ) );
@@ -275,9 +279,11 @@ class DataModelTest{
                                                  dataModel.listRoutesWithPredicate( route -> true ).stream() )
                                         .collect( Collectors.toList() );
         File file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        try{
-            dataModel.saveToFile( file );
-            dataModel.importFromFile( file );
+        try( OutputStream outputStream = Files.newOutputStream( file.toPath() ) ;
+             InputStream inputStream = Files.newInputStream( file.toPath() ) ){
+            dataModel.saveTo( outputStream );
+            dataModel.clear();
+            dataModel.importFrom( inputStream );
             assertTrue( Stream.concat( dataModel.listFlightsWithPredicate( flight -> true ).stream() ,
                                        dataModel.listRoutesWithPredicate( route -> true ).stream() )
                               .parallel()
@@ -285,8 +291,8 @@ class DataModelTest{
         }finally{
             Files.deleteIfExists( file.toPath() );
         }
-        DataModel   anotherModel = new DataModel();
-        List<Route> oldRoutes    = dataModel.listRoutesWithPredicate( route -> true );
+        DataModel anotherModel = new DataModel();
+        List<Route> oldRoutes = dataModel.listRoutesWithPredicate( route -> true );
         List<Route> copyRoutes = new ArrayList<Route>(){{
             random.ints( 3 , 0 , oldRoutes.size() ).distinct().forEach( value -> add( oldRoutes.get( value ) ) );
         }};
@@ -296,7 +302,7 @@ class DataModelTest{
                                                       allZones.get( random.nextInt( allZones.size() ) ) ) )
                                       .collect( Collectors.toList() );
         Stream.concat( copyRoutes.stream() , newRoutes.stream() ).forEach( anotherModel::addRoute );
-        List<Route>  routes      = anotherModel.listRoutesWithPredicate( route -> true );
+        List<Route> routes = anotherModel.listRoutesWithPredicate( route -> true );
         List<Flight> copyFlights = dataModel.listFlightsWithPredicate( flight -> routes.contains( flight.getRoute() ) );
         List<Flight> newFlights = IntStream.rangeClosed( 11 , 15 )
                                            .mapToObj( i -> new Flight( String.format( "number%d" , i ) ,
@@ -312,11 +318,12 @@ class DataModelTest{
                                            .collect( Collectors.toList() );
         Stream.concat( copyFlights.stream() , newFlights.stream() ).forEach( anotherModel::addFlight );
         file = new File( Files.createFile( Paths.get( "test" ) ).toUri() );
-        try{
-            anotherModel.saveToFile( file );
+        try( OutputStream outputStream = Files.newOutputStream( file.toPath() ) ;
+             InputStream inputStream = Files.newInputStream( file.toPath() ) ){
+            anotherModel.saveTo( outputStream );
             List<Serializable> copyData =
                     Stream.concat( copyFlights.stream() , copyRoutes.stream() ).collect( Collectors.toList() );
-            assertTrue( dataModel.mergeData( file ).collect( Collectors.toList() ).containsAll( copyData ) ,
+            assertTrue( dataModel.mergeData( inputStream ).collect( Collectors.toList() ).containsAll( copyData ) ,
                         "All copies were returned from method" );
             assertTrue( newRoutes.stream()
                                  .noneMatch( route1 -> dataModel.listRoutesWithPredicate( route1::pointsEquals )
@@ -332,7 +339,7 @@ class DataModelTest{
     @RepeatedTest( 20 )
     void concurrency() throws InterruptedException{
         dataModel.clear();
-        CountDownLatch  routesLatch   = new CountDownLatch( routes.size() );
+        CountDownLatch routesLatch = new CountDownLatch( routes.size() );
         ExecutorService routesService = Executors.newFixedThreadPool( routes.size() );
         routesService.invokeAll( routes.stream().map( ( Function<Route, Callable<Void>> ) route -> ( () -> {
             try{
@@ -348,7 +355,7 @@ class DataModelTest{
         List<Route> dataBaseRoutes = dataModel.listRoutesWithPredicate( route -> true );
         assertTrue( routes.stream().anyMatch( dataBaseRoutes::contains ) ,
                     "All routes were added from different threads" );
-        CountDownLatch  flightsLatch   = new CountDownLatch( flights.size() );
+        CountDownLatch flightsLatch = new CountDownLatch( flights.size() );
         ExecutorService flightsService = Executors.newFixedThreadPool( 10 );
         flightsService.invokeAll( flights.stream().map( ( Function<Flight, Callable<Void>> ) flight -> () -> {
             try{

@@ -11,7 +11,11 @@ public class DataModelWithLock{
         this.lock = lock;
     }
 
-    public ReentrantReadWriteLock.ReadLock getReadLock(){
-        return lock.readLock();
+    public DataModel getModel(){
+        return model;
+    }
+
+    public ReentrantReadWriteLock getLock(){
+        return lock;
     }
 }

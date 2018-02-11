@@ -13,17 +13,20 @@ import java.util.Map;
  */
 
 public class Data{
-    private Collection<Flight>      flights;
     private Collection<Route>       routes;
+    private Collection<Flight>      flights;
     private Map<String, String>     bases;
-    private List<ListChangeAdapter> listChangeAdapters;
+    private List<ListChangeAdapter> changes;
     private FlightAndRouteException exception;
 
     public Data(){
     }
 
-    public Data( Collection<Flight> flights , Collection<Route> routes ){
-        this.flights = flights;
+    public Collection<Route> getRoutes(){
+        return routes;
+    }
+
+    public void setRoutes( Collection<Route> routes ){
         this.routes = routes;
     }
 
@@ -33,14 +36,6 @@ public class Data{
 
     public void setFlights( Collection<Flight> flights ){
         this.flights = flights;
-    }
-
-    public Collection<Route> getRoutes(){
-        return routes;
-    }
-
-    public void setRoutes( Collection<Route> routes ){
-        this.routes = routes;
     }
 
     public Map<String, String> getBases(){
@@ -63,12 +58,12 @@ public class Data{
         return ( exception == null );
     }
 
-    public List<ListChangeAdapter> getListChangeAdapters(){
-        return listChangeAdapters;
+    public List<ListChangeAdapter> getChanges(){
+        return changes;
     }
 
-    public void setListChangeAdapters( List<ListChangeAdapter> listChangeAdapters ){
-        this.listChangeAdapters = listChangeAdapters;
+    public void setChanges( List<ListChangeAdapter> changes ){
+        this.changes = changes;
     }
 
 }

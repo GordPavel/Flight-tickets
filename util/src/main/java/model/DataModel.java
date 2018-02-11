@@ -28,19 +28,19 @@ public class DataModel{
     DataModel(){
     }
 
-    void addFlightsListener( ListChangeListener<Flight> listener ){
+    public void addFlightsListener( ListChangeListener<Flight> listener ){
         flights.addListener( listener );
     }
 
-    void removeFlightsListener( ListChangeListener<Flight> listener ){
+    public void removeFlightsListener( ListChangeListener<Flight> listener ){
         flights.removeListener( listener );
     }
 
-    void addRoutesListener( ListChangeListener<Route> listener ){
+    public void addRoutesListener( ListChangeListener<Route> listener ){
         routes.addListener( listener );
     }
 
-    void removeRoutesListener( ListChangeListener<Route> listener ){
+    public void removeRoutesListener( ListChangeListener<Route> listener ){
         routes.removeListener( listener );
     }
 
@@ -66,7 +66,7 @@ public class DataModel{
      */
     public List<ZoneId> listAllAirportsWithPredicate( Predicate<ZoneId> predicate ){
         Stream<ZoneId> from = routes.stream().map( Route::getFrom );
-        Stream<ZoneId> to   = routes.stream().map( Route::getTo );
+        Stream<ZoneId> to = routes.stream().map( Route::getTo );
         routesLock.readLock().lock();
         List<ZoneId> airports =
                 Stream.concat( from , to ).distinct().filter( predicate ).collect( Collectors.toList() );
@@ -390,15 +390,15 @@ public class DataModel{
      Deserialize data from file, swap data contains in RAM to data from file. This method doesn't merge RAM and file
      data, like when you just open another file.
 
-     @param file that contains serialized data.
+     @param inputStream that contains serialized data.
 
      @throws IllegalArgumentException if file contains not just flights and routes
      @throws FaRSameNameException     if file has data duplicates
      @throws FaRNotRelatedData        flight has route that doesn't exist in this file
      @throws IOException              If other I/O error has occurred.
      */
-    public void importFromFile( File file ) throws IOException, FlightAndRouteException{
-        Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( file );
+    public void importFrom( InputStream inputStream ) throws IOException, FlightAndRouteException{
+        Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( inputStream );
         if( !routesAndFlights.values()
                              .parallelStream()
                              .flatMap( Collection::stream )
@@ -450,9 +450,9 @@ public class DataModel{
 
      @throws IOException If other I/O error has occurred.
      */
-    public Stream<Serializable> mergeData( File additionalData ) throws IOException, FlightAndRouteException{
+    public Stream<Serializable> mergeData( InputStream additionalData ) throws IOException, FlightAndRouteException{
         Map<Boolean, List<Serializable>> routesAndFlights = deserializeData( additionalData );
-        List<Serializable>               failedData       = new ArrayList<>();
+        List<Serializable> failedData = new ArrayList<>();
         routesAndFlights.get( true ).removeIf( route -> {
             Boolean isNotRoute = !route.getClass().equals( Route.class );
             if( isNotRoute ) failedData.add( route );
@@ -463,7 +463,7 @@ public class DataModel{
             if( isNotFlight ) failedData.add( flight );
             return isNotFlight;
         } );
-        List<Route>  failedRoutes  = new ArrayList<>();
+        List<Route> failedRoutes = new ArrayList<>();
         List<Flight> failedFlights = new ArrayList<>();
         List<Route> routes =
                 routesAndFlights.get( true ).parallelStream().map( Route.class::cast ).collect( Collectors.toList() );
@@ -471,7 +471,7 @@ public class DataModel{
                 routesAndFlights.get( false ).parallelStream().map( Flight.class::cast ).collect( Collectors.toList() );
         routesLock.readLock().lock();
         flightsLock.readLock().lock();
-        Set<Route>  routeSet  = new HashSet<>( this.routes );
+        Set<Route> routeSet = new HashSet<>( this.routes );
         Set<Flight> flightSet = new HashSet<>( this.flights );
         routesLock.readLock().unlock();
         flightsLock.readLock().unlock();
@@ -508,9 +508,9 @@ public class DataModel{
         return Stream.concat( Stream.concat( failedRoutes.stream() , failedFlights.stream() ) , failedData.stream() );
     }
 
-    private Map<Boolean, List<Serializable>> deserializeData( File file ) throws IOException{
-        try( ObjectInput input = new ObjectInputStream( new FileInputStream( file ) ) ){
-            int                i    = 0, size = input.readInt();
+    private Map<Boolean, List<Serializable>> deserializeData( InputStream inputStream ) throws IOException{
+        try( ObjectInput input = new ObjectInputStream( inputStream ) ){
+            int i = 0, size = input.readInt();
             List<Serializable> data = new ArrayList<>();
             while( i++ < size ){
                 data.add( ( Serializable ) input.readObject() );
@@ -526,14 +526,14 @@ public class DataModel{
     /**
      Look at method {@code void exportSpecifiedData( Collection<Serializable> , File )}. Export all data in database
      */
-    public void saveToFile( File file ) throws IOException{
+    public void saveTo( OutputStream outputStream ) throws IOException{
         routesLock.readLock().lock();
         flightsLock.readLock().lock();
         List<Serializable> data =
                 Stream.concat( this.routes.stream() , this.flights.stream() ).collect( Collectors.toList() );
         routesLock.readLock().unlock();
         flightsLock.readLock().unlock();
-        exportSpecifiedData( data , new FileOutputStream( file ) );
+        exportSpecifiedData( data , outputStream );
     }
 
     /**

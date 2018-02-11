@@ -48,7 +48,7 @@ public class Base implements Cloneable{
         isRunning = running;
     }
 
-    public List<User> getUser(){
+    public List<User> getUsers(){
         return user;
     }
 
@@ -56,7 +56,7 @@ public class Base implements Cloneable{
         return user.stream()
                    .map( user1 -> String.format( "%-2s %10s password:%s" ,
                                                  user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
-                                                 user1.getName() , user1.getPassword() ) );
+                                                 user1.getLogin() , user1.getPassword() ) );
     }
 
     @XmlElement

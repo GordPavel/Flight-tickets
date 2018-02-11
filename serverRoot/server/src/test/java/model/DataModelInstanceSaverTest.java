@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import transport.ListChangeAdapter;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -22,32 +24,33 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DataModelInstanceSaverTest{
-    private final String                    baseName = "test";
-    private       Random                    random   = new Random( System.currentTimeMillis() );
-    private       Pattern                   pattern  = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
-    private       Map<String, List<String>> zones    =
-            ZoneId.getAvailableZoneIds()
-                  .stream()
-                  .sorted()
-                  .filter( pattern.asPredicate() )
-                  .map( s -> {
-                      Matcher matcher = pattern.matcher( s );
-                      matcher.find();
-                      return matcher.group( 1 ) + "/" + matcher.group( 2 );
-                  } )
-                  .filter( Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate() )
-                  .distinct()
-                  .collect( Collectors.groupingBy( s -> {
-                      Matcher matcher = pattern.matcher( s );
-                      matcher.find();
-                      return matcher.group( 1 );
-                  } ) );
-    private       List<ZoneId>              allZones = zones.values()
-                                                            .stream()
-                                                            .flatMap( Collection::stream )
-                                                            .map( ZoneId::of )
-                                                            .collect( ArrayList::new , List::add , List::addAll );
-    Map<Boolean, List<Route>>  routes  = new ArrayList<Route>(){{
+    private final String                     baseName = "test";
+    private       Random                     random   = new Random( System.currentTimeMillis() );
+    private       Pattern                    pattern  = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private       Map<String, List<String>>  zones    = ZoneId.getAvailableZoneIds()
+                                                              .stream()
+                                                              .sorted()
+                                                              .filter( pattern.asPredicate() )
+                                                              .map( s -> {
+                                                                  Matcher matcher = pattern.matcher( s );
+                                                                  matcher.find();
+                                                                  return matcher.group( 1 ) + "/" + matcher.group( 2 );
+                                                              } )
+                                                              .filter( Pattern.compile( "(Etc|SystemV)/.+" )
+                                                                              .asPredicate()
+                                                                              .negate() )
+                                                              .distinct()
+                                                              .collect( Collectors.groupingBy( s -> {
+                                                                  Matcher matcher = pattern.matcher( s );
+                                                                  matcher.find();
+                                                                  return matcher.group( 1 );
+                                                              } ) );
+    private       List<ZoneId>               allZones = zones.values()
+                                                             .stream()
+                                                             .flatMap( Collection::stream )
+                                                             .map( ZoneId::of )
+                                                             .collect( ArrayList::new , List::add , List::addAll );
+    private       Map<Boolean, List<Route>>  routes   = new ArrayList<Route>(){{
         Iterator<Integer> iterator = random.ints( 20 , 0 , allZones.size() ).distinct().iterator();
         while( iterator.hasNext() ){
             try{
@@ -56,11 +59,11 @@ class DataModelInstanceSaverTest{
             }
         }
     }}.stream().collect( Collectors.partitioningBy( route -> random.nextBoolean() ) );
-    Map<Boolean, List<Flight>> flights = IntStream.rangeClosed( 1 , 10 ).mapToObj( i -> {
+    private       Map<Boolean, List<Flight>> flights  = IntStream.rangeClosed( 1 , 10 ).mapToObj( i -> {
         List<Route> allRoutes = Stream.concat( routes.get( true ).stream() , routes.get( false ).stream() )
                                       .collect( Collectors.toList() );
-        Route         flightRoute = allRoutes.get( random.nextInt( allRoutes.size() ) );
-        ZonedDateTime departure   = LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( flightRoute.getFrom() );
+        Route flightRoute = allRoutes.get( random.nextInt( allRoutes.size() ) );
+        ZonedDateTime departure = LocalDateTime.of( 2009 + i , 12 , 15 , 10 , 30 ).atZone( flightRoute.getFrom() );
         return new Flight( String.format( "number%d" , i ) , flightRoute , String.format( "planeId%d" , i + 1 ) ,
                            departure , departure.withZoneSameInstant( flightRoute.getTo() )
                                                 .plusHours( Math.abs( random.nextLong() ) % 9 + 1 ) );
@@ -71,15 +74,19 @@ class DataModelInstanceSaverTest{
         DataModel dataModel = new DataModel();
         routes.get( true ).forEach( dataModel::addRoute );
         flights.get( true ).forEach( dataModel::addFlight );
-        dataModel.saveToFile( Paths.get(
+        try( OutputStream outputStream = Files.newOutputStream( Paths.get(
                 "/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot/server/src/test/resources/serverfiles" +
-                "/bases/test.far" ).toFile() );
+                "/bases/test.far" ) ) ){
+            dataModel.saveTo( outputStream );
+        }
 
         DataModel dataModel1 = DataModelInstanceSaver.getInstance( baseName )
                                                      .map( dataModelWithLock -> dataModelWithLock.model )
                                                      .orElse( null ), dataModel2 = new DataModel();
-        dataModel2.importFromFile( Paths.get( DataModelInstanceSaver.basesFolder + baseName + ".far" ).toFile() );
-
+        try( InputStream inputStream = Files.newInputStream(
+                Paths.get( DataModelInstanceSaver.basesFolder + baseName + "" + ".far" ) ) ){
+            dataModel2.importFrom( inputStream );
+        }
         routes.get( false ).forEach( dataModel1::addRoute );
         flights.get( false ).forEach( dataModel1::addFlight );
         dataModel1.getFlightObservableList().removeIf( flight -> random.nextBoolean() );

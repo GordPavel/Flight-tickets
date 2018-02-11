@@ -26,11 +26,16 @@ public class ListChangeAdapter{
     private String update;
     private static ObjectMapper mapper = new ObjectMapper();
 
+
     @JsonCreator
     public ListChangeAdapter(
             @JsonProperty( "update" )
                     String update ){
         this.update = update;
+    }
+
+    public ListChangeAdapter( ListChangeListener.Change<? extends FlightOrRoute> change ) throws JsonProcessingException{
+        this.update = changeToString( change );
     }
 
     @JsonGetter( "update" )

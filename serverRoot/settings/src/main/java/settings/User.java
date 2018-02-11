@@ -20,7 +20,7 @@ public class User implements Cloneable{
         this.privilege = privilege;
     }
 
-    public String getName(){
+    public String getLogin(){
         return name;
     }
 

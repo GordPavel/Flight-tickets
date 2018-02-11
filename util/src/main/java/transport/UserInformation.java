@@ -49,7 +49,7 @@ public class UserInformation{
     }
 
     @JsonGetter( "name" )
-    public String getName(){
+    public String getLogin(){
         return name;
     }
 
