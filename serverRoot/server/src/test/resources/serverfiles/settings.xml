@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<settings>
-    <base name="test">
-        <running>true</running>
-    </base>
-    <cacheTimeout>1000</cacheTimeout>
-</settings>

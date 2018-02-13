@@ -1,5 +1,6 @@
 package model;
 
+
 import exceptions.FlightAndRouteException;
 import javafx.collections.ListChangeListener;
 import server.Server;
@@ -8,6 +9,7 @@ import settings.SettingsManager;
 import transport.ListChangeAdapter;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +17,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,14 +32,16 @@ public abstract class DataModelInstanceSaver{
 
     static{
         try{
-            Properties properties = new Properties();
-            properties.load( DataModelInstanceSaver.class.getResourceAsStream( "/folders.properties" ) );
-            basesCacheFiles = properties.getProperty( "serverFilesFolder" ) + "clientUpdates/";
-            basesFolder = properties.getProperty( "serverFilesFolder" ) + "bases/";
+            String serverFilesPath = URLDecoder.decode(
+                    DataModelInstanceSaver.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
+                    "UTF-8" ) + "/serverfiles/";
+            System.out.println( serverFilesPath );
+            basesCacheFiles = serverFilesPath + "clientUpdates/";
+            basesFolder = serverFilesPath + "bases/";
         }catch( IOException e ){
             e.printStackTrace();
         }
-        bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBases().stream().filter( Base::isRunning ).count() ,
+        bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
                                          0.75f , 32 );
         ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor( Thread::new );
         cleaner.scheduleAtFixedRate( () -> {
@@ -85,7 +88,7 @@ public abstract class DataModelInstanceSaver{
             optionalEntity.map( Map.Entry::getKey ).get().resetTimeStamp();
             return optionalEntity.map( Map.Entry::getValue );
         }else{
-            Optional<Base> optionalBase = Server.settings.getBases()
+            Optional<Base> optionalBase = Server.settings.getBase()
                                                          .parallelStream()
                                                          .filter( base -> base.getName().equals( baseName ) )
                                                          .filter( Base::isRunning )

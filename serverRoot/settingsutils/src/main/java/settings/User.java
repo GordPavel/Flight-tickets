@@ -14,7 +14,7 @@ public class User implements Cloneable{
     public User(){
     }
 
-    User( String name , String password , UserPrivileges privilege ){
+    public User( String name , String password , UserPrivileges privilege ){
         this.name = name;
         this.password = password;
         this.privilege = privilege;

@@ -24,8 +24,8 @@ public class Base implements Cloneable{
         user = new ArrayList<>();
     }
 
-    Base( String path , Boolean isRunning , List<User> user ){
-        this.name = path;
+    public Base( String name , Boolean isRunning , List<User> user ){
+        this.name = name;
         this.isRunning = isRunning;
         this.user = user;
     }

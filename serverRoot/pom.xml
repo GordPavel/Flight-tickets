@@ -19,10 +19,10 @@
     <modules>
         <module>settings</module>
         <module>server</module>
+        <module>settingsutils</module>
     </modules>
 
     <properties>
-        <jaxb.version>2.3.0</jaxb.version>
         <maven.resources.version>2.6</maven.resources.version>
     </properties>
 

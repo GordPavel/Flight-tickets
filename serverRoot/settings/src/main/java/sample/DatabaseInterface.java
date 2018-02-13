@@ -8,7 +8,7 @@ import settings.Base;
 import settings.SettingsManager;
 import settings.UserPrivileges;
 
-class DatabaseInterface implements ShellDependent{
+public class DatabaseInterface implements ShellDependent{
     private Shell shell;
     private Base  base;
 

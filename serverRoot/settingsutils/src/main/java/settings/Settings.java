@@ -15,6 +15,16 @@ public class Settings implements Cloneable{
     private Long   cacheTimeout;
     private List<Base> base = new ArrayList<>();
 
+    public Settings(){
+    }
+
+    //    todo: Для тестирования
+    public Settings( String adminName , String rootPassword , Long cacheTimeout , List<Base> base ){
+        this.adminName = adminName;
+        this.rootPassword = rootPassword;
+        this.cacheTimeout = cacheTimeout;
+        this.base = base;
+    }
 
     public String getAdminName(){
         return adminName;
@@ -34,10 +44,6 @@ public class Settings implements Cloneable{
         this.rootPassword = rootPassword;
     }
 
-    public List<Base> getBases(){
-        return base;
-    }
-
     public Stream<String> listBases(){
         return base.stream()
                    .map( base1 -> String.format( "%s %-7s\n" , base1.getName() , base1.isRunning() ? "running" : "" ) );
@@ -46,6 +52,10 @@ public class Settings implements Cloneable{
     @XmlElement
     void setBase( List<Base> base ){
         this.base = base;
+    }
+
+    public List<Base> getBase(){
+        return base;
     }
 
     @Override

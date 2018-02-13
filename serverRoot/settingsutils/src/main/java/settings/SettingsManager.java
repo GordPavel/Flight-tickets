@@ -1,6 +1,5 @@
 package settings;
 
-
 import settings.serverexceptions.CopyBase;
 import settings.serverexceptions.CopyUser;
 import settings.serverexceptions.IllegalBasePath;
@@ -16,11 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
-public class SettingsManager {
+public class SettingsManager{
     private final static String defaultSettingsFileString =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
 
@@ -29,13 +27,10 @@ public class SettingsManager {
     private static String      settingsFilePath;
 
     static{
-        try{
-            Properties properties = new Properties();
-            properties.load( SettingsManager.class.getResourceAsStream( "/folders.properties" ) );
-            settingsFilePath = properties.getProperty( "serverFilesFolder" ) + "settings.xml";
-        }catch( IOException e ){
-            e.printStackTrace();
-        }
+        String serverFilesPath =
+                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
+                           "UTF-8" ).getParent().getParent().getParent().toString() + "/serverfiles/";
+        settingsFilePath = serverFilesPath + "settings.xml";
         try{
             jaxbContext = JAXBContext.newInstance( Settings.class , Base.class , User.class );
         }catch( JAXBException e ){
@@ -63,7 +58,7 @@ public class SettingsManager {
                     "Your settings.xml file is damaged. Do you want to delete it and restart program? [y/n]" +
                     "All your settings'll be lost." );
             Scanner scanner = new Scanner( System.in );
-            String  answer;
+            String answer;
             while( !( answer = scanner.next() ).matches( "[yn]" ) ){
                 System.out.println( "Type y - yes, delete file; or n - no, not delete." );
             }
@@ -108,14 +103,14 @@ public class SettingsManager {
     }
 
     public static Optional<Base> getBase( String path ){
-        return settings.getBases().stream().filter( base -> base.getName().equals( path ) ).findAny();
+        return settings.getBase().stream().filter( base -> base.getName().equals( path ) ).findAny();
     }
 
     public static void addNewBase( String name ){
-        if( settings.getBases().parallelStream().map( Base::getName ).noneMatch( Predicate.isEqual( name ) ) ){
+        if( settings.getBase().parallelStream().map( Base::getName ).noneMatch( Predicate.isEqual( name ) ) ){
             Base base = new Base( name );
             base.setRunning( false );
-            settings.getBases().add( base );
+            settings.getBase().add( base );
             saveSettings();
         }else{
             throw new CopyBase( "Server already contains this base " + name );
@@ -123,13 +118,13 @@ public class SettingsManager {
     }
 
     public static void deleteBase( String name ){
-        settings.getBases().removeIf( Predicate.isEqual( name ) );
+        settings.getBase().removeIf( Predicate.isEqual( name ) );
         saveSettings();
     }
 
     public static void startStopBase( String name , Boolean start ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> base.getName().equals( name ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( name ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             if( editingBase.isRunning() && start ){
@@ -148,7 +143,7 @@ public class SettingsManager {
     public static void addNewClient( String baseName , String clientName , String clientPassword ,
                                      UserPrivileges privileges ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             if( editingBase.getUsers()
@@ -167,7 +162,7 @@ public class SettingsManager {
 
     public static void deleteClient( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             editingBase.getUsers().removeIf( user -> userNamesEqual( clientName , user ) );
@@ -179,7 +174,7 @@ public class SettingsManager {
 
     public static void changeClientName( String baseName , String oldName , String newName ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
@@ -197,7 +192,7 @@ public class SettingsManager {
 
     public static void changeClientPassword( String baseName , String clientName , String newPassword ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
+                settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =
@@ -215,7 +210,7 @@ public class SettingsManager {
 
     public static void changeClientPrivilege( String baseName , String clientName ){
         Optional<Base> optionalBase =
-                settings.getBases().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
+                settings.getBase().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
             Optional<User> optionalUser =

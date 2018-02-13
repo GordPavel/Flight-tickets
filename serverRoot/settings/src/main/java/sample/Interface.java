@@ -1,5 +1,6 @@
 package sample;
 
+
 import asg.cliche.Command;
 import asg.cliche.Param;
 import asg.cliche.Shell;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Scanner;
 
-class Interface{
+public class Interface{
 
     private static Shell    mainShell;
     private static Settings settings;
