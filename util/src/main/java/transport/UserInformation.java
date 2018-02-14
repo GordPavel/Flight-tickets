@@ -1,25 +1,22 @@
 package transport;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.FlightOrRoute;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 
-import java.io.Serializable;
-import java.util.List;
 import java.util.List;
 import java.util.function.Predicate;
 
 /**
- Information about user ( name, password ) and database, which is required
+ Information about user ( login, password ) and database, which is required
  */
 
 public class UserInformation{
 
-    private String                                       name;
+    private String                                       login;
     private String                                       password;
     private String                                       dataBase;
     @JsonSerialize( using = PredicateSerializer.class )
@@ -29,32 +26,13 @@ public class UserInformation{
 
     public UserInformation(){}
 
-    //    @JsonCreator
-    UserInformation(
-            @JsonProperty( "name" )
-                    String login ,
-            @JsonProperty( "password" )
-                    String password ,
-            @JsonProperty( "dataBase" )
-                    String dataBase ,
-            @JsonProperty( "predicate" )
-                    SerializablePredicate<? super FlightOrRoute> predicate ,
-            @JsonProperty( "changes" )
-                    List<ListChangeAdapter> changes ){
-        this.name = login;
-        this.password = password;
-        this.dataBase = dataBase;
-        this.predicate = predicate;
-        this.changes = changes;
-    }
-
-    @JsonGetter( "name" )
+    @JsonGetter( "login" )
     public String getLogin(){
-        return name;
+        return login;
     }
 
-    @JsonSetter( "name" )
-    public void setName(String name) {this.name=name;}
+    @JsonSetter( "login" )
+    public void setLogin( String login ){this.login = login;}
 
     @JsonGetter( "password" )
     public String getPassword(){
@@ -62,7 +40,7 @@ public class UserInformation{
     }
 
     @JsonSetter( "password" )
-    public void setPassword(String password) {
+    public void setPassword( String password ){
         this.password = password;
     }
 
@@ -72,7 +50,7 @@ public class UserInformation{
     }
 
     @JsonSetter( "dataBase" )
-    public void setDataBase(String dataBase) {
+    public void setDataBase( String dataBase ){
         this.dataBase = dataBase;
     }
 
@@ -82,7 +60,7 @@ public class UserInformation{
     }
 
     @JsonSetter( "predicate" )
-    public void setPredicate(SerializablePredicate<? super FlightOrRoute> predicate) {
+    public void setPredicate( SerializablePredicate<? super FlightOrRoute> predicate ){
         this.predicate = predicate;
     }
 
@@ -92,7 +70,7 @@ public class UserInformation{
     }
 
     @JsonSetter( "changes" )
-    public void setChanges(List<ListChangeAdapter> changes) {
+    public void setChanges( List<ListChangeAdapter> changes ){
         this.changes = changes;
     }
 
@@ -106,7 +84,7 @@ public class UserInformation{
     public boolean equals( Object obj ){
         if( !( obj instanceof UserInformation ) ) return false;
         UserInformation information = ( UserInformation ) obj;
-        return name.equals( information.name ) && password.equals( information.password ) && dataBase == null ?
+        return login.equals( information.login ) && password.equals( information.password ) && dataBase == null ?
                information.dataBase == null :
                dataBase.equals( information.dataBase ) && ( predicate == null && information.predicate == null ) ||
                ( predicate != null && information.predicate != null );

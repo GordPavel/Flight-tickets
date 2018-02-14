@@ -10,9 +10,6 @@ import transport.Data;
 import transport.UserInformation;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,7 +76,7 @@ class LoginOverviewController{
             if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
                 Controller.getInstance().setUserInformation(new UserInformation());
-                Controller.getInstance().getUserInformation().setName( loginTextField.getText() );
+                Controller.getInstance().getUserInformation().setLogin( loginTextField.getText() );
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
