@@ -52,7 +52,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>sample.Main</mainClass>
+                            <mainClass>sample.ClientMain</mainClass>
                         </manifest>
                     </archive>
                     <finalName>flightSystem-${project.version}</finalName>
