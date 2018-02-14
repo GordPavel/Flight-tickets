@@ -106,12 +106,15 @@ class Controller{
 
     public void connectToServer(String ip, int port) {
         try{
+            System.out.println("Connection...");
             Socket socket = new Socket( ip , port );
+            System.out.println("socket.isClosed = "+socket.isClosed());
             setIp(ip);
             setPort(port);
             Controller.getInstance().setClientSocket( socket );
         }catch( IOException ioex ){
             System.out.println( "Connection failed" );
+            System.out.println( ioex.getMessage() );
         }
     }
 

@@ -188,15 +188,11 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
     public void handleUpdateRouteAction(){
 
-        /**
-         * TODO: request all routes from server
-         */
+        requestUpdate(route -> true);
     }
 
     public void handleUpdateFlightAction(){
 
-        /**
-         * TODO: request all flights from server
-         */
+        requestUpdate(flight -> true);
     }
 }
