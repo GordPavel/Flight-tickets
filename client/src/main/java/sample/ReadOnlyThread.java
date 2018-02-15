@@ -18,7 +18,6 @@ import java.net.Socket;
 class ReadOnlyThread extends FaRThread{
 
     private Socket clientSocket;
-    public  int     test = 0;
     private boolean stop = false;
     RoutesFlightsOverviewController parentController;
 
@@ -43,7 +42,6 @@ class ReadOnlyThread extends FaRThread{
     public void run(){
         while( !stop ){
             updateData();
-            System.out.println( test++ );
             try{
                 Thread.sleep( 1000 );
             }catch( InterruptedException e ){

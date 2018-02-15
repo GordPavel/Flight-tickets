@@ -9,7 +9,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 import transport.UserInformation;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,10 +83,12 @@ class LoginOverviewController{
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
-                try{
-                    mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
-                            Controller.getInstance().getUserInformation() );
-                    data = ( Data ) mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                try(DataOutputStream dataOutputStream = new DataOutputStream(Controller.getInstance().getClientSocket().getOutputStream());
+                    DataInputStream inputStream = new DataInputStream(Controller.getInstance().getClientSocket().getInputStream())){
+                    System.out.println(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
+                    dataOutputStream.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
+                    System.out.println("Yshlo");
+                    data = mapper.reader(Data.class).readValue(inputStream.readUTF());
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }

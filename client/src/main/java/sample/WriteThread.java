@@ -1,5 +1,12 @@
 package sample;
 
+import javafx.scene.control.Alert;
+import model.DataModelInstanceSaver;
+import org.codehaus.jackson.map.ObjectMapper;
+import transport.Data;
+import transport.ListChangeAdapter;
+
+import java.io.IOException;
 import java.net.Socket;
 
 
@@ -11,7 +18,6 @@ import java.net.Socket;
 public class WriteThread extends FaRThread{
 
     Socket clientSocket;
-    public  int     test = 0;
     private boolean stop = false;
 
     public void setStop(){
@@ -29,22 +35,38 @@ public class WriteThread extends FaRThread{
 
     public void run(){
         while( !stop ){
-            /*
-              TODO: updating data from server
-             */
-            updateData();
-            System.out.println( test++ );
-            try{
-                Thread.sleep( 1000 );
-            }catch( InterruptedException e ){
+            if (Controller.getInstance().getClientSocket().isClosed())
+            {
+                Controller.getInstance().reconnect();
+            }
+            if( Controller.getInstance().getClientSocket().isConnected() ){
+                Data data = new Data();
+                ObjectMapper mapper = new ObjectMapper();
+                try{
+                    data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                    if( data.notHasException() ){
+                        for( ListChangeAdapter update : data.getChanges() ){
+                            update.apply( DataModelInstanceSaver.getInstance() );
+                        }
+                    }else{
+                        Alert alert = new Alert( Alert.AlertType.WARNING );
+                        alert.setTitle( "Error" );
+                        alert.setHeaderText( "Server error" );
+                        alert.setContentText( data.getException().getMessage() );
+                        alert.showAndWait();
+                    }
+                }catch( IOException | NullPointerException ex ){
+                    System.out.println( ex.getMessage() );
+                }
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex)
+            {
 
             }
-
         }
 
     }
 
-    synchronized void updateData(){
-//        todo : Закончить
-    }
 }

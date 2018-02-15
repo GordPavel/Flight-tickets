@@ -72,7 +72,7 @@ class ChoiceOverviewController{
             Controller.getInstance().getUserInformation().setDataBase(((Map.Entry<String,String>)selectedBase).getKey());
             Stage primaryStage = new Stage();
             RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController(primaryStage);
-            if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("WRITE")) {
+            if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("READWRITE")) {
                 controller = new RoutesFlightsWriteOverviewController(primaryStage);
             }
             ObjectMapper mapper = new ObjectMapper();
