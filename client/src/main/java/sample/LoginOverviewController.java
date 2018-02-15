@@ -38,9 +38,9 @@ class LoginOverviewController{
     @FXML
     private void initialize(){
         loginTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        ipTextField.setText( "127.0.0.1" );
+        ipTextField.setText( "85.113.55.203" );
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        portTextField.setText( "1" );
+        portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
     }
 

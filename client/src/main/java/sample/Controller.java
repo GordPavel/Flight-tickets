@@ -54,6 +54,7 @@ class Controller{
 
     void setThread( FaRThread thread ){
         this.thread = thread;
+        this.thread.setDaemon(true);
     }
 
     void startThread(){

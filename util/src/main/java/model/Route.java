@@ -32,6 +32,8 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
         this.to = to;
     }
 
+    public Route(){}
+
     public Route( ZoneId from , ZoneId to ){
         this.from = from;
         this.to = to;

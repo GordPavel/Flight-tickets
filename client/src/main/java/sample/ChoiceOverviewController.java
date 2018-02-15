@@ -16,6 +16,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 import transport.UserInformation;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -75,10 +77,18 @@ class ChoiceOverviewController{
             if (((Map.Entry<String,String>)selectedBase).getValue().toUpperCase().equals("READWRITE")) {
                 controller = new RoutesFlightsWriteOverviewController(primaryStage);
             }
+            if (Controller.getInstance().getClientSocket().isClosed())
+            {
+                Controller.getInstance().reconnect();
+            }
             ObjectMapper mapper = new ObjectMapper();
-            try {
-                mapper.writeValue(Controller.getInstance().getClientSocket().getOutputStream(), Controller.getInstance().getUserInformation());
-                Data data = (Data) mapper.readValue(Controller.getInstance().getClientSocket().getInputStream(), Data.class);
+            try (DataOutputStream dataOutputStream = new DataOutputStream(Controller.getInstance().getClientSocket().getOutputStream());
+                 DataInputStream inputStream = new DataInputStream(Controller.getInstance().getClientSocket().getInputStream())){
+                dataOutputStream.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
+                System.out.println("Yshlo2");
+                String testString = inputStream.readUTF();
+                System.out.println(testString);
+                data = mapper.reader(Data.class).readValue(testString);
                 if (data.notHasException()) {
                     for (Route route : data.getRoutes()) {
                         DataModelInstanceSaver.getInstance().addRoute(route);
@@ -86,6 +96,14 @@ class ChoiceOverviewController{
                     for (Flight flight : data.getFlights()) {
                         DataModelInstanceSaver.getInstance().addFlight(flight);
                     }
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+                    loader.setController( controller );
+                    primaryStage.setTitle( "Information system about flights and routes" );
+                    Scene scene = new Scene( loader.load() , 700 , 500 );
+                    primaryStage.setScene( scene );
+                    primaryStage.setResizable( false );
+                    primaryStage.show();
+                    closeWindow();
                 }
                 else {
                     Alert alert = new Alert( Alert.AlertType.WARNING );
@@ -94,23 +112,12 @@ class ChoiceOverviewController{
                     alert.setContentText( data.getException().getMessage() );
                     alert.showAndWait();
                 }
-            } catch (IOException | NullPointerException ex) {
-                System.out.println(ex.getMessage());
-            }
-            try{
-
-                FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-                loader.setController( controller );
-                primaryStage.setTitle( "Information system about flights and routes" );
-                Scene scene = new Scene( loader.load() , 700 , 500 );
-                primaryStage.setScene( scene );
-                primaryStage.setResizable( false );
-                primaryStage.show();
-                closeWindow();
             }catch( IOException e ){
                 System.out.println( "load problem" );
                 System.out.println( e.getMessage() );
-            }
+            } catch ( NullPointerException ex) {
+            System.out.println(ex.getMessage());
+        }
     } );
 
 

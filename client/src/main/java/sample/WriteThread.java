@@ -6,6 +6,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 import transport.ListChangeAdapter;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -35,6 +37,7 @@ public class WriteThread extends FaRThread{
 
     public void run(){
         while( !stop ){
+            System.out.println(123);
             if (Controller.getInstance().getClientSocket().isClosed())
             {
                 Controller.getInstance().reconnect();
@@ -42,8 +45,8 @@ public class WriteThread extends FaRThread{
             if( Controller.getInstance().getClientSocket().isConnected() ){
                 Data data = new Data();
                 ObjectMapper mapper = new ObjectMapper();
-                try{
-                    data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                try(DataInputStream inputStream = new DataInputStream(Controller.getInstance().getClientSocket().getInputStream())){
+                    data = mapper.reader(Data.class).readValue(inputStream.readUTF());
                     if( data.notHasException() ){
                         for( ListChangeAdapter update : data.getChanges() ){
                             update.apply( DataModelInstanceSaver.getInstance() );
