@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
  @author pavelgordeev */
 public class DataModel{
-    DataModel(){
+    public DataModel(){
     }
 
     public void addFlightsListener( ListChangeListener<Flight> listener ){
@@ -52,10 +52,10 @@ public class DataModel{
         return routes;
     }
 
-    private ReentrantReadWriteLock flightsLock = new ReentrantReadWriteLock( true );
-    private ObservableList<Flight> flights     = FXCollections.observableList( new ArrayList<>() );
-    private ReentrantReadWriteLock routesLock  = new ReentrantReadWriteLock( true );
-    private ObservableList<Route>  routes      = FXCollections.observableList( new ArrayList<>() );
+    private final ReentrantReadWriteLock flightsLock = new ReentrantReadWriteLock( true );
+    private final ObservableList<Flight> flights     = FXCollections.observableList( new ArrayList<>() );
+    private final ReentrantReadWriteLock routesLock  = new ReentrantReadWriteLock( true );
+    private final ObservableList<Route>  routes      = FXCollections.observableList( new ArrayList<>() );
 
     /**
      List all unique airport, that stores in routes
@@ -86,7 +86,7 @@ public class DataModel{
         return flights;
     }
 
-    private Pattern legalSymbolsChecker = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
+    private final Pattern legalSymbolsChecker = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
 
     /**
      Add new flight in current database in specified index, if it's correct, and immediately saves all changes
@@ -234,13 +234,12 @@ public class DataModel{
                                           .findFirst()
                                           .orElseThrow( () -> new FaRIllegalEditedData(
                                                   "Database doesn't contain previous version of flight" ) );
-            editingFlight.planeID = newPlaneId != null ? newPlaneId : flight.getPlaneID();
-            editingFlight.route = newRoute != null ? newRoute : flight.getRoute();
-            editingFlight.departureDateTime =
-                    ( newDepartureDate != null ? newDepartureDate : flight.getDepartureDateTime() );
-            editingFlight.arriveDateTime = newArriveDate != null ? newArriveDate : flight.getArriveDateTime();
+            Flight newFlight = new Flight( editingFlight.getNumber() , newRoute != null ? newRoute : editingFlight.getRoute() ,
+                                           newPlaneId != null ? newPlaneId : editingFlight.getPlaneID() ,
+                                           newDepartureDate != null ? newDepartureDate : editingFlight.getDepartureDateTime() ,
+                                           newArriveDate != null ? newArriveDate : editingFlight.getArriveDateTime() );
 //        To produce update event on list
-            flights.set( flights.indexOf( editingFlight ) , editingFlight );
+            flights.set( flights.indexOf( editingFlight ) , newFlight );
         }finally{
             flightsLock.writeLock().unlock();
         }
@@ -313,8 +312,9 @@ public class DataModel{
         }
     }
 
-    private Semaphore         keysGeneratorSemaphore     = new Semaphore( 1 , true );
-    private Iterator<Integer> routesPrimaryKeysGenerator = IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
+    private final Semaphore         keysGeneratorSemaphore     = new Semaphore( 1 , true );
+    private       Iterator<Integer> routesPrimaryKeysGenerator =
+            IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
 
     /**
      Delete specified flight from current database and immediately saves all changes
@@ -377,10 +377,14 @@ public class DataModel{
                                        .findFirst()
                                        .orElseThrow( () -> new FaRIllegalEditedData(
                                                "Database doesn't contain previous version of route" ) );
-            editingRoute.from = newDepartureAirport != null ? newDepartureAirport : route.getFrom();
-            editingRoute.to = newDestinationAirport != null ? newDestinationAirport : route.getTo();
+            Route newRoute =
+                    new Route( editingRoute.id , newDepartureAirport != null ? newDepartureAirport : route.getFrom() ,
+                               editingRoute.getTo() );
 //        To produce update event on list
-            routes.set( routes.indexOf( editingRoute ) , editingRoute );
+            flights.stream()
+                   .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() ) )
+                   .forEach( flight -> flight.setRoute( newRoute ) );
+            routes.set( routes.indexOf( editingRoute ) , newRoute );
         }finally{
             routesLock.writeLock().unlock();
         }

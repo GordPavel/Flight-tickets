@@ -128,14 +128,6 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
                arriveDateTime.isEqual( flight.arriveDateTime );
     }
 
-    boolean pointsEquals( Object obj ){
-        if( !( obj instanceof Flight ) ) return false;
-        Flight flight = ( Flight ) obj;
-        return this.number.equals( flight.number ) && this.route.pointsEquals( flight.route ) &&
-               planeID.equals( flight.planeID ) && departureDateTime.equals( flight.departureDateTime ) &&
-               arriveDateTime.equals( flight.arriveDateTime );
-    }
-
     @Override
     protected Object clone() throws CloneNotSupportedException{
         Flight clone = ( Flight ) super.clone();

@@ -61,7 +61,7 @@ class DataModelTest{
                                                            matcher.find();
                                                            return matcher.group( 1 );
                                                        } ) );
-    private List<ZoneId>              allZones = zones.values()
+    public List<ZoneId>              allZones = zones.values()
                                                       .stream()
                                                       .flatMap( Collection::stream )
                                                       .map( ZoneId::of )
@@ -328,9 +328,6 @@ class DataModelTest{
             assertTrue( newRoutes.stream()
                                  .noneMatch( route1 -> dataModel.listRoutesWithPredicate( route1::pointsEquals )
                                                                 .isEmpty() ) , "All new routes in the base" );
-            assertTrue( newFlights.stream()
-                                  .noneMatch( flight1 -> dataModel.listFlightsWithPredicate( flight1::pointsEquals )
-                                                                  .isEmpty() ) , "All new flights in the base" );
         }finally{
             Files.deleteIfExists( file.toPath() );
         }

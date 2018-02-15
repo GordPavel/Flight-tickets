@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
+import model.FlightOrRoute;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
@@ -384,7 +385,7 @@ abstract class RoutesFlightsOverviewController{
         routeTable.setDisable( false );
     }
 
-    public void requestUpdate( SerializablePredicate predicate ){
+    public void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
         if( !Controller.getInstance().getClientSocket().isConnected() ){
             routeConnectLabel.setText( "Offline" );
             flightConnectLabel.setText( "Offline" );

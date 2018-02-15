@@ -16,13 +16,13 @@ import java.util.function.Predicate;
 
 public class UserInformation{
 
-    private String                                       login;
-    private String                                       password;
-    private String                                       dataBase;
+    private String                                         login;
+    private String                                         password;
+    private String                                         dataBase;
     @JsonSerialize( using = PredicateSerializer.class )
     @JsonDeserialize( using = PredicateDeserializer.class )
-    private SerializablePredicate<? super FlightOrRoute> predicate;
-    private List<ListChangeAdapter>                      changes;
+    private SerializablePredicate<? extends FlightOrRoute> predicate;
+    private List<ListChangeAdapter>                        changes;
 
     public UserInformation(){}
 
@@ -55,12 +55,12 @@ public class UserInformation{
     }
 
     @JsonGetter( "predicate" )
-    public Predicate<? super FlightOrRoute> getPredicate(){
+    public Predicate<? extends FlightOrRoute> getPredicate(){
         return predicate;
     }
 
     @JsonSetter( "predicate" )
-    public void setPredicate( SerializablePredicate<? super FlightOrRoute> predicate ){
+    public void setPredicate( SerializablePredicate<? extends FlightOrRoute> predicate ){
         this.predicate = predicate;
     }
 
