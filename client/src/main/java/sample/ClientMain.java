@@ -12,8 +12,6 @@ import java.net.Socket;
 
 public class ClientMain extends Application{
 
-
-
     @Override
     public void start( Stage primaryStage ) throws Exception{
 
