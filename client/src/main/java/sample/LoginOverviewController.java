@@ -9,10 +9,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 import transport.UserInformation;
 
-import java.io.*;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,9 +59,10 @@ class LoginOverviewController{
         Data data = new Data();
         Controller.getInstance().connectToServer( ipTextField.getText() , Integer.parseInt( portTextField.getText() ) );
 
-        if( Controller.getInstance().getClientSocket() != null && Controller.getInstance().getClientSocket().isConnected() ){
+        if( Controller.getInstance().getClientSocket() != null &&
+            Controller.getInstance().getClientSocket().isConnected() ){
 
-            Pattern pattern      = Pattern.compile( "^[\\.\\w\\d\\-_]+$" );
+            Pattern pattern = Pattern.compile( "^[\\.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
             if( !( pattern.matcher( loginTextField.getText() ).matches() &&
@@ -74,32 +74,33 @@ class LoginOverviewController{
                 alert.showAndWait();
             }
 
-        /*
-         */
+            /*
+             */
             if( pattern.matcher( loginTextField.getText() ).matches() &&
                 pattern.matcher( passwordField.getText() ).matches() ){
-                Controller.getInstance().setUserInformation(new UserInformation());
+                Controller.getInstance().setUserInformation( new UserInformation() );
                 Controller.getInstance().getUserInformation().setLogin( loginTextField.getText() );
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
-                try(DataOutputStream dataOutputStream = new DataOutputStream(Controller.getInstance().getClientSocket().getOutputStream());
-                    DataInputStream inputStream = new DataInputStream(Controller.getInstance().getClientSocket().getInputStream())){
-                    System.out.println(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
-                    dataOutputStream.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
-                    System.out.println("Yshlo");
-                    data = mapper.reader(Data.class).readValue(inputStream.readUTF());
+                try( DataOutputStream dataOutputStream = new DataOutputStream(
+                        Controller.getInstance().getClientSocket().getOutputStream() ) ;
+                     DataInputStream inputStream = new DataInputStream(
+                             Controller.getInstance().getClientSocket().getInputStream() ) ){
+                    System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    dataOutputStream.writeUTF(
+                            mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    System.out.println( "Ушло" );
+                    data = mapper.reader( Data.class ).readValue( inputStream.readUTF() );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }
 
-
-                if( data.notHasException() ){
+                data.withoutExceptionOrWith( data1 -> {
                     try{
-                        Stage                    primaryStage = new Stage();
-                        FXMLLoader               loader       =
-                                new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-                        ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data );
+                        Stage primaryStage = new Stage();
+                        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
+                        ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage , data1 );
                         loader.setController( controller );
                         primaryStage.setTitle( "Select DB" );
                         Scene scene = new Scene( loader.load() );
@@ -111,21 +112,21 @@ class LoginOverviewController{
                         System.out.println( "load problem" );
                         System.out.println( e.getMessage() );
                     }
-                } else {
+                } , error -> {
                     Alert alert = new Alert( Alert.AlertType.WARNING );
                     alert.setTitle( "Error" );
                     alert.setHeaderText( "Server error" );
-                    alert.setContentText( data.getException().getMessage() );
+                    alert.setContentText( error.getMessage() );
                     alert.showAndWait();
-                }
-            } else {
+                } );
+            }else{
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Error" );
                 alert.setHeaderText( "Unacceptable symbols" );
                 alert.setContentText( "Check your login, password" );
                 alert.showAndWait();
             }
-        } else {
+        }else{
             Alert alert = new Alert( Alert.AlertType.WARNING );
             alert.setTitle( "Error" );
             alert.setHeaderText( "Network error" );
@@ -139,7 +140,7 @@ class LoginOverviewController{
 //                Data data1 = new Data();
 //                data1.setBases(map);
 //                Stage primaryStage = new Stage();
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiseOverview.fxml"));
+//                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiceOverview.fxml"));
 //                ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
 //                loader.setController(controller);
 //                primaryStage.setTitle("Select DB");
@@ -156,13 +157,12 @@ class LoginOverviewController{
     }
 
     private void fieldCheck(){
-        Pattern ipPattern = Pattern.compile(
-                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
+        Pattern ipPattern = Pattern.compile( "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                                             "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
         Pattern portPattern = Pattern.compile( "[0-9]{1,5}" );
 
         Pattern textPattern = Pattern.compile( "[\\.\\w\\d\\-_]*" );
-        Matcher matcher     = textPattern.matcher( loginTextField.getText() );
+        Matcher matcher = textPattern.matcher( loginTextField.getText() );
         if( !matcher.matches() ){
             loginTextField.setStyle( "-fx-text-inner-color: red;" );
             loginTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );

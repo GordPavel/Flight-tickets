@@ -51,7 +51,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
      */
     @JsonSerialize( using = ZoneIdSerializer.class )
     @JsonDeserialize( using = ZoneIdDeserializer.class )
-    ZoneId from;
+    private ZoneId from;
 
     @JsonGetter( "from" )
     public ZoneId getFrom(){
@@ -63,7 +63,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
      */
     @JsonSerialize( using = ZoneIdSerializer.class )
     @JsonDeserialize( using = ZoneIdDeserializer.class )
-    ZoneId to;
+    private ZoneId to;
 
     @JsonGetter( "to" )
     public ZoneId getTo(){
@@ -85,7 +85,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
     @Override
     public boolean equals( Object obj ){
         if( !( obj instanceof Route ) ) return false;
-        Route   route = ( Route ) obj;
+        Route route = ( Route ) obj;
         boolean test;
         if( id == null ){
             test = route.id == null;

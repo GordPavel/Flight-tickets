@@ -3,25 +3,25 @@ package transport;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
+import exceptions.FlightAndRouteException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 @SuppressWarnings( "WeakerAccess" )
-public class PredicateSerializer extends StdSerializer<SerializablePredicate<?>>{
+public class ExceptionSerializer extends StdSerializer<FlightAndRouteException>{
 
-    public PredicateSerializer(){
-        super( ( Class<SerializablePredicate<?>> ) null );
+    public ExceptionSerializer(){
+        super( ( Class<FlightAndRouteException> ) null );
     }
 
     @Override
-    public void serialize( SerializablePredicate<?> serializablePredicate , JsonGenerator jsonGenerator ,
+    public void serialize( FlightAndRouteException e , JsonGenerator jsonGenerator ,
                            SerializerProvider serializerProvider ) throws IOException{
-        try( ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream() ;
+        try( ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              ObjectOutputStream outputStream = new ObjectOutputStream( byteArrayOutputStream ) ){
-            outputStream.writeObject( serializablePredicate );
+            outputStream.writeObject( e );
             jsonGenerator.writeBinary( byteArrayOutputStream.toByteArray() );
         }
     }

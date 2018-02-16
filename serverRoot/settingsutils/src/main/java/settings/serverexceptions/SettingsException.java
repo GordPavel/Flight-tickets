@@ -1,11 +1,11 @@
 package settings.serverexceptions;
 
-public class SettingsException extends IllegalStateException{
+class SettingsException extends IllegalStateException{
     /**
      Constructs an <code>IllegalStateException</code> with no
      detail message.
      */
-    public SettingsException(){
+    SettingsException(){
         super();
     }
 
@@ -15,7 +15,7 @@ public class SettingsException extends IllegalStateException{
 
      @param s the detail message.
      */
-    public SettingsException( String s ){
+    SettingsException( String s ){
         super( s );
     }
 
@@ -36,7 +36,7 @@ public class SettingsException extends IllegalStateException{
 
      @since 1.5
      */
-    public SettingsException( String message , Throwable cause ){
+    SettingsException( String message , Throwable cause ){
         super( message , cause );
     }
 
@@ -55,7 +55,7 @@ public class SettingsException extends IllegalStateException{
 
      @since 1.5
      */
-    public SettingsException( Throwable cause ){
+    SettingsException( Throwable cause ){
         super( cause );
     }
 

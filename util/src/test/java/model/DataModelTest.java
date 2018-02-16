@@ -41,31 +41,31 @@ class DataModelTest{
     private Set<ZoneId>  airports;
     private List<Route>  routes;
     private List<Flight> flights;
-    private Pattern                   pattern  = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
-    private Random                    random   = new Random( System.currentTimeMillis() );
-    private Map<String, List<String>> zones    = ZoneId.getAvailableZoneIds()
-                                                       .stream()
-                                                       .sorted()
-                                                       .filter( pattern.asPredicate() )
-                                                       .map( s -> {
+    private final Pattern                   pattern  = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private final Random                    random   = new Random( System.currentTimeMillis() );
+    private final Map<String, List<String>> zones    = ZoneId.getAvailableZoneIds()
+                                                             .stream()
+                                                             .sorted()
+                                                             .filter( pattern.asPredicate() )
+                                                             .map( s -> {
                                                            Matcher matcher = pattern.matcher( s );
                                                            matcher.find();
                                                            return matcher.group( 1 ) + "/" + matcher.group( 2 );
                                                        } )
-                                                       .filter( Pattern.compile( "(Etc|SystemV)/.+" )
+                                                             .filter( Pattern.compile( "(Etc|SystemV)/.+" )
                                                                        .asPredicate()
                                                                        .negate() )
-                                                       .distinct()
-                                                       .collect( Collectors.groupingBy( s -> {
+                                                             .distinct()
+                                                             .collect( Collectors.groupingBy( s -> {
                                                            Matcher matcher = pattern.matcher( s );
                                                            matcher.find();
                                                            return matcher.group( 1 );
                                                        } ) );
-    public List<ZoneId>              allZones = zones.values()
-                                                      .stream()
-                                                      .flatMap( Collection::stream )
-                                                      .map( ZoneId::of )
-                                                      .collect( ArrayList::new , List::add , List::addAll );
+    private final List<ZoneId>              allZones = zones.values()
+                                                            .stream()
+                                                            .flatMap( Collection::stream )
+                                                            .map( ZoneId::of )
+                                                            .collect( ArrayList::new , List::add , List::addAll );
 
     @BeforeEach
     void setUp(){

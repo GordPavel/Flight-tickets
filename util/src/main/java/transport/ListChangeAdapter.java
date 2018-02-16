@@ -66,7 +66,7 @@ public class ListChangeAdapter{
     private final Pattern updatePattern = Pattern.compile(
             "^(?<entity>flight|route) \\{ (?<list>\\[.+]) (?<type>changed to|removed|added) (?<new>\\[.+] )?}\n?$" );
 
-    @SuppressWarnings( "ResultOfMethodCallIgnored" )
+    @SuppressWarnings( { "ResultOfMethodCallIgnored" , "unchecked" } )
     public void apply( DataModel dataModel ) throws IllegalArgumentException{
         Matcher matcher = updatePattern.matcher( this.update );
         if( !matcher.matches() ){
@@ -86,6 +86,7 @@ public class ListChangeAdapter{
                                                      .readValue( list ) ).forEach( dataModel::addFlight );
                             break;
                         case "route":
+                            //noinspection unchecked
                             ( ( List<Route> ) mapper.readerFor(
                                     mapper.getTypeFactory().constructCollectionType( List.class , Route.class ) )
                                                     .readValue( list ) ).forEach( dataModel::addRoute );

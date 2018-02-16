@@ -31,7 +31,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
     /**
      initialization of view
-     Hiding menus, add listners, start thread
+     Hiding menus, add listeners, start thread
      */
     @Override
     @FXML
@@ -144,8 +144,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 System.out.println( e.getMessage() );
             }
         } );
-        /**
-         * TODO: set message to delete route to server
+        /*
+          TODO: set message to delete route to server
          */
     }
 
@@ -233,8 +233,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 System.out.println( e.getMessage() );
             }
         } );
-        /**
-         * TODO: add message to server to delete flight
+        /*
+          TODO: add message to server to delete flight
          */
     }
 

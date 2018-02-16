@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class Base implements Cloneable{
     private String     name;
     private Boolean    isRunning;
-    private List<User> user;
+    private List<User> users;
 
     public Base(){
     }
@@ -21,13 +21,13 @@ public class Base implements Cloneable{
     Base( String name ){
         this.name = name;
         isRunning = false;
-        user = new ArrayList<>();
+        users = new ArrayList<>();
     }
 
-    public Base( String name , Boolean isRunning , List<User> user ){
+    public Base( String name , Boolean isRunning , List<User> users ){
         this.name = name;
         this.isRunning = isRunning;
-        this.user = user;
+        this.users = users;
     }
 
     public String getName(){
@@ -49,25 +49,25 @@ public class Base implements Cloneable{
     }
 
     public List<User> getUsers(){
-        return user;
+        return users;
     }
 
     public Stream<String> listAllUsers(){
-        return user.stream()
-                   .map( user1 -> String.format( "%-2s %10s password:%s" ,
+        return users.stream()
+                    .map( user1 -> String.format( "%-2s %10s password:%s" ,
                                                  user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
                                                  user1.getLogin() , user1.getPassword() ) );
     }
 
     @XmlElement
-    void setUser( List<User> user ){
-        this.user = user;
+    void setUsers( List<User> users ){
+        this.users = users;
     }
 
     @Override
     public String toString(){
         StringBuilder stringBuilder = new StringBuilder( String.format( "   %s\n" , name ) );
-        for( User user : user ){
+        for( User user : users ){
             stringBuilder.append( user.toString() );
         }
         return stringBuilder.toString();
@@ -76,7 +76,7 @@ public class Base implements Cloneable{
     @Override
     public int hashCode(){
         Integer integer = name.hashCode();
-        for( User user : this.user ){
+        for( User user : this.users ){
             integer ^= user.hashCode();
         }
         return integer;
@@ -86,9 +86,9 @@ public class Base implements Cloneable{
     public boolean equals( Object obj ){
         if( !( obj instanceof Base ) ) return false;
         Base base = ( Base ) obj;
-        if( this.user.size() != base.user.size() ) return false;
-        Iterator<User> userIterator = base.user.iterator();
-        for( User user : this.user ){
+        if( this.users.size() != base.users.size() ) return false;
+        Iterator<User> userIterator = base.users.iterator();
+        for( User user : this.users ){
             if( !user.equals( userIterator.next() ) ) return false;
         }
         return this.name.equals( base.name );
@@ -97,7 +97,7 @@ public class Base implements Cloneable{
     @Override
     protected Object clone() throws CloneNotSupportedException{
         Base clone = ( Base ) super.clone();
-        clone.user = user.stream().map( user1 -> {
+        clone.users = users.stream().map( user1 -> {
             try{
                 return ( User ) user1.clone();
             }catch( CloneNotSupportedException e ){

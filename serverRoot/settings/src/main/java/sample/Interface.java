@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Scanner;
 
+@SuppressWarnings( "WeakerAccess" )
 public class Interface{
 
-    private static Shell    mainShell;
-    private static Settings settings;
+    private static       Shell    mainShell;
+    private static final Settings settings;
 
     static{
         settings = SettingsManager.loadSettings();
@@ -60,6 +61,6 @@ public class Interface{
                           "server deletes this executor to balance storage usage and speed.\n" +
                           "Specify this time in milliseconds> " );
         SettingsManager.setCacheTimeout( scanner.nextLong() );
-        System.out.println( "Good, now we're ready to work. Type ?l to show all commands." );
+        System.out.println( "Good, now we're ready to work. Type ?h for help." );
     }
 }

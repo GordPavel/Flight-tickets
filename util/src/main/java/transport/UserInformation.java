@@ -76,11 +76,6 @@ public class UserInformation{
 
 
     @Override
-    public int hashCode(){
-        return super.hashCode();
-    }
-
-    @Override
     public boolean equals( Object obj ){
         if( !( obj instanceof UserInformation ) ) return false;
         UserInformation information = ( UserInformation ) obj;

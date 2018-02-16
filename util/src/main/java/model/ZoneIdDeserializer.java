@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.time.ZoneId;
 
+@SuppressWarnings( "WeakerAccess" )
 public class ZoneIdDeserializer extends StdDeserializer<ZoneId>{
 
     public ZoneIdDeserializer(){
@@ -14,7 +15,7 @@ public class ZoneIdDeserializer extends StdDeserializer<ZoneId>{
     }
 
     @Override
-    public ZoneId deserialize( JsonParser p , DeserializationContext ctxt ) throws IOException{
+    public ZoneId deserialize( JsonParser p , DeserializationContext context ) throws IOException{
         return ZoneId.of( p.getText() );
     }
 }

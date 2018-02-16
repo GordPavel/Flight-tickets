@@ -1,6 +1,6 @@
 package model;
 
-public class CacheKey<T>{
+class CacheKey<T>{
     T    key;
     Long timestamp;
 

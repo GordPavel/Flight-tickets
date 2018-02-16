@@ -9,8 +9,8 @@ import settings.SettingsManager;
 import settings.UserPrivileges;
 
 public class DatabaseInterface implements ShellDependent{
-    private Shell shell;
-    private Base  base;
+    private       Shell shell;
+    private final Base  base;
 
     DatabaseInterface( Base base ){
         this.base = base;
@@ -48,7 +48,7 @@ public class DatabaseInterface implements ShellDependent{
         }
     }
 
-    @Command( description = "Add new client to allow him connect to this database.", name = "--newClient", abbrev = "--nC" )
+    @Command( description = "Add new client to allow him connect to this database.", name = "--newClient", abbrev = "-nC" )
     public void addNewClient(
             @Param( description = "Name of user", name = "name" )
                     String name ,
@@ -74,7 +74,7 @@ public class DatabaseInterface implements ShellDependent{
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );
     }
 
-    @Command( description = "Change name of specified client", abbrev = "-cN", name = "--changeName" )
+    @Command( description = "Change name of specified client", abbrev = "-cN", name = "--changeClientName" )
     public void changeClientName(
             @Param( description = "Old name of user", name = "old name" )
                     String oldName ,

@@ -2,6 +2,7 @@ package model;
 
 
 import exceptions.FlightAndRouteException;
+import javafx.collections.ListChangeListener;
 import server.Server;
 import settings.Base;
 import settings.SettingsManager;
@@ -19,90 +20,107 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static settings.SettingsManager.basesCacheFiles;
+import static settings.SettingsManager.basesFolder;
+
 public abstract class DataModelInstanceSaver{
-    private static Map<CacheKey<String>, DataModelWithLock> bases;
-    static         String                                   basesCacheFiles;
-    static         String                                   basesFolder;
+    private static Map<CacheKey<String>, DataModelWithLockAndListener> bases;
 
     static{
-        String serverFilesPath =
-                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-                           "UTF-8" ).getParent().getParent().getParent().toString() + "/serverfiles/";
-        basesCacheFiles = serverFilesPath + "clientUpdates/";
-        basesFolder = serverFilesPath + "bases/";
         bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
                                          0.75f , 32 );
         Executors.newSingleThreadScheduledExecutor( r -> {
             Thread thread = new Thread( r );
             thread.setDaemon( true );
             return thread;
-        } ).scheduleAtFixedRate( () -> bases.entrySet()
-                                            .stream()
-                                            .peek( dataModel -> {
-                                                try{
-                                                    dataModel.getValue().lock.writeLock().lock();
-                                                    dataModel.getValue().model.saveTo( Files.newOutputStream( Paths.get(
-                                                            basesFolder + dataModel.getKey().key + ".far" ) ) );
-                                                    dataModel.getValue().lock.writeLock().unlock();
-                                                }catch( IOException e ){
-                                                    System.err.println(
-                                                            "Database " + dataModel.getKey().key + " has problems" );
-                                                    SettingsManager.startStopBase( dataModel.getKey().key , false );
-                                                    bases.remove( dataModel.getKey() , dataModel.getValue() );
-                                                    dataModel.getValue().lock.writeLock().unlock();
-                                                }
-                                            } )
-                                            .filter( dataModel ->
-                                                             System.currentTimeMillis() - dataModel.getKey().timestamp >
-                                                             Server.settings.getCacheTimeout() )
-                                            .forEach( dataModel -> {
-                                                dataModel.getValue().lock.writeLock().lock();
-                                                bases.remove( dataModel.getKey() , dataModel.getValue() );
-                                                dataModel.getValue().lock.writeLock().unlock();
-                                            } ) , Server.settings.getCacheTimeout() ,
-                                 Server.settings.getCacheTimeout() , TimeUnit.MILLISECONDS );
+        } )
+                 .scheduleAtFixedRate( () -> bases.entrySet()
+                                                  .stream()
+                                                  .peek( DataModelInstanceSaver::saveChanges )
+                                                  .filter( DataModelInstanceSaver::isLongAgoRequested )
+                                                  .forEach( DataModelInstanceSaver::clearCache ) ,
+                                       Server.settings.getCacheTimeout() , Server.settings.getCacheTimeout() ,
+                                       TimeUnit.MILLISECONDS );
+    }
+
+    private static void clearCache( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+        dataModel.getValue().lock.writeLock().lock();
+        bases.remove( dataModel.getKey() , dataModel.getValue() );
+        dataModel.getValue().model.getRouteObservableList().removeListener( dataModel.getValue().routeListener );
+        dataModel.getValue().model.getFlightObservableList().removeListener( dataModel.getValue().flightListener );
+        dataModel.getValue().lock.writeLock().unlock();
+    }
+
+    private static boolean isLongAgoRequested( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+        return System.currentTimeMillis() - dataModel.getKey().timestamp > Server.settings.getCacheTimeout();
+    }
+
+    /**
+     Sometimes we need to save all changes of database for our safety. If database's very popular, it spends all time
+     in cache table
+
+     @param dataModel for saving
+     */
+    private static void saveChanges( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+        try{
+            dataModel.getValue().lock.writeLock().lock();
+            dataModel.getValue().model.saveTo(
+                    Files.newOutputStream( Paths.get( basesFolder + dataModel.getKey().key + ".far" ) ) );
+            dataModel.getValue().lock.writeLock().unlock();
+        }catch( IOException e ){
+            System.err.println( "Database " + dataModel.getKey().key + " has problems" );
+            SettingsManager.startStopBase( dataModel.getKey().key , false );
+            bases.remove( dataModel.getKey() , dataModel.getValue() );
+            dataModel.getValue().lock.writeLock().unlock();
+        }
     }
 
 
     /**
      @param baseName name of database without extension in the end ( .far )
 
-     @return Optional<DataModelWithLock> if this name contains in the configs of server and Optional.empty() in other
+     @return Optional<DataModelWithLockAndListener> if this name contains in the configs of server and Optional.empty() in other
      case
      */
-    public static synchronized Optional<DataModelWithLock> getInstance( String baseName ){
-        Optional<Map.Entry<CacheKey<String>, DataModelWithLock>> optionalEntity =
+    public static synchronized Optional<DataModelWithLockAndListener> getInstance( String baseName ){
+//        find database in cache table
+        Optional<Map.Entry<CacheKey<String>, DataModelWithLockAndListener>> optionalEntity =
                 bases.entrySet().stream().filter( entity -> entity.getKey().key.equals( baseName ) ).findAny();
         if( optionalEntity.isPresent() ){
             optionalEntity.map( Map.Entry::getKey ).get().resetTimeStamp();
             return optionalEntity.map( Map.Entry::getValue );
         }else{
+
             Optional<Base> optionalBase = Server.settings.getBase()
                                                          .parallelStream()
                                                          .filter( base -> base.getName().equals( baseName ) )
                                                          .filter( Base::isRunning )
                                                          .findAny();
+//            find settings of database
             if( optionalBase.isPresent() ){
                 try{
                     DataModel dataModel = new DataModel();
                     dataModel.importFrom( Files.newInputStream( Paths.get( basesFolder + baseName + ".far" ) ) );
 //                    Save all changes to file of this base
-                    dataModel.addRoutesListener( change -> {
+                    ListChangeListener<Route> routeListener = change -> {
                         try{
                             cacheChanges( baseName , ListChangeAdapter.routeChange( change ) );
                         }catch( IOException e ){
                             e.printStackTrace();
                         }
-                    } );
-                    dataModel.addFlightsListener( change -> {
+                    };
+                    ListChangeListener<Flight> flightListener = change -> {
                         try{
                             cacheChanges( baseName , ListChangeAdapter.flightChange( change ) );
                         }catch( IOException e ){
                             e.printStackTrace();
                         }
-                    } );
-                    DataModelWithLock modelWithLock =
-                            new DataModelWithLock( dataModel , new ReentrantReadWriteLock( true ) );
+                    };
+                    dataModel.addRoutesListener( routeListener );
+                    dataModel.addFlightsListener( flightListener );
+                    DataModelWithLockAndListener modelWithLock =
+                            new DataModelWithLockAndListener( dataModel , new ReentrantReadWriteLock( true ) ,
+                                                              routeListener , flightListener );
                     bases.put( new CacheKey<>( baseName ) , modelWithLock );
                     return Optional.of( modelWithLock );
                 }catch( FlightAndRouteException e ){
@@ -127,10 +145,10 @@ public abstract class DataModelInstanceSaver{
      */
     private static void cacheChanges( String baseName , ListChangeAdapter change ) throws IOException{
         Files.list( Paths.get( basesCacheFiles ) )
-             .filter( path2 -> path2.toString().matches( basesCacheFiles + baseName + "_.+" ) )
-             .forEach( path1 -> {
+             .filter( path -> path.toString().matches( "^" + basesCacheFiles + baseName + "_.+$" ) )
+             .forEach( path -> {
                  try{
-                     Files.write( path1 , change.getUpdate().getBytes( Charset.forName( "UTF-8" ) ) ,
+                     Files.write( path , change.getUpdate().getBytes( Charset.forName( "UTF-8" ) ) ,
                                   StandardOpenOption.APPEND , StandardOpenOption.CREATE );
                  }catch( IOException e ){
                      e.printStackTrace();

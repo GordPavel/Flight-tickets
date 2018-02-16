@@ -1,2 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<settings/>
+<settings>
+    <adminName>admin</adminName>
+    <base name="test">
+        <running>true</running>
+        <users login="test">
+            <password>pass</password>
+            <privilege>ReadWrite</privilege>
+        </users>
+    </base>
+    <cacheTimeout>180000</cacheTimeout>
+    <rootPassword>pass</rootPassword>
+</settings>

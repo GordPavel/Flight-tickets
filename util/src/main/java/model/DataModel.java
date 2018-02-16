@@ -101,7 +101,7 @@ public class DataModel{
      <p>
      duplicates number
      */
-    public void addFlight( Integer index , Flight flight ) throws FlightAndRouteException{
+    private void addFlight( Integer index , Flight flight ) throws FlightAndRouteException{
         if( !( legalSymbolsChecker.matcher( flight.getNumber() ).matches() &&
                legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
@@ -268,7 +268,7 @@ public class DataModel{
      @throws IllegalArgumentException       if departure and destination airports are similar
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
-    public void addRoute( Integer index , Route route ){
+    private void addRoute( Integer index , Route route ){
         if( route.getFrom().equals( route.getTo() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }

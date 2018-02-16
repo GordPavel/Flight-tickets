@@ -14,7 +14,6 @@ import model.Flight;
 import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
-import transport.UserInformation;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -85,11 +84,11 @@ class ChoiceOverviewController{
             try (DataOutputStream dataOutputStream = new DataOutputStream(Controller.getInstance().getClientSocket().getOutputStream());
                  DataInputStream inputStream = new DataInputStream(Controller.getInstance().getClientSocket().getInputStream())){
                 dataOutputStream.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
-                System.out.println("Yshlo2");
+                System.out.println("Ушло");
                 String testString = inputStream.readUTF();
                 System.out.println(testString);
                 data = mapper.reader(Data.class).readValue(testString);
-                if (data.notHasException()) {
+                if (data.hasNotException()) {
                     for (Route route : data.getRoutes()) {
                         DataModelInstanceSaver.getInstance().addRoute(route);
                     }

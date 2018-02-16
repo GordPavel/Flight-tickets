@@ -54,7 +54,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores route that this flight connects
      */
-    Route route;
+    private Route route;
 
     public void setRoute( Route route ){
         this.route = route;
@@ -68,7 +68,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     /**
      Stores unique ID of plane that makes this flight
      */
-    String planeID;
+    private String planeID;
 
     @JsonGetter( "planeID" )
     public String getPlaneID(){
@@ -104,7 +104,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
     }
 
     @JsonIgnore
-    public String getTravelTimeString(){
+    private String getTravelTimeString(){
         long startMilli = getTravelTime();
         startMilli /= 1000; // sum of second
         long sumMinute = startMilli / 60; // sum of minute

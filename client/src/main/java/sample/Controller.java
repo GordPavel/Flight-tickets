@@ -113,9 +113,9 @@ class Controller{
             setIp(ip);
             setPort(port);
             Controller.getInstance().setClientSocket( socket );
-        }catch( IOException ioex ){
+        }catch( IOException e ){
             System.out.println( "Connection failed" );
-            System.out.println( ioex.getMessage() );
+            System.out.println( e.getMessage() );
         }
     }
 

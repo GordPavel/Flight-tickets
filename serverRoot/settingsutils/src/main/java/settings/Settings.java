@@ -18,14 +18,6 @@ public class Settings implements Cloneable{
     public Settings(){
     }
 
-    //    todo: Для тестирования
-    public Settings( String adminName , String rootPassword , Long cacheTimeout , List<Base> base ){
-        this.adminName = adminName;
-        this.rootPassword = rootPassword;
-        this.cacheTimeout = cacheTimeout;
-        this.base = base;
-    }
-
     public String getAdminName(){
         return adminName;
     }

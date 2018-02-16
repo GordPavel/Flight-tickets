@@ -4,10 +4,16 @@ import asg.cliche.*;
 import settings.SettingsManager;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+@SuppressWarnings( "WeakerAccess" )
 public class EnteredInterface implements ShellDependent{
 
-    private Shell shell;
+    private Shell   shell;
+    private Process serverProcess;
+    private Integer port;
 
     @Override
     public void cliSetShell( Shell shell ){
@@ -45,52 +51,69 @@ public class EnteredInterface implements ShellDependent{
 
     @Command( description = "Add path of new database", name = "--newDatabase", abbrev = "-nD" )
     public void addNewDatabase(
-            @Param( description = "Path to *.far file which contains database.", name = "path" )
-                    String path ){
-        SettingsManager.addNewBase( path );
+            @Param( description = "Name of file *.far in folder /serverfiles/bases.", name = "name" )
+                    String name ){
+        SettingsManager.addNewBase( name );
         System.out.println( "To accept all changes please restart server. ( command <restart> )" );
     }
 
     @Command( description = "Delete the path of database from settings file.", abbrev = "-dD", name = "--deleteDatabase" )
     public void deleteDatabase(
-            @Param( description = "Path to *.far file which contains database.", name = "path" )
-                    String path ){
-        SettingsManager.deleteBase( path );
+            @Param( description = "Name of file *.far in folder /serverfiles/base.", name = "path" )
+                    String name ){
+        SettingsManager.deleteBase( name );
         System.out.println( "To accept all changes please restart server. ( command <restart> )" );
     }
 
     @Command( description = "Open submenu to configure specified database. Don't forget to restart server after all " +
                             "changes.", abbrev = "-mD", name = "--manageDatabase" )
     public void manageDatabase(
-            @Param( description = "Path to *.far file which contains database.", name = "path" )
-                    String path ) throws IOException{
-        ShellFactory.createSubshell( SettingsManager.settings.getAdminName() + "/" +
-                                     path.substring( path.lastIndexOf( "/" ) , path.lastIndexOf( "." ) ) , shell ,
-                                     path , new DatabaseInterface( SettingsManager.getBase( path )
-                                                                                  .orElseThrow(
-                                                                                          () -> new IllegalArgumentException(
-                                                                                                  "Server doesn't have database " +
-                                                                                                  path ) ) ) )
+            @Param( description = "Name of file *.far in folder /serverfiles/base.", name = "path" )
+                    String name ) throws IOException{
+        ShellFactory.createSubshell( name , shell , name , new DatabaseInterface( SettingsManager.getBase( name )
+                                                                                                 .orElseThrow(
+                                                                                                         () -> new IllegalArgumentException(
+                                                                                                                 "Server doesn't have database " +
+                                                                                                                 name ) ) ) )
                     .commandLoop();
     }
 
     @Command( description = "Start server" )
-    public void start(){
-//        todo: Запуск сервера
+    public void start(
+            @Param( description = "listening port for server", name = "port" )
+                    Integer port ) throws IOException{
+        this.port = port;
+        ProcessBuilder processBuilder =
+                new ProcessBuilder( "java" , "-jar" , "flight-system-server-1.1.0.jar" , this.port.toString() );
+        Path path = Paths.get( "/Users/pavelgordeev/Desktop/errors.txt" );
+        if( !Files.exists( path ) ){
+            Files.createFile( path );
+        }
+        processBuilder.redirectOutput( path.toFile() );
+        processBuilder.directory( Paths.get( SettingsManager.rootFolderPath ).toFile() );
+        serverProcess = processBuilder.start();
     }
 
     @Command( description = "Stop server when it can" )
     public void stop(){
-//        todo: Остановка сервера
+        serverProcess.destroy();
     }
 
     @Command( description = "Immediately stop server" )
     public void kill(){
-//        todo: Немедленная остановка сервера
+        serverProcess.destroyForcibly();
     }
 
     @Command( description = "Immediately restart server" )
-    public void restart(){
-//        todo: Перезапуск сервера
+    public void restart() throws IOException{
+        ProcessBuilder processBuilder =
+                new ProcessBuilder( "java" , "-jar" , "flight-system-server-1.1.0.jar" , this.port.toString() );
+        Path path = Paths.get( "/Users/pavelgordeev/Desktop/errors.txt" );
+        if( !Files.exists( path ) ){
+            Files.createFile( path );
+        }
+        processBuilder.redirectOutput( path.toFile() );
+        processBuilder.directory( Paths.get( SettingsManager.rootFolderPath ).toFile() );
+        serverProcess = processBuilder.start();
     }
 }

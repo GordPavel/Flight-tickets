@@ -4,10 +4,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import transport.UserInformation;
-
-import java.io.File;
-import java.net.Socket;
 
 
 public class ClientMain extends Application{

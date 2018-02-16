@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.time.ZoneId;
 
+@SuppressWarnings( "WeakerAccess" )
 public class ZoneIdSerializer extends StdSerializer<ZoneId>{
 
     public ZoneIdSerializer(){

@@ -1,11 +1,13 @@
 package exceptions;
 
+import java.io.Serializable;
+
 /**
  Superclass for all exceptions in this project
  */
 
 @SuppressWarnings( "WeakerAccess" )
-public abstract class FlightAndRouteException extends RuntimeException{
+public abstract class FlightAndRouteException extends RuntimeException implements Serializable{
     /**
      Constructs an <code>FlightAndRouteException</code> with no
      detail message.

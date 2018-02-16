@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Predicate;
@@ -22,15 +23,21 @@ public class SettingsManager{
     private final static String defaultSettingsFileString =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
 
-    public static  Settings    settings;
-    private static JAXBContext jaxbContext;
-    private static String      settingsFilePath;
+    public static        Settings    settings;
+    private static       JAXBContext jaxbContext;
+    private static final String      settingsFilePath;
+
+    public static final String rootFolderPath;
+    public static final String basesCacheFiles;
+    public static final String basesFolder;
 
     static{
-        String serverFilesPath =
+        rootFolderPath =
                 Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-                           "UTF-8" ).getParent().getParent().getParent().toString() + "/serverfiles/";
-        settingsFilePath = serverFilesPath + "settings.xml";
+                           "UTF-8" ).getParent().getParent().getParent().toString() + "/target";
+        settingsFilePath = rootFolderPath + "/serverfiles/settings.xml";
+        basesCacheFiles = rootFolderPath + "/serverfiles/clientUpdates/";
+        basesFolder = rootFolderPath + "/serverfiles/bases/";
         try{
             jaxbContext = JAXBContext.newInstance( Settings.class , Base.class , User.class );
         }catch( JAXBException e ){
@@ -44,8 +51,8 @@ public class SettingsManager{
         if( !Files.exists( Paths.get( settingsFilePath ) ) ){
             Path filePath = Paths.get( settingsFilePath );
             try{
-                Files.createFile( filePath );
-                Files.write( filePath , defaultSettingsFileString.getBytes( StandardCharsets.UTF_8 ) );
+                Files.write( filePath , defaultSettingsFileString.getBytes( StandardCharsets.UTF_8 ) ,
+                             StandardOpenOption.CREATE_NEW );
             }catch( IOException e ){
                 e.printStackTrace();
             }
@@ -69,7 +76,7 @@ public class SettingsManager{
                     e1.printStackTrace();
                 }
             }
-            System.exit( 1 );
+            System.exit( 0 );
         }catch( IOException e ){
             e.printStackTrace();
             System.exit( 1 );
@@ -180,7 +187,7 @@ public class SettingsManager{
             Optional<User> optionalUser =
                     editingBase.getUsers().stream().filter( user -> userNamesEqual( oldName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
-                optionalUser.get().setName( newName );
+                optionalUser.get().setLogin( newName );
                 saveSettings();
             }else{
                 throw new CopyUser( "Base " + baseName + " doesn't have this client " + oldName );

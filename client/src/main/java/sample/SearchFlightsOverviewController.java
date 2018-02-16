@@ -23,7 +23,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.TimerTask;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,11 +58,11 @@ class SearchFlightsOverviewController{
     private RoutesFlightsOverviewController                 mainController;
     private Stage                                           thisStage;
     private boolean                                         correctSymbols;
-    private ObjectProperty<SerializablePredicate<Flight>>   flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
-    private FilteredList<Route>                             routeFilteredList =
+    private ObjectProperty<SerializablePredicate<Flight>> flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
+    private FilteredList<Route>                           routeFilteredList =
             DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
-    private ObjectProperty<SerializablePredicate<Route>>    routesPredicate   = new SimpleObjectProperty<>( route -> true );
-    private SerializablePredicate<Flight>                   searchPredecate = flight -> true;
+    private ObjectProperty<SerializablePredicate<Route>>  routesPredicate   = new SimpleObjectProperty<>( route -> true );
+    private SerializablePredicate<Flight>                 searchPredicate   = flight -> true;
 
     SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
         this.mainController = mainController;
@@ -193,12 +192,12 @@ class SearchFlightsOverviewController{
                                                  .and( arriveDatePredicate )
                                                  .and( flightTimePredicate );
             flightsPredicate.setValue( v );
-            searchPredecate=v;
+            searchPredicate =v;
             if( ( mainController instanceof RoutesFlightsReadOnlyOverviewController ) ){
                 ((RoutesFlightsReadOnlyOverviewController) mainController).restartTask(new TimerTask() {
                     @Override
                     public void run() {
-                        mainController.requestFlights(searchPredecate);
+                        mainController.requestFlights( searchPredicate );
                     }
                 });
             }
@@ -297,7 +296,7 @@ class SearchFlightsOverviewController{
      */
     @FXML
     private void handleSearchAction(){
-        mainController.requestFlights(searchPredecate);
+        mainController.requestFlights( searchPredicate );
     }
 
 }

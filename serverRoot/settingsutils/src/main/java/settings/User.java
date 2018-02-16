@@ -7,26 +7,26 @@ import javax.xml.bind.annotation.XmlRootElement;
 @SuppressWarnings( "WeakerAccess" )
 @XmlRootElement
 public class User implements Cloneable{
-    private String         name;
+    private String         login;
     private String         password;
     private UserPrivileges privilege;
 
     public User(){
     }
 
-    public User( String name , String password , UserPrivileges privilege ){
-        this.name = name;
+    public User( String login , String password , UserPrivileges privilege ){
+        this.login = login;
         this.password = password;
         this.privilege = privilege;
     }
 
     public String getLogin(){
-        return name;
+        return login;
     }
 
     @XmlAttribute
-    void setName( String name ){
-        this.name = name;
+    void setLogin( String login ){
+        this.login = login;
     }
 
     public String getPassword(){
@@ -49,19 +49,19 @@ public class User implements Cloneable{
 
     @Override
     public String toString(){
-        return String.format( "         %s\n" + "         %s\n" + "         %s\n\n" , name , password , privilege );
+        return String.format( "         %s\n" + "         %s\n" + "         %s\n\n" , login , password , privilege );
     }
 
     @Override
     public int hashCode(){
-        return name.hashCode() ^ password.hashCode() ^ privilege.hashCode();
+        return login.hashCode() ^ password.hashCode() ^ privilege.hashCode();
     }
 
     @Override
     public boolean equals( Object obj ){
         if( !( obj instanceof User ) ) return false;
         User user = ( User ) obj;
-        return this.name.equals( user.name ) && this.password.equals( user.password ) &&
+        return this.login.equals( user.login ) && this.password.equals( user.password ) &&
                this.privilege.equals( user.privilege );
     }
 

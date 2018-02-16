@@ -20,7 +20,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         super( thisStage );
     }
 
-    Timer     timer = new Timer();
+    final Timer timer = new Timer();
     TimerTask task  = new TimerTask(){
         @Override
         public void run(){

@@ -23,7 +23,6 @@ import model.Route;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
-import transport.ListChangeAdapter;
 import transport.UserInformation;
 
 import java.io.IOException;
@@ -310,13 +309,13 @@ abstract class RoutesFlightsOverviewController{
                 System.out.println( ex.getMessage() );
             }
 
-            if( data.notHasException() ){
+            data.withoutExceptionOrWith( data1 -> {
                 DataModelInstanceSaver.getInstance().clear();
                 Controller.getInstance().stopThread();
                 try{
                     Stage primaryStage = new Stage();
-                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiseOverview.fxml" ) );
-                    ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage , data );
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
+                    ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage , data1 );
                     loader.setController( controller );
                     primaryStage.setTitle( "Select DB" );
                     Scene scene = new Scene( loader.load() );
@@ -328,13 +327,13 @@ abstract class RoutesFlightsOverviewController{
                     System.out.println( "load problem" );
                     System.out.println( e.getMessage() );
                 }
-            }else{
+            } , error -> {
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Error" );
                 alert.setHeaderText( "Server error" );
-                alert.setContentText( data.getException().getMessage() );
+                alert.setContentText( error.getMessage() );
                 alert.showAndWait();
-            }
+            } );
         }
     }
 
@@ -394,24 +393,22 @@ abstract class RoutesFlightsOverviewController{
         if( Controller.getInstance().getClientSocket().isConnected() ){
             routeConnectLabel.setText( "Online" );
             flightConnectLabel.setText( "Online" );
-            Data data = new Data();
+            Data data;
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setPredicate( predicate );
             try{
                 mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
                                    Controller.getInstance().getUserInformation() );
                 data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
-                if( data.notHasException() ){
-                    for( ListChangeAdapter update : data.getChanges() ){
-                        update.apply( DataModelInstanceSaver.getInstance() );
-                    }
-                }else{
+                data.withoutExceptionOrWith( data1 -> {
+                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                } , error -> {
                     Alert alert = new Alert( Alert.AlertType.WARNING );
                     alert.setTitle( "Error" );
                     alert.setHeaderText( "Server error" );
-                    alert.setContentText( data.getException().getMessage() );
+                    alert.setContentText( error.getMessage() );
                     alert.showAndWait();
-                }
+                } );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
             }
