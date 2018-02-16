@@ -1,5 +1,6 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.FlightAndRouteException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,8 +8,15 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
+import model.Flight;
+import model.Route;
+import transport.Data;
+import transport.ListChangeAdapter;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -113,6 +121,28 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
             }
+            try {
+                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
+                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
+                Data data = new Data();
+                ObjectMapper mapper = new ObjectMapper();
+
+                ArrayList<Route> routes = new ArrayList<>();
+                routes.add( selectedRoute );
+
+                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+                changes.add( ListChangeAdapter.removeRoute( routes ) );
+
+                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+
+                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                // get Data
+                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                Controller.getInstance().getUserInformation().setChanges(null);
+            }catch( IOException e ){
+                System.out.println("Connection problem");
+                System.out.println( e.getMessage() );
+            }
         } );
         /**
          * TODO: set message to delete route to server
@@ -179,6 +209,28 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 DataModelInstanceSaver.getInstance().removeFlight( selectedFlight.getNumber() );
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
+            }
+            try {
+                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
+                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
+                Data data = new Data();
+                ObjectMapper mapper = new ObjectMapper();
+
+                ArrayList<Flight> flights = new ArrayList<>();
+                flights.add( selectedFlight );
+
+                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+                changes.add( ListChangeAdapter.removeFlight( flights ) );
+
+                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+
+                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                // get Data
+
+                Controller.getInstance().getUserInformation().setChanges(null);
+            }catch( IOException e ){
+                System.out.println("Connection problem");
+                System.out.println( e.getMessage() );
             }
         } );
         /**

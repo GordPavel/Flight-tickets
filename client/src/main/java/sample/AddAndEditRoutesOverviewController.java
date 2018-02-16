@@ -1,5 +1,6 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import exceptions.FlightAndRouteException;
 import javafx.beans.property.BooleanProperty;
@@ -12,7 +13,12 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.DataModelInstanceSaver;
 import model.Route;
+import transport.Data;
+import transport.ListChangeAdapter;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -169,7 +175,35 @@ class AddAndEditRoutesOverviewController{
                                                           destinationCityChoice.getSelectionModel().getSelectedItem() )
                                                           .orElseThrow( IllegalStateException::new ) );
             }
-//            TODO: put here request to server to add flight
+//            TODO: put here request to server to add route
+            try {
+                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
+                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
+                Data data = new Data();
+                ObjectMapper mapper = new ObjectMapper();
+                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+
+                if (isAdd){
+                    ArrayList<Route> routes = new ArrayList<>();
+                    routes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem(), destinationCityChoice.getSelectionModel().getSelectedItem()));
+                    changes.add( ListChangeAdapter.addRoute( routes ) );
+                }else{
+                    ArrayList<Route> oldRoutes = new ArrayList<>(), newRoutes = new ArrayList<>();
+                    oldRoutes.add( editingRoute );
+                    newRoutes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem(), destinationCityChoice.getSelectionModel().getSelectedItem()));
+                    changes.add( ListChangeAdapter.editRoute( oldRoutes, newRoutes ) );
+                }
+
+                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+
+                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                // get Data
+                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                Controller.getInstance().getUserInformation().setChanges(null);
+            }catch( IOException e ){
+                System.out.println("Connection problem");
+                System.out.println( e.getMessage() );
+            }
             Controller.changed = true;
             closeWindow();
         }catch( FlightAndRouteException e ){
