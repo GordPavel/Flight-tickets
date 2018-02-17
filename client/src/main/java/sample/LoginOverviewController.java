@@ -37,7 +37,7 @@ class LoginOverviewController{
     @FXML
     private void initialize(){
         loginTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        ipTextField.setText( "127.0.0.1" );
+        ipTextField.setText( "85.113.55.203" );
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
@@ -87,10 +87,8 @@ class LoginOverviewController{
                         Controller.getInstance().getClientSocket().getOutputStream() ) ;
                      DataInputStream inputStream = new DataInputStream(
                              Controller.getInstance().getClientSocket().getInputStream() ) ){
-                    System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     dataOutputStream.writeUTF(
                             mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                    System.out.println( "Ушло" );
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );

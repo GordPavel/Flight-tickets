@@ -1,5 +1,8 @@
 package sample;
 
+import model.DataModelInstanceSaver;
+
+import java.io.*;
 import java.net.Socket;
 
 
@@ -34,9 +37,10 @@ class ReadOnlyThread extends FaRThread{
 
     public void run(){
         while( !stop ){
+            saveDM();
             updateData();
             try{
-                Thread.sleep( 1000 );
+                Thread.sleep( 60000 );
             }catch( InterruptedException e ){
 
             }
@@ -48,5 +52,21 @@ class ReadOnlyThread extends FaRThread{
     synchronized void updateData() {
 
         parentController.requestUpdate(null);
+    }
+
+    private void saveDM(){
+        File file = new File(Controller.getInstance().getUserInformation().getDataBase()+".dm");
+        try {
+            if (!file.exists()) {
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), "utf-8"));
+                writer.write("temp");
+            }
+            DataModelInstanceSaver.getInstance().saveTo(new FileOutputStream(file));
+        }catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        }catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }

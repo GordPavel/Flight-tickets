@@ -17,7 +17,6 @@ import java.net.Socket;
  */
 public class WriteThread extends FaRThread{
 
-    Socket clientSocket;
     private boolean stop = false;
 
     public void setStop(){
@@ -29,7 +28,6 @@ public class WriteThread extends FaRThread{
     }
 
     public void start(){
-        clientSocket = Controller.getInstance().getClientSocket();
         super.start();
     }
 

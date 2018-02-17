@@ -3,7 +3,12 @@ package sample;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import model.DataModelInstanceSaver;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -53,7 +58,6 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
 
 
         Controller.getInstance().setThread( new ReadOnlyThread(this) );
-        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         thisStage.setOnHidden( event -> timer.cancel() );
         Controller.getInstance().startThread();
         infoMenuButton.setOnAction( event -> handleAboutAction() );
@@ -92,6 +96,8 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         alert.setContentText( " - Use * and ? in search field instead of many or one unknown symbol;\n" );
         alert.showAndWait();
     }
+
+
 }
 
 

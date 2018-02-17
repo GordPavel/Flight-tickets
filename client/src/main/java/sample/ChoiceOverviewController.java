@@ -10,14 +10,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import model.DataModel;
 import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 import transport.Data;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 import java.util.Optional;
 
@@ -85,18 +84,31 @@ class ChoiceOverviewController{
             try( DataOutputStream dataOutputStream = new DataOutputStream(
                     Controller.getInstance().getClientSocket().getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream(
-                         Controller.getInstance().getClientSocket().getInputStream() ) ){
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                System.out.println( "Ушло" );
+                         Controller.getInstance().getClientSocket().getInputStream() ) ) {
+                dataOutputStream.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
+                System.out.println("Ушло");
                 String testString = inputStream.readUTF();
-                System.out.println( testString );
-                data = mapper.readerFor( Data.class ).readValue( testString );
+                System.out.println(testString);
+                data = mapper.readerFor(Data.class).readValue(testString);
+            } catch (IOException e) {
+                System.out.println( "load problem" );
+                System.out.println( e.getMessage() );
+            }
+            try{
                 if( data.hasNotException() ){
-                    for( Route route : data.getRoutes() ){
-                        DataModelInstanceSaver.getInstance().addRoute( route );
-                    }
-                    for( Flight flight : data.getFlights() ){
-                        DataModelInstanceSaver.getInstance().addFlight( flight );
+                    if ((controller instanceof RoutesFlightsReadOnlyOverviewController)&&
+                            (data.getRoutes()==null)&&
+                            (new File(Controller.getInstance().getUserInformation().getDataBase()+".dm")).exists()) {
+                        DataModelInstanceSaver.getInstance().importFrom(new FileInputStream(Controller.getInstance().getUserInformation().getDataBase()+".dm"));
+                        data.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                    }else {
+                        System.out.println((new File(Controller.getInstance().getUserInformation().getDataBase()+".dm")).exists());
+                        for (Route route : data.getRoutes()) {
+                            DataModelInstanceSaver.getInstance().addRoute(route);
+                        }
+                        for (Flight flight : data.getFlights()) {
+                            DataModelInstanceSaver.getInstance().addFlight(flight);
+                        }
                     }
                     FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
                     loader.setController( controller );

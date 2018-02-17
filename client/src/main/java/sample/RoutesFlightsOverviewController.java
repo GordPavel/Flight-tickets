@@ -25,6 +25,8 @@ import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.UserInformation;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -292,6 +294,9 @@ abstract class RoutesFlightsOverviewController{
 
     private void handleChangeDBAction(){
 
+        DataModelInstanceSaver.getInstance().clear();
+        Controller.getInstance().stopThread();
+
         if( !Controller.getInstance().getClientSocket().isConnected() ){
             Controller.getInstance().reconnect();
         }
@@ -301,17 +306,20 @@ abstract class RoutesFlightsOverviewController{
             Controller.getInstance().getClientSocket().isConnected() ){
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setDataBase( null );
-            try{
-                mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
-                                   Controller.getInstance().getUserInformation() );
-                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+            try( DataOutputStream dataOutputStream = new DataOutputStream(
+                    Controller.getInstance().getClientSocket().getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream(
+                         Controller.getInstance().getClientSocket().getInputStream() ) ){
+                dataOutputStream.writeUTF(
+                        mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
+                ex.printStackTrace();
             }
 
             data.withoutExceptionOrWith( data1 -> {
-                DataModelInstanceSaver.getInstance().clear();
-                Controller.getInstance().stopThread();
+
                 try{
                     Stage primaryStage = new Stage();
                     FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
@@ -385,6 +393,10 @@ abstract class RoutesFlightsOverviewController{
     }
 
     public void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
+        if (Controller.getInstance().getClientSocket().isClosed())
+        {
+            Controller.getInstance().reconnect();
+        }
         if( !Controller.getInstance().getClientSocket().isConnected() ){
             routeConnectLabel.setText( "Offline" );
             flightConnectLabel.setText( "Offline" );
@@ -396,11 +408,13 @@ abstract class RoutesFlightsOverviewController{
             Data data;
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setPredicate( predicate );
-            try{
-                mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
-                                   Controller.getInstance().getUserInformation() );
-                data = mapper.readerFor( Data.class )
-                             .readValue( Controller.getInstance().getClientSocket().getInputStream() );
+            try( DataOutputStream dataOutputStream = new DataOutputStream(
+                    Controller.getInstance().getClientSocket().getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream(
+                         Controller.getInstance().getClientSocket().getInputStream() ) ){
+                dataOutputStream.writeUTF(
+                        mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
                 } , error -> {
@@ -412,6 +426,8 @@ abstract class RoutesFlightsOverviewController{
                 } );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println("Yep");
             }
             Controller.getInstance().getUserInformation().setPredicate( null );
         }

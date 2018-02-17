@@ -44,7 +44,6 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         flightConnectLabel.setVisible(false);
 
         Controller.getInstance().setThread( new WriteThread() );
-        thisStage.setOnCloseRequest( event -> Controller.getInstance().stopThread() );
         Controller.getInstance().startThread();
 
         addRouteButton.setOnAction( event -> handleAddRouteAction() );
