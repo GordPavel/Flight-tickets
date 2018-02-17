@@ -26,6 +26,11 @@ public class UserInformation{
 
     public UserInformation(){}
 
+    public UserInformation( String login , String password ){
+        this.login = login;
+        this.password = password;
+    }
+
     @JsonGetter( "login" )
     public String getLogin(){
         return login;

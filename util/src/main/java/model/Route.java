@@ -72,8 +72,8 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
 
     @Override
     public int compareTo( Route o ){
-        int from = this.from.toString().compareToIgnoreCase( o.from.toString() );
-        return from != 0 ? from : this.to.toString().compareToIgnoreCase( o.to.toString() );
+        int from = this.from.getId().compareToIgnoreCase( o.from.getId() );
+        return from != 0 ? from : this.to.getId().compareToIgnoreCase( o.to.getId() );
     }
 
     @Override

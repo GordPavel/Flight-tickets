@@ -7,7 +7,12 @@
             <password>pass</password>
             <privilege>ReadWrite</privilege>
         </users>
+        <users login="reader">
+            <password>pass</password>
+            <privilege>Read</privilege>
+        </users>
     </base>
     <cacheTimeout>180000</cacheTimeout>
+    <logFile>/Volumes/Users/pavelgordee/Desktop/errors.txt</logFile>
     <rootPassword>pass</rootPassword>
 </settings>

@@ -1,5 +1,6 @@
 package model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import transport.UserInformation;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -48,19 +50,19 @@ class DataModelTest{
                                                              .sorted()
                                                              .filter( pattern.asPredicate() )
                                                              .map( s -> {
-                                                           Matcher matcher = pattern.matcher( s );
-                                                           matcher.find();
-                                                           return matcher.group( 1 ) + "/" + matcher.group( 2 );
-                                                       } )
+                                                                 Matcher matcher = pattern.matcher( s );
+                                                                 matcher.find();
+                                                                 return matcher.group( 1 ) + "/" + matcher.group( 2 );
+                                                             } )
                                                              .filter( Pattern.compile( "(Etc|SystemV)/.+" )
-                                                                       .asPredicate()
-                                                                       .negate() )
+                                                                             .asPredicate()
+                                                                             .negate() )
                                                              .distinct()
                                                              .collect( Collectors.groupingBy( s -> {
-                                                           Matcher matcher = pattern.matcher( s );
-                                                           matcher.find();
-                                                           return matcher.group( 1 );
-                                                       } ) );
+                                                                 Matcher matcher = pattern.matcher( s );
+                                                                 matcher.find();
+                                                                 return matcher.group( 1 );
+                                                             } ) );
     private final List<ZoneId>              allZones = zones.values()
                                                             .stream()
                                                             .flatMap( Collection::stream )
@@ -112,14 +114,14 @@ class DataModelTest{
         ZoneId randomAirport = new ArrayList<>( airports ).get( random.nextInt( airports.size() ) );
         assertIterableEquals( airports.stream()
                                       .map( ZoneId::getId )
-                                      .filter( s -> s.endsWith( randomAirport.toString()
+                                      .filter( s -> s.endsWith( randomAirport.getId()
                                                                              .substring(
-                                                                                     randomAirport.toString().length() -
+                                                                                     randomAirport.getId().length() -
                                                                                      2 ) ) )
                                       .collect( Collectors.toList() ) , dataModel.listAllAirportsWithPredicate(
-                airport -> airport.toString()
-                                  .endsWith( randomAirport.toString()
-                                                          .substring( randomAirport.toString().length() - 2 ) ) )
+                airport -> airport.getId()
+                                  .endsWith( randomAirport.getId()
+                                                          .substring( randomAirport.getId().length() - 2 ) ) )
                                                                                  .stream()
                                                                                  .map( ZoneId::getId )
                                                                                  .collect( Collectors.toList() ) ,
@@ -397,4 +399,20 @@ class DataModelTest{
         addedRoutes.forEach( dataModel::addRoute );
     }
 
+    @Test
+    void test() throws IOException{
+        ObjectMapper mapper = new ObjectMapper();
+
+        UserInformation information = new UserInformation( "login" , "password" );
+        information.setPredicate( flightOrRoute -> getRoutePattern( "\\w+/\\w+" ).matcher(
+                ( ( Route ) flightOrRoute ).getTo().getId() ).matches() );
+        String str = mapper.writeValueAsString( information );
+        System.out.println( str );
+        UserInformation information1 = mapper.readerFor( UserInformation.class ).readValue( str );
+    }
+
+    private Pattern getRoutePattern( String searchText ){
+        return Pattern.compile( ".*" + searchText.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE );
+    }
 }

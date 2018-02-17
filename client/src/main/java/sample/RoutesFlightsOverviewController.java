@@ -154,11 +154,8 @@ abstract class RoutesFlightsOverviewController{
     }
 
     private void searchListeners( String departure , String destination ){
-        Predicate<Route> v = route ->
-                Pattern.compile( ".*" + departure.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                 Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                Pattern.compile( ".*" + destination.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                 Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches();
+        Predicate<Route> v = route -> getRoutePattern( departure ).matcher( route.getFrom().getId() ).matches() &&
+                                      getRoutePattern( destination ).matcher( route.getTo().getId() ).matches();
         routesPredicate.setValue( v );
         searchFlightButton.setOnAction( event -> handleSearchFlightAction() );
     }
@@ -311,8 +308,7 @@ abstract class RoutesFlightsOverviewController{
                     Controller.getInstance().getClientSocket().getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream(
                          Controller.getInstance().getClientSocket().getInputStream() ) ){
-                dataOutputStream.writeUTF(
-                        mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
@@ -394,8 +390,7 @@ abstract class RoutesFlightsOverviewController{
     }
 
     public void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
-        if (Controller.getInstance().getClientSocket().isClosed())
-        {
+        if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
         if( !Controller.getInstance().getClientSocket().isConnected() ){
@@ -413,8 +408,7 @@ abstract class RoutesFlightsOverviewController{
                     Controller.getInstance().getClientSocket().getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream(
                          Controller.getInstance().getClientSocket().getInputStream() ) ){
-                dataOutputStream.writeUTF(
-                        mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
@@ -428,7 +422,7 @@ abstract class RoutesFlightsOverviewController{
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();
-                System.out.println("Yep");
+                System.out.println( "Yep" );
             }
             Controller.getInstance().getUserInformation().setPredicate( null );
         }
@@ -469,11 +463,13 @@ abstract class RoutesFlightsOverviewController{
      Search for routes
      */
     private void handleSearchRouteAction(){
-        requestRoutes( route -> Pattern.compile(
-                ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() && Pattern.compile(
-                ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches() );
+        requestRoutes( route -> getRoutePattern( departure.getText() ).matcher( route.getFrom().getId() ).matches() &&
+                                getRoutePattern( destination.getText() ).matcher( route.getTo().getId() ).matches() );
+    }
+
+    private Pattern getRoutePattern( String searchText ){
+        return Pattern.compile( ".*" + searchText.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
+                                Pattern.CASE_INSENSITIVE );
     }
 
 }

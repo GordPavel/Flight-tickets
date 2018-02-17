@@ -74,7 +74,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
                         Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
                                 Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
                                 Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().toString() ).matches());
+                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches());
             }
         });
     }
