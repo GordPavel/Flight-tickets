@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @SuppressWarnings( "WeakerAccess" )
 public class EnteredInterface implements ShellDependent{
@@ -93,11 +94,16 @@ public class EnteredInterface implements ShellDependent{
         this.port = port;
         ProcessBuilder processBuilder =
                 new ProcessBuilder( "java" , "-jar" , "flight-system-server-1.1.0.jar" , this.port.toString() );
-        Path path = Paths.get( SettingsManager.logFile() );
-        if( !Files.exists( path ) ){
-            Files.createFile( path );
-        }
-        processBuilder.redirectOutput( path.toFile() );
+        Optional.ofNullable( SettingsManager.logFile() ).map( Paths::get ).ifPresent( path -> {
+            if( !Files.exists( path ) ){
+                try{
+                    Files.createFile( path );
+                }catch( IOException e ){
+                    e.printStackTrace();
+                }
+            }
+            processBuilder.redirectOutput( path.toFile() );
+        } );
         processBuilder.directory( Paths.get( SettingsManager.rootFolderPath ).toFile() );
         serverProcess = processBuilder.start();
     }
