@@ -1,8 +1,8 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.control.Alert;
 import model.DataModelInstanceSaver;
-import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 
 import java.io.DataInputStream;
@@ -44,7 +44,7 @@ public class WriteThread extends FaRThread{
                 ObjectMapper mapper = new ObjectMapper();
                 try( DataInputStream inputStream = new DataInputStream(
                         Controller.getInstance().getClientSocket().getInputStream() ) ){
-                    data = mapper.reader( Data.class ).readValue( inputStream.readUTF() );
+                    data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                     data.withoutExceptionOrWith( data1 -> data1.getChanges()
                                                                .forEach( update -> update.apply(
                                                                        DataModelInstanceSaver.getInstance() ) ) ,

@@ -1,11 +1,11 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.codehaus.jackson.map.ObjectMapper;
 import transport.Data;
 import transport.UserInformation;
 
@@ -37,7 +37,7 @@ class LoginOverviewController{
     @FXML
     private void initialize(){
         loginTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        ipTextField.setText( "85.113.55.203" );
+        ipTextField.setText( "127.0.0.1" );
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
@@ -62,7 +62,7 @@ class LoginOverviewController{
         if( Controller.getInstance().getClientSocket() != null &&
             Controller.getInstance().getClientSocket().isConnected() ){
 
-            Pattern pattern = Pattern.compile( "^[\\.\\w\\d\\-_]+$" );
+            Pattern pattern = Pattern.compile( "^[.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
             if( !( pattern.matcher( loginTextField.getText() ).matches() &&
@@ -91,7 +91,7 @@ class LoginOverviewController{
                     dataOutputStream.writeUTF(
                             mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     System.out.println( "Ушло" );
-                    data = mapper.reader( Data.class ).readValue( inputStream.readUTF() );
+                    data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }

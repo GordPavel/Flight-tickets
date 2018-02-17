@@ -32,9 +32,10 @@ public class SettingsManager{
     public static final String basesFolder;
 
     static{
-        rootFolderPath =
-                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-                           "UTF-8" ).getParent().getParent().getParent().toString() + "/target";
+        rootFolderPath = "/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot"
+//                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
+//                           "UTF-8" ).getParent().getParent().getParent().toString()
+                + "/target";
         settingsFilePath = rootFolderPath + "/serverfiles/settings.xml";
         basesCacheFiles = rootFolderPath + "/serverfiles/clientUpdates/";
         basesFolder = rootFolderPath + "/serverfiles/bases/";
@@ -122,6 +123,15 @@ public class SettingsManager{
         }else{
             throw new CopyBase( "Server already contains this base " + name );
         }
+    }
+
+    public static void setLogFile( String path ){
+        settings.setLogFile( path );
+        saveSettings();
+    }
+
+    public static String logFile(){
+        return settings.getLogFile();
     }
 
     public static void deleteBase( String name ){

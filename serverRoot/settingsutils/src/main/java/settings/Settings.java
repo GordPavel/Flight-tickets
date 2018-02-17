@@ -13,6 +13,7 @@ public class Settings implements Cloneable{
     private String adminName;
     private String rootPassword;
     private Long   cacheTimeout;
+    private String logFile;
     private List<Base> base = new ArrayList<>();
 
     public Settings(){
@@ -48,6 +49,15 @@ public class Settings implements Cloneable{
 
     public List<Base> getBase(){
         return base;
+    }
+
+    public String getLogFile(){
+        return logFile;
+    }
+
+    @XmlElement
+    public void setLogFile( String logFile ){
+        this.logFile = logFile;
     }
 
     @Override
