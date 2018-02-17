@@ -44,7 +44,7 @@ class ChoiceOverviewController{
     @FXML
     private void initialize(){
         selectButton.setOnAction( event -> handleSelectAction() );
-        cancelButton.setOnAction( event -> closeWindow() );
+        cancelButton.setOnAction( event -> handleCancelAction() );
         baseTable.getSelectionModel().setSelectionMode( SelectionMode.SINGLE );
         nameColumn.setCellValueFactory(
                 ( TableColumn.CellDataFeatures<Map.Entry<String, String>, String> p ) -> new SimpleStringProperty(
@@ -154,6 +154,23 @@ class ChoiceOverviewController{
 //        }
 
 
+    }
+
+    private void handleCancelAction(){
+        try {
+            Stage loginStage = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/LoginOverview.fxml"));
+            LoginOverviewController controller = new LoginOverviewController(loginStage);
+            loader.setController(controller);
+            loginStage.setTitle("Login");
+            Scene scene = new Scene(loader.load());
+            loginStage.setScene(scene);
+            loginStage.setResizable(false);
+            loginStage.show();
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+        }
+        closeWindow();
     }
 
     private void closeWindow(){

@@ -296,6 +296,7 @@ abstract class RoutesFlightsOverviewController{
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
+        Controller.getInstance().reconnect();
 
         if( !Controller.getInstance().getClientSocket().isConnected() ){
             Controller.getInstance().reconnect();

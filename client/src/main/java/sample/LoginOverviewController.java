@@ -87,9 +87,13 @@ class LoginOverviewController{
                         Controller.getInstance().getClientSocket().getOutputStream() ) ;
                      DataInputStream inputStream = new DataInputStream(
                              Controller.getInstance().getClientSocket().getInputStream() ) ){
+                    System.out.println(mapper.writeValueAsString( Controller.getInstance().getUserInformation() ));
+                    System.out.println("Connected: "+Controller.getInstance().getClientSocket().isConnected());
                     dataOutputStream.writeUTF(
                             mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    System.out.println("Write succes");
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                    System.out.println("Read succes");
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }
