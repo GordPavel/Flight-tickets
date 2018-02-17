@@ -1,10 +1,13 @@
 package sample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import transport.Data;
 import transport.UserInformation;
@@ -41,7 +44,21 @@ class LoginOverviewController{
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
+        ipTextField.setOnKeyReleased(enterHandler);
+        loginTextField.setOnKeyReleased(enterHandler);
+        portTextField.setOnKeyReleased(enterHandler);
+        passwordField.setOnKeyReleased(enterHandler);
+
+
     }
+
+    EventHandler<KeyEvent> enterHandler = new EventHandler<KeyEvent>() {
+        @Override
+        public void handle(KeyEvent event) {
+            if (event.getCode()== KeyCode.ENTER)
+                handleLogInAction();
+        }
+    };
 
 
     /**
@@ -65,14 +82,6 @@ class LoginOverviewController{
             Pattern pattern = Pattern.compile( "^[.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
-            if( !( pattern.matcher( loginTextField.getText() ).matches() &&
-                   pattern.matcher( passwordField.getText() ).matches() ) ){
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Error while log in " );
-                alert.setHeaderText( "Unacceptable symbols" );
-                alert.setContentText( "Please check login and try again." );
-                alert.showAndWait();
-            }
 
             /*
              */

@@ -397,7 +397,8 @@ abstract class RoutesFlightsOverviewController{
             flightConnectLabel.setText( "Online" );
             Data data;
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate( predicate );
+            Controller.getInstance().getUserInformation().setPredicate(  route -> getRoutePattern( departure.getText() ).matcher( ((Route)route).getFrom().getId() ).matches() &&
+                    getRoutePattern( destination.getText() ).matcher( ((Route)route).getTo().getId() ).matches() );
             try( DataOutputStream dataOutputStream = new DataOutputStream(
                     Controller.getInstance().getClientSocket().getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream(

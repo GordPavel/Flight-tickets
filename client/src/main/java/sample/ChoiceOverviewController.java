@@ -5,10 +5,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
@@ -56,7 +59,16 @@ class ChoiceOverviewController{
         baseTable.setItems( observableList );
         baseTable.getColumns().setAll( nameColumn , rightsColumn );
         baseTable.getSelectionModel().select( 0 );
+        baseTable.setOnKeyReleased(enterHandler);
     }
+
+    EventHandler<KeyEvent> enterHandler = new EventHandler<KeyEvent>() {
+        @Override
+        public void handle(KeyEvent event) {
+            if (event.getCode()== KeyCode.ENTER)
+                handleSelectAction();
+        }
+    };
 
     private void handleSelectAction(){
 
