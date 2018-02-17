@@ -1,5 +1,6 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import exceptions.FlightAndRouteException;
 import javafx.beans.binding.StringBinding;
@@ -20,7 +21,6 @@ import model.DataModelInstanceSaver;
 import model.Flight;
 import model.FlightOrRoute;
 import model.Route;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.UserInformation;
@@ -399,7 +399,8 @@ abstract class RoutesFlightsOverviewController{
             try{
                 mapper.writeValue( Controller.getInstance().getClientSocket().getOutputStream() ,
                                    Controller.getInstance().getUserInformation() );
-                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                data = mapper.readerFor( Data.class )
+                             .readValue( Controller.getInstance().getClientSocket().getInputStream() );
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
                 } , error -> {

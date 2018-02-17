@@ -78,6 +78,14 @@ public class EnteredInterface implements ShellDependent{
                     .commandLoop();
     }
 
+    @Command( description = "Write path to file where write all server logs", abbrev = "-sLF", name = "--setLogFile" )
+    public void setLogFile(
+            @Param( description = "path to file with server logs", name = "path" )
+                    String path ){
+        SettingsManager.setLogFile( path );
+        System.out.println( "To accept all changes please restart server. ( command <restart> )" );
+    }
+
     @Command( description = "Start server" )
     public void start(
             @Param( description = "listening port for server", name = "port" )
@@ -85,7 +93,7 @@ public class EnteredInterface implements ShellDependent{
         this.port = port;
         ProcessBuilder processBuilder =
                 new ProcessBuilder( "java" , "-jar" , "flight-system-server-1.1.0.jar" , this.port.toString() );
-        Path path = Paths.get( "/Users/pavelgordeev/Desktop/errors.txt" );
+        Path path = Paths.get( SettingsManager.logFile() );
         if( !Files.exists( path ) ){
             Files.createFile( path );
         }
