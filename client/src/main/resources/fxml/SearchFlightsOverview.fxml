@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
+<!--suppress ALL -->
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0"
             prefWidth="461.0" snapToPixel="false" style="caspian" xmlns="http://javafx.com/javafx/9"
             xmlns:fx="http://javafx.com/fxml/1">

@@ -20,7 +20,7 @@ public class EnteredInterface implements ShellDependent{
 
     private Shell   shell;
     private Integer port;
-    private Integer stoppingPort = 5556;
+    private final Integer stoppingPort = 5556;
 
     @Override
     public void cliSetShell( Shell shell ){
@@ -153,14 +153,14 @@ public class EnteredInterface implements ShellDependent{
     }
 
     static class Process{
-        Integer UID;
-        Integer PID;
-        Integer PPID;
-        Integer C;
-        String  STIME;
-        String  TTY;
-        String  TIME;
-        Path    path;
+        final Integer UID;
+        final Integer PID;
+        final Integer PPID;
+        final Integer C;
+        final String  STIME;
+        final String  TTY;
+        final String  TIME;
+        final Path    path;
 
         static Optional<Process> instace( String processString ){
             Matcher matcher = pattern.matcher( processString );

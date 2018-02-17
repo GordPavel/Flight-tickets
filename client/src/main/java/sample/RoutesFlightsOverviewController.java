@@ -332,13 +332,7 @@ abstract class RoutesFlightsOverviewController{
                     System.out.println( "load problem" );
                     System.out.println( e.getMessage() );
                 }
-            } , error -> {
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Error" );
-                alert.setHeaderText( "Server error" );
-                alert.setContentText( error.getMessage() );
-                alert.showAndWait();
-            } );
+            } , ClientMain::showWarningServerError );
         }
     }
 
@@ -410,15 +404,10 @@ abstract class RoutesFlightsOverviewController{
                          Controller.getInstance().getClientSocket().getInputStream() ) ){
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
-                } , error -> {
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
-                    alert.setTitle( "Error" );
-                    alert.setHeaderText( "Server error" );
-                    alert.setContentText( error.getMessage() );
-                    alert.showAndWait();
-                } );
+                } , ClientMain::showWarningServerError );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();

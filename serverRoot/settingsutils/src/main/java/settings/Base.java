@@ -34,6 +34,7 @@ public class Base implements Cloneable{
         return name;
     }
 
+    @SuppressWarnings( "unused" )
     @XmlAttribute
     void setName( String name ){
         this.name = name;
@@ -59,6 +60,7 @@ public class Base implements Cloneable{
                                                  user1.getLogin() , user1.getPassword() ) );
     }
 
+    @SuppressWarnings( "unused" )
     @XmlElement
     void setUsers( List<User> users ){
         this.users = users;

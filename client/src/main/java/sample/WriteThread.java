@@ -1,13 +1,11 @@
 package sample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.scene.control.Alert;
 import model.DataModelInstanceSaver;
 import transport.Data;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.Socket;
 
 
 /**
@@ -46,13 +44,7 @@ public class WriteThread extends FaRThread{
                     data.withoutExceptionOrWith( data1 -> data1.getChanges()
                                                                .forEach( update -> update.apply(
                                                                        DataModelInstanceSaver.getInstance() ) ) ,
-                                                 error -> {
-                                                     Alert alert = new Alert( Alert.AlertType.WARNING );
-                                                     alert.setTitle( "Error" );
-                                                     alert.setHeaderText( "Server error" );
-                                                     alert.setContentText( error.getMessage() );
-                                                     alert.showAndWait();
-                                                 } );
+                                                 ClientMain::showWarningServerError );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }

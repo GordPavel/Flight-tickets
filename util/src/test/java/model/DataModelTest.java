@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.FaRDateMismatchException;
 import exceptions.FaRIllegalEditedData;
 import exceptions.FaRNotRelatedData;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import transport.UserInformation;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -399,20 +397,4 @@ class DataModelTest{
         addedRoutes.forEach( dataModel::addRoute );
     }
 
-    @Test
-    void test() throws IOException{
-        ObjectMapper mapper = new ObjectMapper();
-
-        UserInformation information = new UserInformation( "login" , "password" );
-        information.setPredicate( flightOrRoute -> getRoutePattern( "\\w+/\\w+" ).matcher(
-                ( ( Route ) flightOrRoute ).getTo().getId() ).matches() );
-        String str = mapper.writeValueAsString( information );
-        System.out.println( str );
-        UserInformation information1 = mapper.readerFor( UserInformation.class ).readValue( str );
-    }
-
-    private Pattern getRoutePattern( String searchText ){
-        return Pattern.compile( ".*" + searchText.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE );
-    }
 }

@@ -23,9 +23,9 @@ public class SettingsManager{
     private final static String defaultSettingsFileString =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
 
-    public static        Settings    settings;
-    private static       JAXBContext jaxbContext;
-    private static final String      settingsFilePath;
+    public static                                    Settings    settings;
+    @SuppressWarnings( "CanBeFinal" ) private static JAXBContext jaxbContext;
+    private static final                             String      settingsFilePath;
 
     public static final String rootFolderPath;
     public static final String basesCacheFiles;

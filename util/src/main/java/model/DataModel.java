@@ -188,6 +188,7 @@ public class DataModel{
      @throws FaRNotRelatedData        it has route, that doesn't exist in database
      @throws FaRSameNameException     it duplicates in ( planeID && route && arrive date && departure date ).
      */
+    @SuppressWarnings( "ConstantConditions" )
     public void editFlight( Flight flight , Route newRoute , String newPlaneId , ZonedDateTime newDepartureDate ,
                             ZonedDateTime newArriveDate ) throws FlightAndRouteException{
         if( !legalSymbolsChecker.matcher( newPlaneId != null ? newPlaneId : flight.getPlaneID() ).matches() ){

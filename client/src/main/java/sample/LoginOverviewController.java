@@ -87,13 +87,12 @@ class LoginOverviewController{
                         Controller.getInstance().getClientSocket().getOutputStream() ) ;
                      DataInputStream inputStream = new DataInputStream(
                              Controller.getInstance().getClientSocket().getInputStream() ) ){
-                    System.out.println(mapper.writeValueAsString( Controller.getInstance().getUserInformation() ));
-                    System.out.println("Connected: "+Controller.getInstance().getClientSocket().isConnected());
+                    System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
                     dataOutputStream.writeUTF(
                             mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                    System.out.println("Write succes");
+                    System.out.println( "Ушло" );
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                    System.out.println("Read succes");
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }
@@ -114,13 +113,7 @@ class LoginOverviewController{
                         System.out.println( "load problem" );
                         System.out.println( e.getMessage() );
                     }
-                } , error -> {
-                    Alert alert = new Alert( Alert.AlertType.WARNING );
-                    alert.setTitle( "Error" );
-                    alert.setHeaderText( "Server error" );
-                    alert.setContentText( error.getMessage() );
-                    alert.showAndWait();
-                } );
+                } , ClientMain::showWarningServerError );
             }else{
                 Alert alert = new Alert( Alert.AlertType.WARNING );
                 alert.setTitle( "Error" );
@@ -163,7 +156,7 @@ class LoginOverviewController{
                                              "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
         Pattern portPattern = Pattern.compile( "[0-9]{1,5}" );
 
-        Pattern textPattern = Pattern.compile( "[\\.\\w\\d\\-_]*" );
+        Pattern textPattern = Pattern.compile( "[.\\w\\d\\-_]*" );
         Matcher matcher = textPattern.matcher( loginTextField.getText() );
         if( !matcher.matches() ){
             loginTextField.setStyle( "-fx-text-inner-color: red;" );

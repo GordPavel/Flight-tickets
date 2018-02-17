@@ -1,5 +1,6 @@
 package exceptions;
 
+@SuppressWarnings( "unused" )
 public class FaRIllegalDataException extends FlightAndRouteException{
     /**
      Constructs an <code>FaRIllegalEditedData</code> with no

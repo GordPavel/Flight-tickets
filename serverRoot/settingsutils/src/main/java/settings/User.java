@@ -65,6 +65,7 @@ public class User implements Cloneable{
                this.privilege.equals( user.privilege );
     }
 
+    @SuppressWarnings( "EmptyMethod" )
     @Override
     protected Object clone() throws CloneNotSupportedException{
         return super.clone();

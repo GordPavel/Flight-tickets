@@ -1,7 +1,7 @@
 package model;
 
 class CacheKey<T>{
-    T    key;
+    final T key;
     Long timestamp;
 
     CacheKey( T key ){

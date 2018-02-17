@@ -2,23 +2,16 @@ package sample;
 
 import asg.cliche.Command;
 import asg.cliche.Param;
-import asg.cliche.Shell;
-import asg.cliche.ShellDependent;
 import settings.Base;
 import settings.SettingsManager;
 import settings.UserPrivileges;
 
-public class DatabaseInterface implements ShellDependent{
-    private       Shell shell;
-    private final Base  base;
+@SuppressWarnings( "WeakerAccess" )
+public class DatabaseInterface{
+    private final Base base;
 
     DatabaseInterface( Base base ){
         this.base = base;
-    }
-
-    @Override
-    public void cliSetShell( Shell shell ){
-        this.shell = shell;
     }
 
     @Command( description = "Lists all clients.", abbrev = "-l", name = "--list" )

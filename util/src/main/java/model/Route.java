@@ -70,6 +70,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
         return to;
     }
 
+    @SuppressWarnings( "NullableProblems" )
     @Override
     public int compareTo( Route o ){
         int from = this.from.getId().compareToIgnoreCase( o.from.getId() );

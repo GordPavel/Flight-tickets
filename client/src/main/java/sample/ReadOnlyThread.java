@@ -63,8 +63,6 @@ class ReadOnlyThread extends FaRThread{
                 writer.write("temp");
             }
             DataModelInstanceSaver.getInstance().saveTo(new FileOutputStream(file));
-        }catch (FileNotFoundException ex) {
-            System.out.println(ex.getMessage());
         }catch (IOException ex) {
             System.out.println(ex.getMessage());
         }

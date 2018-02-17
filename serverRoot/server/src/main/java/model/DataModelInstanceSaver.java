@@ -24,7 +24,7 @@ import static settings.SettingsManager.basesCacheFiles;
 import static settings.SettingsManager.basesFolder;
 
 public abstract class DataModelInstanceSaver{
-    private static Map<CacheKey<String>, DataModelWithLockAndListener> bases;
+    private static final Map<CacheKey<String>, DataModelWithLockAndListener> bases;
 
     static{
         bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,

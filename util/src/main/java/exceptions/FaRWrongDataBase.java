@@ -1,5 +1,6 @@
 package exceptions;
 
+@SuppressWarnings( "ALL" )
 public class FaRWrongDataBase extends FlightAndRouteException{
     /**
      Constructs an <code>FlightAndRouteException</code> with no

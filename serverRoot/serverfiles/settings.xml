@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--suppress ALL -->
 <settings>
     <adminName>admin</adminName>
     <base name="test">
@@ -13,6 +14,6 @@
         </users>
     </base>
     <cacheTimeout>180000</cacheTimeout>
-    <logFile>/Volumes/Users/pavelgordee/Desktop/errors.txt</logFile>
+    <logFile>/Volumes/Users/pavelgordeev/Desktop/errors.txt</logFile>
     <rootPassword>pass</rootPassword>
 </settings>

@@ -22,31 +22,4 @@ public class DataModelWithLockAndListener{
         return model;
     }
 
-    public void setModel( DataModel model ){
-        this.model = model;
-    }
-
-    public ReentrantReadWriteLock getLock(){
-        return lock;
-    }
-
-    public void setLock( ReentrantReadWriteLock lock ){
-        this.lock = lock;
-    }
-
-    public ListChangeListener<Route> getRouteListener(){
-        return routeListener;
-    }
-
-    public void setRouteListener( ListChangeListener<Route> routeListener ){
-        this.routeListener = routeListener;
-    }
-
-    public ListChangeListener<Flight> getFlightListener(){
-        return flightListener;
-    }
-
-    public void setFlightListener( ListChangeListener<Flight> flightListener ){
-        this.flightListener = flightListener;
-    }
 }

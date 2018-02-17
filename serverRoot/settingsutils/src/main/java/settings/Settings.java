@@ -42,6 +42,7 @@ public class Settings implements Cloneable{
                    .map( base1 -> String.format( "%s %-7s\n" , base1.getName() , base1.isRunning() ? "running" : "" ) );
     }
 
+    @SuppressWarnings( "unused" )
     @XmlElement
     void setBase( List<Base> base ){
         this.base = base;
