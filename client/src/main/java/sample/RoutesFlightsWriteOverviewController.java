@@ -11,6 +11,7 @@ import model.FlightOrRoute;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.ListChangeAdapter;
+import transport.PredicateParser;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

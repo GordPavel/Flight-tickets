@@ -5,16 +5,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
-import model.Route;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
+import transport.PredicateParser;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Pattern;
 
 
 /**
@@ -31,6 +29,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
             System.out.println( "test" );
         }
     };
+
     public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
         super( thisStage );
     }

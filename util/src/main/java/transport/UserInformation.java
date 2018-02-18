@@ -2,13 +2,8 @@ package transport;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import model.FlightOrRoute;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  Information about user ( login, password ) and database, which is required
@@ -16,18 +11,18 @@ import java.util.function.Predicate;
 
 public class UserInformation{
 
-    private String                                         login;
-    private String                                         password;
-    private String                                         dataBase;
-    private PredicateParser                                predicateParser;
-    private List<ListChangeAdapter>                        changes;
+    private String                  login;
+    private String                  password;
+    private String                  dataBase;
+    private PredicateParser         predicateParser;
+    private List<ListChangeAdapter> changes;
 
     public UserInformation(){}
 
-    public UserInformation(UserInformation user){
-        this.login=user.getLogin();
-        this.password=user.getPassword();
-        this.dataBase=user.getDataBase();
+    public UserInformation( UserInformation user ){
+        this.login = user.getLogin();
+        this.password = user.getPassword();
+        this.dataBase = user.getDataBase();
     }
 
     public UserInformation( String login , String password ){
@@ -90,7 +85,8 @@ public class UserInformation{
         UserInformation information = ( UserInformation ) obj;
         return login.equals( information.login ) && password.equals( information.password ) && dataBase == null ?
                information.dataBase == null :
-               dataBase.equals( information.dataBase ) && ( predicateParser == null && information.predicateParser == null ) ||
+               dataBase.equals( information.dataBase ) &&
+               ( predicateParser == null && information.predicateParser == null ) ||
                ( predicateParser != null && information.predicateParser != null );
     }
 }

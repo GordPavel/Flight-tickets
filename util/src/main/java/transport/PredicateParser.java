@@ -1,5 +1,6 @@
 package transport;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import model.Flight;
 import model.Route;
 
@@ -13,23 +14,61 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PredicateParser{
+    @Override
+    public boolean equals( Object obj ){
+        if( !( obj instanceof PredicateParser ) ) return false;
+        PredicateParser predicateParser = ( PredicateParser ) obj;
+        if( isRoutePredicate ){
+            return routeFrom.equals( predicateParser.routeFrom ) && routeTo.equals( predicateParser.routeTo );
+        }else{
+            return flightNumber.equals( predicateParser.flightNumber ) &&
+                   flightPlane.equals( predicateParser.flightPlane ) &&
+                   flightDepartureFromDate.equals( predicateParser.flightPlane ) &&
+                   flightDepartureToDate.equals( predicateParser.flightDepartureToDate ) &&
+                   flightArriveFromDate.equals( predicateParser.flightArriveFromDate ) &&
+                   flightArriveToDate.equals( predicateParser.flightArriveToDate ) &&
+                   flightTimeFrom.equals( predicateParser.flightTimeFrom ) &&
+                   flightTimeTo.equals( predicateParser.flightTimeTo ) &&
+                   flightFrom.equals( predicateParser.flightFrom ) &&
+                   flightTo.equals( predicateParser.flightTo );
+        }
+    }
 
-    private String  routeFrom;
-    private String  routeTo;
-    private String  flightNumber;
-    private String  flightPlane;
-    private String  flightDepartureFromDate;
-    private String  flightDepartureToDate;
-    private String  flightArriveFromDate;
-    private String  flightArriveToDate;
-    private String  flightTimeFrom;
-    private String  flightTimeTo;
-    private String  flightFrom;
-    private String  flightTo;
+    @Override
+    public int hashCode(){
+        if( isRoutePredicate ){
+            return routeFrom.hashCode() ^ routeTo.hashCode();
+        }else{
+            return flightNumber.hashCode() ^
+                   flightPlane.hashCode() ^
+                   flightDepartureFromDate.hashCode() ^
+                   flightDepartureToDate.hashCode() ^
+                   flightArriveFromDate.hashCode() ^
+                   flightArriveToDate.hashCode() ^
+                   flightTimeFrom.hashCode() ^
+                   flightTimeTo.hashCode() ^
+                   flightFrom.hashCode() ^
+                   flightTo.hashCode();
+        }
+    }
+
+    private String routeFrom;
+    private String routeTo;
+    private String flightNumber;
+    private String flightPlane;
+    private String flightDepartureFromDate;
+    private String flightDepartureToDate;
+    private String flightArriveFromDate;
+    private String flightArriveToDate;
+    private String flightTimeFrom;
+    private String flightTimeTo;
+    private String flightFrom;
+    private String flightTo;
     //    If false, it's flight predicate
+
     private Boolean isRoutePredicate;
 
-    public PredicateParser(  ){
+    public PredicateParser(){
     }
 
     private PredicateParser( String routeFrom , String routeTo , Boolean isRoutePredicate ){
@@ -60,10 +99,10 @@ public class PredicateParser{
     }
 
     public static PredicateParser createFlightPredicate( String flightNumber , String flightPlane ,
-                                                  String flightDepartureFromDate , String flightDepartureToDate ,
-                                                  String flightArriveFromDate , String flightArriveToDate ,
-                                                  String flightTimeFrom , String flightTimeTo , String flightFrom ,
-                                                  String flightTo ){
+                                                         String flightDepartureFromDate , String flightDepartureToDate ,
+                                                         String flightArriveFromDate , String flightArriveToDate ,
+                                                         String flightTimeFrom , String flightTimeTo ,
+                                                         String flightFrom , String flightTo ){
         return new PredicateParser( flightNumber ,
                                     flightPlane ,
                                     flightDepartureFromDate ,
@@ -77,6 +116,7 @@ public class PredicateParser{
                                     true );
     }
 
+    @JsonIgnore
     // Each field nullable, means empty predicate
     public Predicate<Route> getRoutePredicate(){
         if( !isRoutePredicate ) throw new IllegalStateException( "Not route predicate" );
@@ -91,8 +131,10 @@ public class PredicateParser{
     }
 
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
+
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
 
+    @JsonIgnore
     // Each field nullable, means empty predicate
     public Predicate<Flight> getFlightPredicate(){
         if( isRoutePredicate ) throw new IllegalStateException( "Not flight predicate" );
