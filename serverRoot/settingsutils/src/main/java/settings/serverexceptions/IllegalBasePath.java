@@ -1,6 +1,8 @@
 package settings.serverexceptions;
 
 public class IllegalBasePath extends SettingsException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>SettingsException</code> with no
      detail message.
@@ -58,6 +60,4 @@ public class IllegalBasePath extends SettingsException{
     public IllegalBasePath( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

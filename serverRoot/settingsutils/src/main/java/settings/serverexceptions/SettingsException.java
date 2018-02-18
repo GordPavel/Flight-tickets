@@ -1,6 +1,8 @@
 package settings.serverexceptions;
 
 class SettingsException extends IllegalStateException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>IllegalStateException</code> with no
      detail message.
@@ -58,6 +60,4 @@ class SettingsException extends IllegalStateException{
     SettingsException( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

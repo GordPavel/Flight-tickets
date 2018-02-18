@@ -1,5 +1,6 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
@@ -15,7 +16,11 @@ import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
+import transport.Data;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -55,13 +60,15 @@ class SearchFlightsOverviewController{
 
     @FXML JFXButton searchButton;
 
-    private RoutesFlightsOverviewController                 mainController;
-    private Stage                                           thisStage;
-    private boolean                                         correctSymbols;
-    private ObjectProperty<SerializablePredicate<Flight>> flightsPredicate  = new SimpleObjectProperty<>( flight -> true );
+    private RoutesFlightsOverviewController mainController;
+    private Stage                           thisStage;
+    private boolean                         correctSymbols;
+    private ObjectProperty<SerializablePredicate<Flight>> flightsPredicate  =
+            new SimpleObjectProperty<>( flight -> true );
     private FilteredList<Route>                           routeFilteredList =
             DataModelInstanceSaver.getInstance().getRouteObservableList().filtered( route -> true );
-    private ObjectProperty<SerializablePredicate<Route>>  routesPredicate   = new SimpleObjectProperty<>( route -> true );
+    private ObjectProperty<SerializablePredicate<Route>>  routesPredicate   =
+            new SimpleObjectProperty<>( route -> true );
     private SerializablePredicate<Flight>                 searchPredicate   = flight -> true;
 
     SearchFlightsOverviewController( RoutesFlightsOverviewController mainController , Stage thisStage ){
@@ -126,12 +133,27 @@ class SearchFlightsOverviewController{
                       .selectedItemProperty()
                       .addListener( ( observable , oldValue , newValue ) -> changed() );
         ChangeListener<String> routeSearchListener = ( observable , oldValue , newValue ) -> {
-            SerializablePredicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + ".*" + searchFromTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches();
-            SerializablePredicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() || Pattern.compile(
-                    "^" + ".*" + searchToTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                    ".*" + "$" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches();
+            SerializablePredicate<Route> fromPredicate = route -> searchFromTextField.getText().isEmpty() ||
+                                                                  Pattern.compile( "^" + ".*" +
+                                                                                   searchFromTextField.getText()
+                                                                                                      .replaceAll( "\\*" ,
+                                                                                                                   ".*" )
+                                                                                                      .replaceAll( "\\?" ,
+                                                                                                                   "." ) +
+                                                                                   ".*" + "$" ,
+                                                                                   Pattern.CASE_INSENSITIVE )
+                                                                         .matcher( route.getFrom().getId() )
+                                                                         .matches();
+            SerializablePredicate<Route> toPredicate = route -> searchToTextField.getText().isEmpty() ||
+                                                                Pattern.compile( "^" + ".*" +
+                                                                                 searchToTextField.getText()
+                                                                                                  .replaceAll( "\\*" ,
+                                                                                                               ".*" )
+                                                                                                  .replaceAll( "\\?" ,
+                                                                                                               "." ) +
+                                                                                 ".*" + "$" , Pattern.CASE_INSENSITIVE )
+                                                                       .matcher( route.getTo().getId() )
+                                                                       .matches();
             routesPredicate.setValue( fromPredicate.and( toPredicate ) );
         };
         searchFromTextField.textProperty().addListener( routeSearchListener );
@@ -153,53 +175,115 @@ class SearchFlightsOverviewController{
      Flight search method, used in listeners
      */
     private void changed(){
-        SerializablePredicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() || Pattern.compile(
-                "^" + ".*" + numberTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
-                "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getNumber() ).matches();
-        SerializablePredicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() || Pattern.compile(
-                "^" + ".*" + planeIdTextField.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" +
-                "$" , Pattern.CASE_INSENSITIVE ).matcher( flight.getPlaneID() ).matches();
-        SerializablePredicate<Flight> routePredicate = flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
-                                                     routesListView.getSelectionModel()
-                                                                   .getSelectedItems()
-                                                                   .contains( flight.getRoute() );
-        Pattern           datePattern   = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
+        SerializablePredicate<Flight> numberPredicate = flight -> numberTextField.getText().isEmpty() ||
+                                                                  Pattern.compile( "^" + ".*" +
+                                                                                   numberTextField.getText()
+                                                                                                  .replaceAll( "\\*" ,
+                                                                                                               ".*" )
+                                                                                                  .replaceAll( "\\?" ,
+                                                                                                               "." ) +
+                                                                                   ".*" + "$" ,
+                                                                                   Pattern.CASE_INSENSITIVE )
+                                                                         .matcher( flight.getNumber() )
+                                                                         .matches();
+        SerializablePredicate<Flight> planePredicate = flight -> planeIdTextField.getText().isEmpty() ||
+                                                                 Pattern.compile( "^" + ".*" +
+                                                                                  planeIdTextField.getText()
+                                                                                                  .replaceAll( "\\*" ,
+                                                                                                               ".*" )
+                                                                                                  .replaceAll( "\\?" ,
+                                                                                                               "." ) +
+                                                                                  ".*" + "$" ,
+                                                                                  Pattern.CASE_INSENSITIVE )
+                                                                        .matcher( flight.getPlaneID() )
+                                                                        .matches();
+        SerializablePredicate<Flight> routePredicate =
+                flight -> routesListView.getSelectionModel().getSelectedItems().isEmpty() ||
+                          routesListView.getSelectionModel().getSelectedItems().contains( flight.getRoute() );
+        Pattern datePattern = Pattern.compile( "^([0-2]\\d|3[0-1]).[0-1]\\d.\\d{4}$" );
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
-        SimpleDateFormat  dateFormat    = new SimpleDateFormat( "dd.MM.yyyy" );
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd.MM.yyyy" );
         SerializablePredicate<Flight> departureDatePredicate = flight ->
-                getDateTimePredicate( departureFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                      dateFormat , true ).test( flight.getDepartureDateTime() ) &&
-                getDateTimePredicate( departureToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                      dateFormat , false ).test( flight.getDepartureDateTime() );
+                getDateTimePredicate( departureFromDatePicker.getEditor().getText() ,
+                                      datePattern ,
+                                      dateFormatter ,
+                                      dateFormat ,
+                                      true ).test( flight.getDepartureDateTime() ) && getDateTimePredicate(
+                        departureToDatePicker.getEditor().getText() ,
+                        datePattern ,
+                        dateFormatter ,
+                        dateFormat ,
+                        false ).test( flight.getDepartureDateTime() );
         SerializablePredicate<Flight> arriveDatePredicate = flight ->
-                getDateTimePredicate( arriveFromDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                      dateFormat , true ).test( flight.getDepartureDateTime() ) &&
-                getDateTimePredicate( arriveToDatePicker.getEditor().getText() , datePattern , dateFormatter ,
-                                      dateFormat , false ).test( flight.getDepartureDateTime() );
+                getDateTimePredicate( arriveFromDatePicker.getEditor().getText() ,
+                                      datePattern ,
+                                      dateFormatter ,
+                                      dateFormat ,
+                                      true ).test( flight.getDepartureDateTime() ) && getDateTimePredicate(
+                        arriveToDatePicker.getEditor().getText() ,
+                        datePattern ,
+                        dateFormatter ,
+                        dateFormat ,
+                        false ).test( flight.getDepartureDateTime() );
         SerializablePredicate<Flight> flightTimePredicate = flight -> {
             SerializablePredicate<Long> startTime = aLong -> flightTimeFrom.getEditor().getText().isEmpty() ||
-                                                 flightTimeFrom.getValue().get( ChronoField.MILLI_OF_DAY ) <=
-                                                 flight.getTravelTime();
+                                                             flightTimeFrom.getValue()
+                                                                           .get( ChronoField.MILLI_OF_DAY ) <=
+                                                             flight.getTravelTime();
             SerializablePredicate<Long> endTime = aLong -> flightTimeTo.getEditor().getText().isEmpty() ||
-                                               flightTimeTo.getValue().get( ChronoField.MILLI_OF_DAY ) >=
-                                               flight.getTravelTime();
+                                                           flightTimeTo.getValue().get( ChronoField.MILLI_OF_DAY ) >=
+                                                           flight.getTravelTime();
             return startTime.test( flight.getTravelTime() ) && endTime.test( flight.getTravelTime() );
         };
         if( correctSymbols ){
             SerializablePredicate<Flight> v = numberPredicate.and( planePredicate )
-                                                 .and( routePredicate )
-                                                 .and( departureDatePredicate )
-                                                 .and( arriveDatePredicate )
-                                                 .and( flightTimePredicate );
+                                                             .and( routePredicate )
+                                                             .and( departureDatePredicate )
+                                                             .and( arriveDatePredicate )
+                                                             .and( flightTimePredicate );
             flightsPredicate.setValue( v );
-            searchPredicate =v;
+            searchPredicate = v;
             if( ( mainController instanceof RoutesFlightsReadOnlyOverviewController ) ){
-                ((RoutesFlightsReadOnlyOverviewController) mainController).restartTask(new TimerTask() {
+                ( ( RoutesFlightsReadOnlyOverviewController ) mainController ).restartTask( new TimerTask(){
                     @Override
-                    public void run() {
-                        mainController.requestFlights( searchPredicate );
+                    public void run(){
+                        mainController.flightTable.setDisable( true );
+                        if( Controller.getInstance().getClientSocket().isClosed() ){
+                            Controller.getInstance().reconnect();
+                        }
+                        if( !Controller.getInstance().getClientSocket().isConnected() ){
+                            mainController.routeConnectLabel.setText( "Offline" );
+                            mainController.flightConnectLabel.setText( "Offline" );
+                            Controller.getInstance().reconnect();
+                        }
+                        if( Controller.getInstance().getClientSocket().isConnected() ){
+                            mainController.routeConnectLabel.setText( "Online" );
+                            mainController.flightConnectLabel.setText( "Online" );
+                            Data data;
+                            ObjectMapper mapper = new ObjectMapper();
+                            Controller.getInstance().getUserInformation().setPredicate( searchPredicate );
+                            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                                     .getClientSocket()
+                                                                                                     .getOutputStream() ) ;
+                                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                                              .getClientSocket()
+                                                                                              .getInputStream() ) ){
+                                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                                //noinspection CodeBlock2Expr
+                                data.withoutExceptionOrWith( data1 -> {
+                                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                                } , ClientMain::showWarningByError );
+                            }catch( IOException | NullPointerException ex ){
+                                System.out.println( ex.getMessage() );
+                                ex.printStackTrace();
+                                System.out.println( "Yep" );
+                            }
+                            Controller.getInstance().getUserInformation().setPredicate( null );
+                        }
+                        mainController.flightTable.setDisable( false );
                     }
-                });
+                } );
             }
         }
     }
@@ -211,7 +295,7 @@ class SearchFlightsOverviewController{
      */
     private void formatCheck( TextField field ){
         Pattern textPattern = Pattern.compile( "[\\w\\d?*\\-_]*" );
-        Matcher matcher     = textPattern.matcher( field.getText() );
+        Matcher matcher = textPattern.matcher( field.getText() );
         if( !matcher.matches() ){
             field.setStyle( "-fx-text-inner-color: red;" );
             field.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _, *, ?" ) );
@@ -229,13 +313,13 @@ class SearchFlightsOverviewController{
 
     }
 
-    private SerializablePredicate<ZonedDateTime> getDateTimePredicate(String inputDate , Pattern datePattern ,
-                                                                      DateTimeFormatter dateFormatter ,
-                                                                      SimpleDateFormat dateFormat , Boolean before ){
+    private SerializablePredicate<ZonedDateTime> getDateTimePredicate( String inputDate , Pattern datePattern ,
+                                                                       DateTimeFormatter dateFormatter ,
+                                                                       SimpleDateFormat dateFormat , Boolean before ){
         SerializablePredicate<ZonedDateTime> datePredicate;
         if( datePattern.matcher( inputDate ).matches() ){
             datePredicate = date -> {
-                LocalDate inputLocalDate  = LocalDate.parse( inputDate , dateFormatter );
+                LocalDate inputLocalDate = LocalDate.parse( inputDate , dateFormatter );
                 LocalDate flightLocalDate = LocalDate.parse( dateFormat.format( date ) , dateFormatter );
                 return before ? !inputLocalDate.isAfter( flightLocalDate ) :
                        !inputLocalDate.isBefore( flightLocalDate );
@@ -296,7 +380,41 @@ class SearchFlightsOverviewController{
      */
     @FXML
     private void handleSearchAction(){
-        mainController.requestFlights( searchPredicate );
+        mainController.flightTable.setDisable( true );
+        if( Controller.getInstance().getClientSocket().isClosed() ){
+            Controller.getInstance().reconnect();
+        }
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            mainController.routeConnectLabel.setText( "Offline" );
+            mainController.flightConnectLabel.setText( "Offline" );
+            Controller.getInstance().reconnect();
+        }
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            mainController.routeConnectLabel.setText( "Online" );
+            mainController.flightConnectLabel.setText( "Online" );
+            Data data;
+            ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setPredicate( searchPredicate );
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                //noinspection CodeBlock2Expr
+                data.withoutExceptionOrWith( data1 -> {
+                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                } , ClientMain::showWarningByError );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println( "Yep" );
+            }
+            Controller.getInstance().getUserInformation().setPredicate( null );
+        }
+        mainController.flightTable.setDisable( false );
     }
 
 }

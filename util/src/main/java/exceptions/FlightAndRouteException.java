@@ -8,6 +8,8 @@ import java.io.Serializable;
 
 @SuppressWarnings( "WeakerAccess" )
 public abstract class FlightAndRouteException extends RuntimeException implements Serializable{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FlightAndRouteException</code> with no
      detail message.
@@ -65,6 +67,4 @@ public abstract class FlightAndRouteException extends RuntimeException implement
     public FlightAndRouteException( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

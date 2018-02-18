@@ -20,16 +20,14 @@ import java.util.Scanner;
 import java.util.function.Predicate;
 
 public class SettingsManager{
-    private final static String defaultSettingsFileString =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
-
-    public static                                    Settings    settings;
-    @SuppressWarnings( "CanBeFinal" ) private static JAXBContext jaxbContext;
-    private static final                             String      settingsFilePath;
-
     public static final String rootFolderPath;
     public static final String basesCacheFiles;
     public static final String basesFolder;
+    private final static String defaultSettingsFileString =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
+    private static final                             String      settingsFilePath;
+    public static                                    Settings    settings;
+    @SuppressWarnings( "CanBeFinal" ) private static JAXBContext jaxbContext;
 
     static{
         rootFolderPath =
@@ -54,7 +52,8 @@ public class SettingsManager{
         if( !Files.exists( Paths.get( settingsFilePath ) ) ){
             Path filePath = Paths.get( settingsFilePath );
             try{
-                Files.write( filePath , defaultSettingsFileString.getBytes( StandardCharsets.UTF_8 ) ,
+                Files.write( filePath ,
+                             defaultSettingsFileString.getBytes( StandardCharsets.UTF_8 ) ,
                              StandardOpenOption.CREATE_NEW );
             }catch( IOException e ){
                 e.printStackTrace();

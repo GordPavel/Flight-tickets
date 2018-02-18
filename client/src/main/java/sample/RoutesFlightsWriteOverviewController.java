@@ -9,13 +9,13 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
+import model.FlightOrRoute;
 import model.Route;
+import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.ListChangeAdapter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -40,8 +40,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         updateFlightButton.setLayoutX( updateFlightButton.getLayoutX() - 37 );
         searchFlightButton.setLayoutX( searchFlightButton.getLayoutX() - 37 );
 
-        routeConnectLabel.setVisible(false);
-        flightConnectLabel.setVisible(false);
+        routeConnectLabel.setVisible( false );
+        flightConnectLabel.setVisible( false );
 
         Controller.getInstance().setThread( new WriteThread() );
         Controller.getInstance().startThread();
@@ -49,12 +49,12 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         addRouteButton.setOnAction( event -> handleAddRouteAction() );
         editRouteButton.setOnAction( event -> handleEditRouteAction() );
         deleteRouteButton.setOnAction( event -> handleDeleteRouteAction() );
-        updateRouteButton.setOnAction(event -> handleUpdateRouteAction());
+        updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
 
         addFlightButton.setOnAction( event -> handleAddFlightAction() );
         editFlightButton.setOnAction( event -> handleEditFlightAction() );
         deleteFlightButton.setOnAction( event -> handleDeleteFlightAction() );
-        updateFlightButton.setOnAction(event -> handleUpdateFlightAction());
+        updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
     }
 
     /**
@@ -88,7 +88,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-                Stage      popUp  = new Stage();
+                Stage popUp = new Stage();
                 AddAndEditRoutesOverviewController controller =
                         new AddAndEditRoutesOverviewController( selectedRoute , popUp );
                 loader.setController( controller );
@@ -120,7 +120,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
             }
-            try {
+            try{
                 OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
                 InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
                 Data data = new Data();
@@ -132,14 +132,14 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 ArrayList<ListChangeAdapter> changes = new ArrayList<>();
                 changes.add( ListChangeAdapter.removeRoute( routes ) );
 
-                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+                Controller.getInstance().getUserInformation().setChanges( changes );
 
-                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
                 // get Data
                 data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
-                Controller.getInstance().getUserInformation().setChanges(null);
+                Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
-                System.out.println("Connection problem");
+                System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
         } );
@@ -154,7 +154,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleAddFlightAction(){
         try{
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-            Stage                               popUp      = new Stage();
+            Stage popUp = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
 
@@ -180,7 +180,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-                Stage      popUp  = new Stage();
+                Stage popUp = new Stage();
                 AddAndEditFlightsOverviewController controller =
                         new AddAndEditFlightsOverviewController( selectedFlight , popUp );
                 loader.setController( controller );
@@ -209,7 +209,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             }catch( FlightAndRouteException e ){
                 showModelAlert( e );
             }
-            try {
+            try{
                 OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
                 InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
                 Data data = new Data();
@@ -221,14 +221,14 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 ArrayList<ListChangeAdapter> changes = new ArrayList<>();
                 changes.add( ListChangeAdapter.removeFlight( flights ) );
 
-                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+                Controller.getInstance().getUserInformation().setChanges( changes );
 
-                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
                 // get Data
 
-                Controller.getInstance().getUserInformation().setChanges(null);
+                Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
-                System.out.println("Connection problem");
+                System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
         } );
@@ -239,11 +239,75 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
     public void handleUpdateRouteAction(){
 
-        requestUpdate(route -> true);
+        if( Controller.getInstance().getClientSocket().isClosed() ){
+            Controller.getInstance().reconnect();
+        }
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Offline" );
+            flightConnectLabel.setText( "Offline" );
+            Controller.getInstance().reconnect();
+        }
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Online" );
+            flightConnectLabel.setText( "Online" );
+            Data data;
+            ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) route -> true );
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                //noinspection CodeBlock2Expr
+                data.withoutExceptionOrWith( data1 -> {
+                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                } , ClientMain::showWarningByError );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println( "Yep" );
+            }
+            Controller.getInstance().getUserInformation().setPredicate( null );
+        }
     }
 
     public void handleUpdateFlightAction(){
 
-        requestUpdate(flight -> true);
+        if( Controller.getInstance().getClientSocket().isClosed() ){
+            Controller.getInstance().reconnect();
+        }
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Offline" );
+            flightConnectLabel.setText( "Offline" );
+            Controller.getInstance().reconnect();
+        }
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Online" );
+            flightConnectLabel.setText( "Online" );
+            Data data;
+            ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) flight -> true );
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                //noinspection CodeBlock2Expr
+                data.withoutExceptionOrWith( data1 -> {
+                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                } , ClientMain::showWarningByError );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println( "Yep" );
+            }
+            Controller.getInstance().getUserInformation().setPredicate( null );
+        }
     }
 }

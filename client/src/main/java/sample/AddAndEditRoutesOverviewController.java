@@ -48,6 +48,7 @@ class AddAndEditRoutesOverviewController{
 
     private Stage thisStage;
     private Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    //    Collect all zones to map by country
     private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds()
                                                       .stream()
                                                       .sorted()
@@ -56,30 +57,28 @@ class AddAndEditRoutesOverviewController{
                                                                       .negate()
                                                                       .and( pattern.asPredicate() ) )
                                                       .collect( Collector.of( HashMap::new ,
-                                                                              ( Map<String, List<ZoneId>> map , String zone ) -> {
-                                                                                  Matcher matcher =
-                                                                                          pattern.matcher( zone );
-                                                                                  //noinspection ResultOfMethodCallIgnored
-                                                                                  matcher.find();
-                                                                                  String key = matcher.group( 1 );
-                                                                                  final ZoneId zoneId =
-                                                                                          ZoneId.of( zone );
-                                                                                  if( map.containsKey( key ) ){
-                                                                                      map.get( key ).add( zoneId );
-                                                                                  }else{
-                                                                                      map.put( key ,
-                                                                                               new ArrayList<ZoneId>(){{
-                                                                                                   add( zoneId );
-                                                                                               }} );
-                                                                                  }
-                                                                              } , ( map1 , map2 ) -> {
-                                                                  map1.forEach( ( key1 , value1 ) -> map2.merge( key1 ,
-                                                                                                                 value1 ,
-                                                                                                                 ( key2 , value2 ) -> key2 )
-                                                                                                         .addAll(
-                                                                                                                 value1 ) );
-                                                                  return map2;
-                                                              } ) );
+                                                                              this::putNewZoneToMap ,
+                                                                              this::mergeTwoMaps ) );
+
+    private Map<String, List<ZoneId>> mergeTwoMaps( Map<String, List<ZoneId>> map1 , Map<String, List<ZoneId>> map2 ){
+        map1.forEach( ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
+        return map2;
+    }
+
+    private void putNewZoneToMap( Map<String, List<ZoneId>> map , String zone ){
+        Matcher matcher = pattern.matcher( zone );
+        //noinspection ResultOfMethodCallIgnored
+        matcher.find();
+        String key = matcher.group( 1 );
+        final ZoneId zoneId = ZoneId.of( zone );
+        if( map.containsKey( key ) ){
+            map.get( key ).add( zoneId );
+        }else{
+            map.put( key , new ArrayList<ZoneId>(){{
+                add( zoneId );
+            }} );
+        }
+    }
 
     AddAndEditRoutesOverviewController( Route editingRoute , Stage thisStage ){
         this.editingRoute = editingRoute;
@@ -159,49 +158,51 @@ class AddAndEditRoutesOverviewController{
         try{
             if( isAdd ){
                 DataModelInstanceSaver.getInstance()
-                                      .addRoute( new Route( Optional.ofNullable(
-                                              departureCityChoice.getSelectionModel().getSelectedItem() )
+                                      .addRoute( new Route( Optional.ofNullable( departureCityChoice.getSelectionModel()
+                                                                                                    .getSelectedItem() )
                                                                     .orElseThrow( IllegalStateException::new ) ,
-                                                            Optional.ofNullable(
-                                                                    destinationCityChoice.getSelectionModel()
-                                                                                         .getSelectedItem() )
+                                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
+                                                                                                      .getSelectedItem() )
                                                                     .orElseThrow( IllegalStateException::new ) ) );
             }else{
                 DataModelInstanceSaver.getInstance()
-                                      .editRoute( editingRoute , Optional.ofNullable(
-                                              departureCityChoice.getSelectionModel().getSelectedItem() )
-                                                                         .orElseThrow( IllegalStateException::new ) ,
-                                                  Optional.ofNullable(
-                                                          destinationCityChoice.getSelectionModel().getSelectedItem() )
+                                      .editRoute( editingRoute ,
+                                                  Optional.ofNullable( departureCityChoice.getSelectionModel()
+                                                                                          .getSelectedItem() )
+                                                          .orElseThrow( IllegalStateException::new ) ,
+                                                  Optional.ofNullable( destinationCityChoice.getSelectionModel()
+                                                                                            .getSelectedItem() )
                                                           .orElseThrow( IllegalStateException::new ) );
             }
 //            TODO: put here request to server to add route
-            try {
+            try{
                 OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
                 InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
                 Data data = new Data();
                 ObjectMapper mapper = new ObjectMapper();
                 ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
-                if (isAdd){
+                if( isAdd ){
                     ArrayList<Route> routes = new ArrayList<>();
-                    routes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem(), destinationCityChoice.getSelectionModel().getSelectedItem()));
+                    routes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem() ,
+                                           destinationCityChoice.getSelectionModel().getSelectedItem() ) );
                     changes.add( ListChangeAdapter.addRoute( routes ) );
                 }else{
                     ArrayList<Route> oldRoutes = new ArrayList<>(), newRoutes = new ArrayList<>();
                     oldRoutes.add( editingRoute );
-                    newRoutes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem(), destinationCityChoice.getSelectionModel().getSelectedItem()));
-                    changes.add( ListChangeAdapter.editRoute( oldRoutes, newRoutes ) );
+                    newRoutes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem() ,
+                                              destinationCityChoice.getSelectionModel().getSelectedItem() ) );
+                    changes.add( ListChangeAdapter.editRoute( oldRoutes , newRoutes ) );
                 }
 
-                Controller.getInstance().getUserInformation().setChanges( changes ) ;
+                Controller.getInstance().getUserInformation().setChanges( changes );
 
-                mapper.writeValue( outClient, Controller.getInstance().getUserInformation() );
+                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
                 // get Data
                 data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
-                Controller.getInstance().getUserInformation().setChanges(null);
+                Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
-                System.out.println("Connection problem");
+                System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
             Controller.changed = true;
@@ -216,8 +217,8 @@ class AddAndEditRoutesOverviewController{
         if( chosenCorty.isPresent() ){
             cityBox.setItems( zones.get( chosenCorty.get() )
                                    .stream()
-                                   .collect(
-                                           Collectors.collectingAndThen( toList() , FXCollections::observableList ) ) );
+                                   .collect( Collectors.collectingAndThen( toList() ,
+                                                                           FXCollections::observableList ) ) );
         }else{
             cityBox.getItems().clear();
         }

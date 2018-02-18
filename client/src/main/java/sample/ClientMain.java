@@ -10,29 +10,32 @@ import javafx.stage.Stage;
 
 public class ClientMain extends Application{
 
-    @Override
-    public void start( Stage primaryStage ) throws Exception{
-        Stage loginStage = new Stage();
-        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
-        LoginOverviewController controller = new LoginOverviewController( loginStage );
-        loader.setController( controller );
-        loginStage.setTitle( "Login" );
-        Scene scene = new Scene( loader.load() );
-        loginStage.setScene( scene );
-        loginStage.setResizable( false );
-        loginStage.show();
+    public static void showWarningByError( FlightAndRouteException e ){
+        showWarning( "Error" , "Server error" , e.getMessage() );
     }
 
-    static void showWarningServerError( FlightAndRouteException e ){
+    static void showWarning( String title , String header , String content ){
         Alert alert = new Alert( Alert.AlertType.WARNING );
-        alert.setTitle( "Error" );
-        alert.setHeaderText( "Server error" );
-        alert.setContentText( e.getMessage() );
+        alert.setTitle( title );
+        alert.setHeaderText( header );
+        alert.setContentText( content );
         alert.showAndWait();
     }
 
     public static void main( String[] args ){
         launch( args );
+    }
+
+    @Override
+    public void start( Stage primaryStage ) throws Exception{
+        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+        LoginOverviewController controller = new LoginOverviewController( primaryStage );
+        loader.setController( controller );
+        primaryStage.setTitle( "Login" );
+        Scene scene = new Scene( loader.load() );
+        primaryStage.setScene( scene );
+        primaryStage.setResizable( false );
+        primaryStage.show();
     }
 
 }

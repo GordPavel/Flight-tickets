@@ -2,6 +2,8 @@ package exceptions;
 
 public class FaRAlreadyConnectedClient extends FlightAndRouteException{
 
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FlightAndRouteException</code> with no
      detail message.
@@ -59,7 +61,5 @@ public class FaRAlreadyConnectedClient extends FlightAndRouteException{
     public FaRAlreadyConnectedClient( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }
 

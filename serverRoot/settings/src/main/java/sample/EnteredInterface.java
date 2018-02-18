@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -18,9 +17,9 @@ import java.util.regex.Pattern;
 @SuppressWarnings( "WeakerAccess" )
 public class EnteredInterface implements ShellDependent{
 
+    private final Integer stoppingPort = 5556;
     private Shell   shell;
     private Integer port;
-    private final Integer stoppingPort = 5556;
 
     @Override
     public void cliSetShell( Shell shell ){
@@ -77,12 +76,13 @@ public class EnteredInterface implements ShellDependent{
     public void manageDatabase(
             @Param( description = "Name of file *.far in folder /serverfiles/base.", name = "path" )
                     String name ) throws IOException{
-        ShellFactory.createSubshell( name , shell , name , new DatabaseInterface( SettingsManager.getBase( name )
-                                                                                                 .orElseThrow(
-                                                                                                         () -> new IllegalArgumentException(
-                                                                                                                 "Server doesn't have database " +
-                                                                                                                 name ) ) ) )
-                    .commandLoop();
+        ShellFactory.createSubshell( name ,
+                                     shell ,
+                                     name ,
+                                     new DatabaseInterface( SettingsManager.getBase( name )
+                                                                           .orElseThrow( () -> new IllegalArgumentException(
+                                                                                   "Server doesn't have database " +
+                                                                                   name ) ) ) ).commandLoop();
     }
 
     @Command( description = "Write path to file where write all server logs", abbrev = "-sLF", name = "--setLogFile" )
@@ -119,9 +119,11 @@ public class EnteredInterface implements ShellDependent{
     }
 
     private void startServer( Integer port ) throws IOException{
-        ProcessBuilder processBuilder =
-                new ProcessBuilder( "java" , "-jar" , "flight-system-server-1.1.0.jar" , port.toString() ,
-                                    this.stoppingPort.toString() );
+        ProcessBuilder processBuilder = new ProcessBuilder( "java" ,
+                                                            "-jar" ,
+                                                            "flight-system-server-1.1.0.jar" ,
+                                                            port.toString() ,
+                                                            this.stoppingPort.toString() );
         Optional.ofNullable( SettingsManager.logFile() ).map( Paths::get ).ifPresent( path -> {
             if( !Files.exists( path ) ){
                 try{
@@ -152,68 +154,24 @@ public class EnteredInterface implements ShellDependent{
         }
     }
 
-    static class Process{
-        final Integer UID;
-        final Integer PID;
-        final Integer PPID;
-        final Integer C;
-        final String  STIME;
-        final String  TTY;
-        final String  TIME;
-        final Path    path;
-
-        static Optional<Process> instace( String processString ){
-            Matcher matcher = pattern.matcher( processString );
-            if( matcher.find() ){
-                return Optional.of(
-                        new Process( matcher.group( "UID" ) , matcher.group( "PID" ) , matcher.group( "PPID" ) ,
-                                     matcher.group( "C" ) , matcher.group( "STIME" ) , matcher.group( "TTY" ) ,
-                                     matcher.group( "TIME" ) , matcher.group( "path" ) ) );
-            }else{
-                return Optional.empty();
-            }
-        }
-
-        public Process( String UID , String PID , String PPID , String C , String STIME , String TTY , String TIME ,
-                        String path ){
-            this.UID = Integer.parseInt( UID );
-            this.PID = Integer.parseInt( PID );
-            this.PPID = Integer.parseInt( PPID );
-            this.C = Integer.parseInt( C );
-            this.STIME = STIME;
-            this.TTY = TTY;
-            this.TIME = TIME;
-            this.path = Paths.get( path );
-        }
-
-        @Override
-        public String toString(){
-            return String.format( "%d %d %d %d %s %s %s %s" , UID , PID , PPID , C , STIME , TTY , TIME ,
-                                  path.toString() );
-        }
-
-        public Integer getPID(){
-            return PID;
-        }
-
-        static final Pattern pattern = Pattern.compile(
-                "^\\s*(?<UID>\\d+)\\s+(?<PID>\\d+)\\s+(?<PPID>\\d+)\\s+(?<C>\\d+)\\s+(?<STIME>\\d+:\\d+[AP]M)\\s+" +
-                "(?<TTY>.+)\\s+(?<TIME>\\d+:\\d+.\\d+)\\s+(?<path>.+)$" );
-    }
-
     @Command( description = "Immediately stop server" )
     public void kill(){
-        try( BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader( new ProcessBuilder( "ps" , "-few" ).start().getInputStream() ) ) ){
-            Integer pid = bufferedReader.lines()
-                                        .map( Process::instace )
-                                        .filter( Optional::isPresent )
-                                        .map( Optional::get )
-                                        .filter( process -> process.path.toString().contains( "server.Server" ) )
-                                        .map( Process::getPID )
-                                        .findFirst()
-                                        .orElseThrow( IllegalStateException::new );
-            new ProcessBuilder( "kill" , pid.toString() ).start();
+        try( BufferedReader bufferedReader = new BufferedReader( new InputStreamReader( new ProcessBuilder( "ps" ,
+                                                                                                            "-few" ).start()
+                                                                                                                    .getInputStream() ) ) ){
+            String pid = bufferedReader.lines()
+                                       .filter( process -> process.contains( "/usr/bin/java" ) )
+                                       .filter( process -> process.contains( "flight-system-server" ) )
+                                       .map( process -> {
+                                           Matcher matcher =
+                                                   Pattern.compile( "^\\s*(\\d+)\\s+(?<PID>\\d+)" ).matcher( process );
+                                           //noinspection ResultOfMethodCallIgnored
+                                           matcher.find();
+                                           return matcher.group( "PID" );
+                                       } )
+                                       .findFirst()
+                                       .orElseThrow( IllegalStateException::new );
+            new ProcessBuilder( "kill" , pid ).start();
             System.out.println( "Server process has been killed" );
         }catch( IOException e ){
             System.out.println( "Something went wrong while killing the service" );
@@ -226,4 +184,5 @@ public class EnteredInterface implements ShellDependent{
         startServer( Optional.ofNullable( this.port )
                              .orElseThrow( () -> new IllegalArgumentException( "Server's port isn't configured" ) ) );
     }
+
 }
