@@ -19,12 +19,16 @@ public class UserInformation{
     private String                                         login;
     private String                                         password;
     private String                                         dataBase;
-    @JsonSerialize( using = PredicateSerializer.class )
-    @JsonDeserialize( using = PredicateDeserializer.class )
-    private SerializablePredicate<? extends FlightOrRoute> predicate;
+    private String                                         predicate;
     private List<ListChangeAdapter>                        changes;
 
     public UserInformation(){}
+
+    public UserInformation(UserInformation user){
+        this.login=user.getLogin();
+        this.password=user.getPassword();
+        this.dataBase=user.getDataBase();
+    }
 
     public UserInformation( String login , String password ){
         this.login = login;
@@ -60,12 +64,12 @@ public class UserInformation{
     }
 
     @JsonGetter( "predicate" )
-    public Predicate<? extends FlightOrRoute> getPredicate(){
+    public String getPredicate(){
         return predicate;
     }
 
     @JsonSetter( "predicate" )
-    public void setPredicate( SerializablePredicate<? extends FlightOrRoute> predicate ){
+    public void setPredicate( String predicate ){
         this.predicate = predicate;
     }
 
