@@ -217,7 +217,6 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     }
 
     public void handleUpdateRouteAction(){
-
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
