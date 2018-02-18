@@ -1,6 +1,8 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import model.DataModelInstanceSaver;
+import transport.Data;
 
 import java.io.*;
 import java.net.Socket;
@@ -13,21 +15,21 @@ import java.net.Socket;
  */
 class ReadOnlyThread extends FaRThread{
 
+    RoutesFlightsOverviewController parentController;
     private Socket clientSocket;
     private boolean stop = false;
-    RoutesFlightsOverviewController parentController;
-
-    public void setStop(){
-        this.stop = true;
-    }
 
     public ReadOnlyThread(){
         super();
     }
 
-    public ReadOnlyThread(RoutesFlightsOverviewController parentController){
+    public ReadOnlyThread( RoutesFlightsOverviewController parentController ){
         super();
         this.parentController = parentController;
+    }
+
+    public void setStop(){
+        this.stop = true;
     }
 
     public void start(){
@@ -49,22 +51,54 @@ class ReadOnlyThread extends FaRThread{
 
     }
 
-    synchronized void updateData() {
+    synchronized void updateData(){
 
-        parentController.requestUpdate(null);
+        if( Controller.getInstance().getClientSocket().isClosed() ){
+            Controller.getInstance().reconnect();
+        }
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            parentController.routeConnectLabel.setText( "Offline" );
+            parentController.flightConnectLabel.setText( "Offline" );
+            Controller.getInstance().reconnect();
+        }
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            parentController.routeConnectLabel.setText( "Online" );
+            parentController.flightConnectLabel.setText( "Online" );
+            Data data;
+            ObjectMapper mapper = new ObjectMapper();
+            Controller.getInstance().getUserInformation().setPredicate( null );
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                //noinspection CodeBlock2Expr
+                data.withoutExceptionOrWith( data1 -> {
+                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                } , ClientMain::showWarningByError );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println( "Yep" );
+            }
+            Controller.getInstance().getUserInformation().setPredicate( null );
+        }
     }
 
     private void saveDM(){
-        File file = new File(Controller.getInstance().getUserInformation().getDataBase()+".dm");
-        try {
-            if (!file.exists()) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(file), "utf-8"));
-                writer.write("temp");
+        File file = new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" );
+        try{
+            if( !file.exists() ){
+                BufferedWriter writer =
+                        new BufferedWriter( new OutputStreamWriter( new FileOutputStream( file ) , "utf-8" ) );
+                writer.write( "temp" );
             }
-            DataModelInstanceSaver.getInstance().saveTo(new FileOutputStream(file));
-        }catch (IOException ex) {
-            System.out.println(ex.getMessage());
+            DataModelInstanceSaver.getInstance().saveTo( new FileOutputStream( file ) );
+        }catch( IOException ex ){
+            System.out.println( ex.getMessage() );
         }
     }
 }

@@ -21,18 +21,17 @@ import java.util.regex.Pattern;
 @SuppressWarnings( "WeakerAccess" )
 class LoginOverviewController{
 
-    private Stage thisStage;
+    @FXML   Button        cancelButton;
+    @FXML   Button        logInButton;
+    @FXML   TextField     loginTextField;
+    @FXML   PasswordField passwordField;
+    @FXML   TextField     ipTextField;
+    @FXML   TextField     portTextField;
+    private Stage         thisStage;
 
     LoginOverviewController( Stage thisStage ){
         this.thisStage = thisStage;
     }
-
-    @FXML Button        cancelButton;
-    @FXML Button        logInButton;
-    @FXML TextField     loginTextField;
-    @FXML PasswordField passwordField;
-    @FXML TextField     ipTextField;
-    @FXML TextField     portTextField;
 
     /**
      initializing of view
@@ -44,20 +43,16 @@ class LoginOverviewController{
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        ipTextField.setOnKeyReleased(enterHandler);
-        loginTextField.setOnKeyReleased(enterHandler);
-        portTextField.setOnKeyReleased(enterHandler);
-        passwordField.setOnKeyReleased(enterHandler);
+        ipTextField.setOnKeyReleased( enterHandler );
+        loginTextField.setOnKeyReleased( enterHandler );
+        portTextField.setOnKeyReleased( enterHandler );
+        passwordField.setOnKeyReleased( enterHandler );
 
 
     }
 
-    EventHandler<KeyEvent> enterHandler = new EventHandler<KeyEvent>() {
-        @Override
-        public void handle(KeyEvent event) {
-            if (event.getCode()== KeyCode.ENTER)
-                handleLogInAction();
-        }
+    EventHandler<KeyEvent> enterHandler = event -> {
+        if( event.getCode() == KeyCode.ENTER ) handleLogInAction();
     };
 
 
@@ -82,6 +77,12 @@ class LoginOverviewController{
             Pattern pattern = Pattern.compile( "^[.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
+            if( !( pattern.matcher( loginTextField.getText() ).matches() &&
+                   pattern.matcher( passwordField.getText() ).matches() ) ){
+                ClientMain.showWarning( "Error while log in " ,
+                                        "Unacceptable symbols" ,
+                                        "Please check login and try again." );
+            }
 
             /*
              */
@@ -92,14 +93,16 @@ class LoginOverviewController{
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
-                try( DataOutputStream dataOutputStream = new DataOutputStream(
-                        Controller.getInstance().getClientSocket().getOutputStream() ) ;
-                     DataInputStream inputStream = new DataInputStream(
-                             Controller.getInstance().getClientSocket().getInputStream() ) ){
+                try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                         .getClientSocket()
+                                                                                         .getOutputStream() ) ;
+                     DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                                  .getClientSocket()
+                                                                                  .getInputStream() ) ){
                     System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
-                    dataOutputStream.writeUTF(
-                            mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance()
+                                                                                    .getUserInformation() ) );
                     System.out.println( "Ушло" );
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 }catch( IOException | NullPointerException ex ){
@@ -122,20 +125,12 @@ class LoginOverviewController{
                         System.out.println( "load problem" );
                         System.out.println( e.getMessage() );
                     }
-                } , ClientMain::showWarningServerError );
+                } , ClientMain::showWarningByError );
             }else{
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Error" );
-                alert.setHeaderText( "Unacceptable symbols" );
-                alert.setContentText( "Check your login, password" );
-                alert.showAndWait();
+                ClientMain.showWarning( "Error" , "Unacceptable symbols" , "Check your login, password" );
             }
         }else{
-            Alert alert = new Alert( Alert.AlertType.WARNING );
-            alert.setTitle( "Error" );
-            alert.setHeaderText( "Network error" );
-            alert.setContentText( "Can`t connect to server" );
-            alert.showAndWait();
+            ClientMain.showWarning( "Error" , "Network error" , "Can`t connect to server" );
 //            try {
 //                Map<String,String> map = new HashMap();
 ////                      map.put("1","2");

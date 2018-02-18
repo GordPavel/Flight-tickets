@@ -5,6 +5,8 @@ package exceptions;
  */
 
 public class FaRSameNameException extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FaRSameNameException</code> with no
      detail message.
@@ -62,7 +64,5 @@ public class FaRSameNameException extends FlightAndRouteException{
     public FaRSameNameException( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 
 }

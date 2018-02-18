@@ -1,5 +1,11 @@
 package model;
 
+/**
+ Class describes ket for hash map,that stores datamodels
+
+ @param <T>
+ */
+
 class CacheKey<T>{
     final T key;
     Long timestamp;

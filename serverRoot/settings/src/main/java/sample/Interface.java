@@ -15,30 +15,11 @@ import java.util.Scanner;
 @SuppressWarnings( "WeakerAccess" )
 public class Interface{
 
-    private static       Shell    mainShell;
     private static final Settings settings;
+    private static       Shell    mainShell;
 
     static{
         settings = SettingsManager.loadSettings();
-    }
-
-    @Command( description = "Log in the system to manage server.", abbrev = "-l", name = "--login" )
-    public void login(
-            @Param( description = "admin's name", name = "Admin name" )
-                    String login ,
-            @Param( description = "admin's password", name = "Admin password" )
-                    String password ) throws IOException{
-        if( !login.equals( settings.getAdminName() ) ){
-            System.out.println( "Illegal admin name" );
-            return;
-        }
-        if( !password.equals( settings.getRootPassword() ) ){
-            System.out.println( "Illegal admin password" );
-            return;
-        }
-        System.out.println( "Successfully entered." );
-        ShellFactory.createSubshell( SettingsManager.settings.getAdminName() , mainShell , "server" ,
-                                     new EnteredInterface() ).commandLoop();
     }
 
     public static void main( String[] params ) throws IOException{
@@ -62,5 +43,26 @@ public class Interface{
                           "Specify this time in milliseconds> " );
         SettingsManager.setCacheTimeout( scanner.nextLong() );
         System.out.println( "Good, now we're ready to work. Type ?h for help." );
+    }
+
+    @Command( description = "Log in the system to manage server.", abbrev = "-l", name = "--login" )
+    public void login(
+            @Param( description = "admin's name", name = "Admin name" )
+                    String login ,
+            @Param( description = "admin's password", name = "Admin password" )
+                    String password ) throws IOException{
+        if( !login.equals( settings.getAdminName() ) ){
+            System.out.println( "Illegal admin name" );
+            return;
+        }
+        if( !password.equals( settings.getRootPassword() ) ){
+            System.out.println( "Illegal admin password" );
+            return;
+        }
+        System.out.println( "Successfully entered." );
+        ShellFactory.createSubshell( SettingsManager.settings.getAdminName() ,
+                                     mainShell ,
+                                     "server" ,
+                                     new EnteredInterface() ).commandLoop();
     }
 }

@@ -1,6 +1,8 @@
 package settings.serverexceptions;
 
 public class CopyBase extends SettingsException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>SettingsException</code> with no
      detail message.
@@ -58,6 +60,4 @@ public class CopyBase extends SettingsException{
     public CopyBase( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

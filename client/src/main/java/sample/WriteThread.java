@@ -17,12 +17,12 @@ public class WriteThread extends FaRThread{
 
     private boolean stop = false;
 
-    public void setStop(){
-        this.stop = true;
-    }
-
     public WriteThread(){
         super();
+    }
+
+    public void setStop(){
+        this.stop = true;
     }
 
     public void start(){
@@ -38,13 +38,13 @@ public class WriteThread extends FaRThread{
             if( Controller.getInstance().getClientSocket().isConnected() ){
                 Data data;
                 ObjectMapper mapper = new ObjectMapper();
-                try( DataInputStream inputStream = new DataInputStream(
-                        Controller.getInstance().getClientSocket().getInputStream() ) ){
+                try( DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                                  .getClientSocket()
+                                                                                  .getInputStream() ) ){
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                     data.withoutExceptionOrWith( data1 -> data1.getChanges()
-                                                               .forEach( update -> update.apply(
-                                                                       DataModelInstanceSaver.getInstance() ) ) ,
-                                                 ClientMain::showWarningServerError );
+                                                               .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) ) ,
+                                                 ClientMain::showWarningByError );
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }

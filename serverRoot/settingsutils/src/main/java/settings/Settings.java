@@ -42,14 +42,14 @@ public class Settings implements Cloneable{
                    .map( base1 -> String.format( "%s %-7s\n" , base1.getName() , base1.isRunning() ? "running" : "" ) );
     }
 
+    public List<Base> getBase(){
+        return base;
+    }
+
     @SuppressWarnings( "unused" )
     @XmlElement
     void setBase( List<Base> base ){
         this.base = base;
-    }
-
-    public List<Base> getBase(){
-        return base;
     }
 
     public String getLogFile(){
@@ -57,7 +57,7 @@ public class Settings implements Cloneable{
     }
 
     @XmlElement
-    public void setLogFile( String logFile ){
+    void setLogFile( String logFile ){
         this.logFile = logFile;
     }
 

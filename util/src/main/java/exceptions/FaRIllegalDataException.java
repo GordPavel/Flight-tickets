@@ -2,6 +2,8 @@ package exceptions;
 
 @SuppressWarnings( "unused" )
 public class FaRIllegalDataException extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FaRIllegalEditedData</code> with no
      detail message.
@@ -59,6 +61,4 @@ public class FaRIllegalDataException extends FlightAndRouteException{
     public FaRIllegalDataException( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

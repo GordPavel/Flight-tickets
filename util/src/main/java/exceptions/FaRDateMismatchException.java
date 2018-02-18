@@ -5,6 +5,8 @@ package exceptions;
  */
 
 public class FaRDateMismatchException extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FaRDateMismatchException</code> with no
      detail message.
@@ -62,6 +64,4 @@ public class FaRDateMismatchException extends FlightAndRouteException{
     public FaRDateMismatchException( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

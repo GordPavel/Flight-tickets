@@ -18,6 +18,19 @@ import java.time.ZoneId;
 public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable<Route>{
 
     private static final long serialVersionUID = 1L;
+    Integer id;
+    /**
+     Stores unique id of arrival airport.
+     */
+    @JsonSerialize( using = ZoneIdSerializer.class )
+    @JsonDeserialize( using = ZoneIdDeserializer.class )
+    private ZoneId from;
+    /**
+     Stores unique id of departure airport
+     */
+    @JsonSerialize( using = ZoneIdSerializer.class )
+    @JsonDeserialize( using = ZoneIdDeserializer.class )
+    private ZoneId to;
 
     @JsonCreator
     public Route(
@@ -39,31 +52,15 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
         this.to = to;
     }
 
-    Integer id;
-
     @JsonGetter( "id" )
     public Integer getId(){
         return id;
     }
 
-    /**
-     Stores unique id of arrival airport.
-     */
-    @JsonSerialize( using = ZoneIdSerializer.class )
-    @JsonDeserialize( using = ZoneIdDeserializer.class )
-    private ZoneId from;
-
     @JsonGetter( "from" )
     public ZoneId getFrom(){
         return from;
     }
-
-    /**
-     Stores unique id of departure airport
-     */
-    @JsonSerialize( using = ZoneIdSerializer.class )
-    @JsonDeserialize( using = ZoneIdDeserializer.class )
-    private ZoneId to;
 
     @JsonGetter( "to" )
     public ZoneId getTo(){
@@ -93,11 +90,7 @@ public class Route implements FlightOrRoute, Serializable, Cloneable, Comparable
         }else{
             test = this.id.equals( route.id );
         }
-        return pointsEquals( route ) && test;
-    }
-
-    boolean pointsEquals( Route route ){
-        return this.from.equals( route.from ) && this.to.equals( route.to );
+        return this.from.equals( route.from ) && this.to.equals( route.to ) && test;
     }
 
     @Override

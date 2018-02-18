@@ -53,17 +53,18 @@ public class Base implements Cloneable{
         return users;
     }
 
-    public Stream<String> listAllUsers(){
-        return users.stream()
-                    .map( user1 -> String.format( "%-2s %10s password:%s" ,
-                                                 user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
-                                                 user1.getLogin() , user1.getPassword() ) );
-    }
-
     @SuppressWarnings( "unused" )
     @XmlElement
     void setUsers( List<User> users ){
         this.users = users;
+    }
+
+    public Stream<String> listAllUsers(){
+        return users.stream()
+                    .map( user1 -> String.format( "%-2s %10s password:%s" ,
+                                                  user1.getPrivilege() == UserPrivileges.ReadWrite ? "rw" : "r" ,
+                                                  user1.getLogin() ,
+                                                  user1.getPassword() ) );
     }
 
     @Override
