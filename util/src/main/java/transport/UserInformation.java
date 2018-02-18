@@ -19,7 +19,7 @@ public class UserInformation{
     private String                                         login;
     private String                                         password;
     private String                                         dataBase;
-    private String                                         predicate;
+    private PredicateParser                                predicateParser;
     private List<ListChangeAdapter>                        changes;
 
     public UserInformation(){}
@@ -63,14 +63,14 @@ public class UserInformation{
         this.dataBase = dataBase;
     }
 
-    @JsonGetter( "predicate" )
-    public String getPredicate(){
-        return predicate;
+    @JsonGetter( "predicateParser" )
+    public PredicateParser getPredicate(){
+        return predicateParser;
     }
 
-    @JsonSetter( "predicate" )
-    public void setPredicate( String predicate ){
-        this.predicate = predicate;
+    @JsonSetter( "predicateParser" )
+    public void setPredicate( PredicateParser predicateParser ){
+        this.predicateParser = predicateParser;
     }
 
     @JsonGetter( "changes" )
@@ -90,7 +90,7 @@ public class UserInformation{
         UserInformation information = ( UserInformation ) obj;
         return login.equals( information.login ) && password.equals( information.password ) && dataBase == null ?
                information.dataBase == null :
-               dataBase.equals( information.dataBase ) && ( predicate == null && information.predicate == null ) ||
-               ( predicate != null && information.predicate != null );
+               dataBase.equals( information.dataBase ) && ( predicateParser == null && information.predicateParser == null ) ||
+               ( predicateParser != null && information.predicateParser != null );
     }
 }

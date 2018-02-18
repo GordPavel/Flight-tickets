@@ -17,6 +17,7 @@ import model.Flight;
 import model.Route;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
+import transport.PredicateParser;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -247,41 +248,7 @@ class SearchFlightsOverviewController{
                 ( ( RoutesFlightsReadOnlyOverviewController ) mainController ).restartTask( new TimerTask(){
                     @Override
                     public void run(){
-                        mainController.flightTable.setDisable( true );
-                        if( Controller.getInstance().getClientSocket().isClosed() ){
-                            Controller.getInstance().reconnect();
-                        }
-                        if( !Controller.getInstance().getClientSocket().isConnected() ){
-                            mainController.routeConnectLabel.setText( "Offline" );
-                            mainController.flightConnectLabel.setText( "Offline" );
-                            Controller.getInstance().reconnect();
-                        }
-                        if( Controller.getInstance().getClientSocket().isConnected() ){
-                            mainController.routeConnectLabel.setText( "Online" );
-                            mainController.flightConnectLabel.setText( "Online" );
-                            Data data;
-                            ObjectMapper mapper = new ObjectMapper();
-                            Controller.getInstance().getUserInformation().setPredicate( searchPredicate );
-                            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                                     .getClientSocket()
-                                                                                                     .getOutputStream() ) ;
-                                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                                              .getClientSocket()
-                                                                                              .getInputStream() ) ){
-                                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                                //noinspection CodeBlock2Expr
-                                data.withoutExceptionOrWith( data1 -> {
-                                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
-                                } , ClientMain::showWarningByError );
-                            }catch( IOException | NullPointerException ex ){
-                                System.out.println( ex.getMessage() );
-                                ex.printStackTrace();
-                                System.out.println( "Yep" );
-                            }
-                            Controller.getInstance().getUserInformation().setPredicate( null );
-                        }
-                        mainController.flightTable.setDisable( false );
+                        handleSearchAction();
                     }
                 } );
             }
@@ -392,27 +359,12 @@ class SearchFlightsOverviewController{
         if( Controller.getInstance().getClientSocket().isConnected() ){
             mainController.routeConnectLabel.setText( "Online" );
             mainController.flightConnectLabel.setText( "Online" );
-            Data data;
-            ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate( searchPredicate );
-            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                     .getClientSocket()
-                                                                                     .getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                              .getClientSocket()
-                                                                              .getInputStream() ) ){
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                //noinspection CodeBlock2Expr
-                data.withoutExceptionOrWith( data1 -> {
-                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
-                } , ClientMain::showWarningByError );
-            }catch( IOException | NullPointerException ex ){
-                System.out.println( ex.getMessage() );
-                ex.printStackTrace();
-                System.out.println( "Yep" );
-            }
-            Controller.getInstance().getUserInformation().setPredicate( null );
+            Controller.getInstance().getUserInformation().setPredicate( PredicateParser.createFlightPredicate(
+                    numberTextField.getText(),planeIdTextField.getText(),departureFromDatePicker.getEditor().getText(),
+                    departureToDatePicker.getEditor().getText(),arriveFromDatePicker.getEditor().getText(),
+                    arriveToDatePicker.getEditor().getText(),flightTimeFrom.getEditor().getText(),
+                    flightTimeTo.getEditor().getText(),searchFromTextField.getText(),searchToTextField.getText()) );
+            mainController.requestUpdate();
         }
         mainController.flightTable.setDisable( false );
     }

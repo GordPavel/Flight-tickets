@@ -29,6 +29,9 @@ public class PredicateParser{
     //    If false, it's flight predicate
     private Boolean isRoutePredicate;
 
+    public PredicateParser(  ){
+    }
+
     private PredicateParser( String routeFrom , String routeTo , Boolean isRoutePredicate ){
         this.routeFrom = routeFrom;
         this.routeTo = routeTo;
@@ -52,11 +55,11 @@ public class PredicateParser{
         this.isRoutePredicate = isRoutePredicate;
     }
 
-    static PredicateParser createRoutePredicate( String routeFrom , String routeTo ){
+    public static PredicateParser createRoutePredicate( String routeFrom , String routeTo ){
         return new PredicateParser( routeFrom , routeTo , true );
     }
 
-    static PredicateParser createFlightPredicate( String flightNumber , String flightPlane ,
+    public static PredicateParser createFlightPredicate( String flightNumber , String flightPlane ,
                                                   String flightDepartureFromDate , String flightDepartureToDate ,
                                                   String flightArriveFromDate , String flightArriveToDate ,
                                                   String flightTimeFrom , String flightTimeTo , String flightFrom ,

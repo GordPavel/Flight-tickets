@@ -24,6 +24,7 @@ import model.FlightOrRoute;
 import model.Route;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
+import transport.PredicateParser;
 import transport.UserInformation;
 
 import java.io.DataInputStream;
@@ -358,29 +359,24 @@ abstract class RoutesFlightsOverviewController{
      Update flight list
      */
     private void handleUpdateFlightAction(){
-        requestFlights( flight -> true );
+        Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createFlightPredicate(
+                "*","","","","","","","","",""));
+        requestUpdate();
     }
 
-    private void requestFlights( SerializablePredicate<Flight> predicate ){
-        flightTable.setDisable( true );
-        requestUpdate( predicate );
-        flightTable.setDisable( false );
-    }
 
     /**
      Update route list
      */
     private void handleUpdateRouteAction(){
-        requestRoutes( route -> true );
+        Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createRoutePredicate("*","*"));
+        requestUpdate();
     }
 
-    private void requestRoutes( SerializablePredicate<Route> predicate ){
-        routeTable.setDisable( true );
-        requestUpdate( predicate );
-        routeTable.setDisable( false );
-    }
-
-    private void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
+    /**
+     * Method used for updates and searches. PredicateParser setuped by other methods, after operation cleared.
+     */
+    void requestUpdate(  ){
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
@@ -394,7 +390,7 @@ abstract class RoutesFlightsOverviewController{
             flightConnectLabel.setText( "Online" );
             Data data;
             ObjectMapper mapper = new ObjectMapper();
-            //TODO: ADD PREDICATE!
+
             try( DataOutputStream dataOutputStream = new DataOutputStream(
                     Controller.getInstance().getClientSocket().getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream(
@@ -449,15 +445,16 @@ abstract class RoutesFlightsOverviewController{
      Search for routes
      */
     private void handleSearchRouteAction(){
-        requestRoutes( route -> getRoutePattern( departure.getText() ).matcher( route.getFrom().getId() ).matches() &&
-                                getRoutePattern( destination.getText() ).matcher( route.getTo().getId() ).matches() );
+        Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createRoutePredicate(
+                departure.getText(),destination.getText()));
+        requestUpdate();
     }
+
 
     private Pattern getRoutePattern( String searchText ){
         return Pattern.compile( ".*" + searchText.replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE );
+                Pattern.CASE_INSENSITIVE );
     }
-
 }
 
 
