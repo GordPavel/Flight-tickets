@@ -11,14 +11,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import model.DataModelInstanceSaver;
 import model.Route;
-import transport.Data;
 import transport.ListChangeAdapter;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -156,50 +153,48 @@ class AddAndEditRoutesOverviewController{
 
     private void addOrEdit( Boolean isAdd ){
         try{
-            if( isAdd ){
-                DataModelInstanceSaver.getInstance()
-                                      .addRoute( new Route( Optional.ofNullable( departureCityChoice.getSelectionModel()
-                                                                                                    .getSelectedItem() )
-                                                                    .orElseThrow( IllegalStateException::new ) ,
-                                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
-                                                                                                      .getSelectedItem() )
-                                                                    .orElseThrow( IllegalStateException::new ) ) );
-            }else{
-                DataModelInstanceSaver.getInstance()
-                                      .editRoute( editingRoute ,
-                                                  Optional.ofNullable( departureCityChoice.getSelectionModel()
-                                                                                          .getSelectedItem() )
-                                                          .orElseThrow( IllegalStateException::new ) ,
-                                                  Optional.ofNullable( destinationCityChoice.getSelectionModel()
-                                                                                            .getSelectedItem() )
-                                                          .orElseThrow( IllegalStateException::new ) );
-            }
+//            if( isAdd ){
+//                DataModelInstanceSaver.getInstance()
+//                                      .addRoute( new Route( Optional.ofNullable( departureCityChoice.getSelectionModel()
+//                                                                                                    .getSelectedItem() )
+//                                                                    .orElseThrow( IllegalStateException::new ) ,
+//                                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
+//                                                                                                      .getSelectedItem() )
+//                                                                    .orElseThrow( IllegalStateException::new ) ) );
+//            }else{
+//                DataModelInstanceSaver.getInstance()
+//                                      .editRoute( editingRoute ,
+//                                                  Optional.ofNullable( departureCityChoice.getSelectionModel()
+//                                                                                          .getSelectedItem() )
+//                                                          .orElseThrow( IllegalStateException::new ) ,
+//                                                  Optional.ofNullable( destinationCityChoice.getSelectionModel()
+//                                                                                            .getSelectedItem() )
+//                                                          .orElseThrow( IllegalStateException::new ) );
+//            }
 //            TODO: put here request to server to add route
             try{
-                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
-                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
-                Data data = new Data();
+                DataOutputStream outClient =
+                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
                 ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
                 if( isAdd ){
-                    ArrayList<Route> routes = new ArrayList<>();
-                    routes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem() ,
-                                           destinationCityChoice.getSelectionModel().getSelectedItem() ) );
-                    changes.add( ListChangeAdapter.addRoute( routes ) );
+                    changes.add( ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                                                                                      .getSelectedItem() ,
+                                                                                                   destinationCityChoice
+                                                                                                           .getSelectionModel()
+                                                                                                           .getSelectedItem() ) ) ) );
                 }else{
-                    ArrayList<Route> oldRoutes = new ArrayList<>(), newRoutes = new ArrayList<>();
-                    oldRoutes.add( editingRoute );
-                    newRoutes.add( new Route( departureCityChoice.getSelectionModel().getSelectedItem() ,
-                                              destinationCityChoice.getSelectionModel().getSelectedItem() ) );
-                    changes.add( ListChangeAdapter.editRoute( oldRoutes , newRoutes ) );
+                    changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
+                                                              Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                                                                                       .getSelectedItem() ,
+                                                                                                    destinationCityChoice
+                                                                                                            .getSelectionModel()
+                                                                                                            .getSelectedItem() ) ) ) );
                 }
 
                 Controller.getInstance().getUserInformation().setChanges( changes );
-
-                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
-                // get Data
-                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
+                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );

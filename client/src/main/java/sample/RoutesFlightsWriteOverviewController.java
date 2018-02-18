@@ -1,22 +1,21 @@
 package sample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import exceptions.FlightAndRouteException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
-import model.Flight;
 import model.FlightOrRoute;
-import model.Route;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.ListChangeAdapter;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -115,28 +114,17 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleDeleteRouteAction(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
-                DataModelInstanceSaver.getInstance().removeRoute( selectedRoute );
-                Controller.getInstance().changed = true;
-            }catch( FlightAndRouteException e ){
-                showModelAlert( e );
-            }
-            try{
-                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
-                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
-                Data data = new Data();
+                DataOutputStream outClient =
+                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
 
-                ArrayList<Route> routes = new ArrayList<>();
-                routes.add( selectedRoute );
+                Controller.getInstance()
+                          .getUserInformation()
+                          .setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( Collections.singletonList(
+                                  selectedRoute ) ) ) );
 
-                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
-                changes.add( ListChangeAdapter.removeRoute( routes ) );
-
-                Controller.getInstance().getUserInformation().setChanges( changes );
-
-                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
+                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 // get Data
-                data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
@@ -205,25 +193,16 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleDeleteFlightAction(){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
-                DataModelInstanceSaver.getInstance().removeFlight( selectedFlight.getNumber() );
-            }catch( FlightAndRouteException e ){
-                showModelAlert( e );
-            }
-            try{
-                OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
-                InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
-                Data data = new Data();
+                DataOutputStream outClient =
+                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
                 ObjectMapper mapper = new ObjectMapper();
 
-                ArrayList<Flight> flights = new ArrayList<>();
-                flights.add( selectedFlight );
+                Controller.getInstance()
+                          .getUserInformation()
+                          .setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( Collections.singletonList(
+                                  selectedFlight ) ) ) );
 
-                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
-                changes.add( ListChangeAdapter.removeFlight( flights ) );
-
-                Controller.getInstance().getUserInformation().setChanges( changes );
-
-                mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
+                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 // get Data
 
                 Controller.getInstance().getUserInformation().setChanges( null );
@@ -252,7 +231,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             flightConnectLabel.setText( "Online" );
             Data data;
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) route -> true );
+            Controller.getInstance()
+                      .getUserInformation()
+                      .setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) route -> true );
             try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
                                                                                      .getClientSocket()
                                                                                      .getOutputStream() ) ;
@@ -289,7 +270,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             flightConnectLabel.setText( "Online" );
             Data data;
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) flight -> true );
+            Controller.getInstance()
+                      .getUserInformation()
+                      .setPredicate( ( SerializablePredicate<? extends FlightOrRoute> ) flight -> true );
             try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
                                                                                      .getClientSocket()
                                                                                      .getOutputStream() ) ;

@@ -15,16 +15,15 @@ import javafx.util.StringConverter;
 import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
-import transport.Data;
 import transport.ListChangeAdapter;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -252,53 +251,49 @@ class AddAndEditFlightsOverviewController{
             ClientMain.showWarning( "You have no plain" , "Flight must have plain" , "Write plain data" );
         }else{
             try{
-                if( isAdd ){
-                    DataModelInstanceSaver.getInstance()
-                                          .addFlight( new Flight( number.getText() ,
-                                                                  routesBox.getSelectionModel().getSelectedItem() ,
-                                                                  planeID.getText() ,
-                                                                  departureDateTime ,
-                                                                  arriveDateTime ) );
-                }else{
-                    DataModelInstanceSaver.getInstance()
-                                          .editFlight( editingFlight ,
-                                                       routesBox.getSelectionModel().getSelectedItem() ,
-                                                       planeID.getText() ,
-                                                       departureDateTime ,
-                                                       arriveDateTime );
-                }
+//                if( isAdd ){
+//                    DataModelInstanceSaver.getInstance()
+//                                          .addFlight( new Flight( number.getText() ,
+//                                                                  routesBox.getSelectionModel().getSelectedItem() ,
+//                                                                  planeID.getText() ,
+//                                                                  departureDateTime ,
+//                                                                  arriveDateTime ) );
+//                }else{
+//                    DataModelInstanceSaver.getInstance()
+//                                          .editFlight( editingFlight ,
+//                                                       routesBox.getSelectionModel().getSelectedItem() ,
+//                                                       planeID.getText() ,
+//                                                       departureDateTime ,
+//                                                       arriveDateTime );
+//                }
 //            TODO: put here request to server to add flight
 
                 try{
-                    OutputStream outClient = Controller.getInstance().getClientSocket().getOutputStream();
-                    InputStream inClient = Controller.getInstance().getClientSocket().getInputStream();
-                    Data data = new Data();
+                    DataOutputStream outClient =
+                            ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
                     ObjectMapper mapper = new ObjectMapper();
                     ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
                     if( isAdd ){
-                        ArrayList<Flight> flights = new ArrayList<>();
-                        flights.add( new Flight( number.getText() ,
-                                                 routesBox.getSelectionModel().getSelectedItem() ,
-                                                 planeID.getText() ,
-                                                 departureDateTime ,
-                                                 arriveDateTime ) );
-                        changes.add( ListChangeAdapter.addFlight( flights ) );
+                        changes.add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
+                                                                                                         routesBox.getSelectionModel()
+                                                                                                                  .getSelectedItem() ,
+                                                                                                         planeID.getText() ,
+                                                                                                         departureDateTime ,
+                                                                                                         arriveDateTime ) ) ) );
                     }else{
-                        ArrayList<Flight> oldFlights = new ArrayList<>(), newFlights = new ArrayList<>();
-                        oldFlights.add( editingFlight );
-                        newFlights.add( new Flight( editingFlight.getNumber() ,
-                                                    routesBox.getSelectionModel().getSelectedItem() ,
-                                                    planeID.getText() ,
-                                                    departureDateTime ,
-                                                    arriveDateTime ) );
-                        changes.add( ListChangeAdapter.editFlight( oldFlights , newFlights ) );
+                        changes.add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
+                                                                   Collections.singletonList( new Flight( editingFlight.getNumber() ,
+                                                                                                          routesBox.getSelectionModel()
+                                                                                                                   .getSelectedItem() ,
+                                                                                                          planeID.getText() ,
+                                                                                                          departureDateTime ,
+                                                                                                          arriveDateTime ) ) ) );
                     }
 
                     Controller.getInstance().getUserInformation().setChanges( changes );
-                    mapper.writeValue( outClient , Controller.getInstance().getUserInformation() );
+                    outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     // get Data
-                    data = mapper.readValue( Controller.getInstance().getClientSocket().getInputStream() , Data.class );
                     Controller.getInstance().getUserInformation().setChanges( null );
                 }catch( IOException e ){
                     System.out.println( "Connection problem" );
