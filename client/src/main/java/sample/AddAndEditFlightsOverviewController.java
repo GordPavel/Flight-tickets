@@ -270,7 +270,7 @@ class AddAndEditFlightsOverviewController{
 
                 try{
                     DataOutputStream outClient =
-                            ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
+                            new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
                     ObjectMapper mapper = new ObjectMapper();
                     ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 

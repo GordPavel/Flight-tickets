@@ -115,7 +115,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataOutputStream outClient =
-                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
+                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
                 ObjectMapper mapper = new ObjectMapper();
 
                 Controller.getInstance()
@@ -194,7 +194,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataOutputStream outClient =
-                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
+                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
                 ObjectMapper mapper = new ObjectMapper();
 
                 Controller.getInstance()

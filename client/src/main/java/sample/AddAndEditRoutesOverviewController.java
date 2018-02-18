@@ -174,7 +174,7 @@ class AddAndEditRoutesOverviewController{
 //            TODO: put here request to server to add route
             try{
                 DataOutputStream outClient =
-                        ( DataOutputStream ) Controller.getInstance().getClientSocket().getOutputStream();
+                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
                 ObjectMapper mapper = new ObjectMapper();
                 ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
