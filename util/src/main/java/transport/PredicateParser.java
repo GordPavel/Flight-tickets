@@ -15,18 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PredicateParser {
-    private String                                         routeTo;
-    private String                                         routeFrom;
-    private String                                         flightTo;
-    private String                                         flightFrom;
-    private String                                         flightNumber;
-    private String                                         flightPlane;
-    private String                                         depFromDate;
-    private String                                         depToDate;
-    private String                                         arrFromDate;
-    private String                                         arrToDate;
-    private String                                         flightToTime;
-    private String                                         flightFromTime;
 
     public static String getPredicateString(String routeFrom,String routeTo){
 
