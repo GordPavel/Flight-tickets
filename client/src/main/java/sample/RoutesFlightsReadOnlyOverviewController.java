@@ -84,33 +84,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
                 if( Controller.getInstance().getClientSocket().isConnected() ){
                     routeConnectLabel.setText( "Online" );
                     flightConnectLabel.setText( "Online" );
-                    Data data;
-                    ObjectMapper mapper = new ObjectMapper();
-                    Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<Route> ) route ->
-                            Pattern.compile(
-                                    ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                                    ".*" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                            Pattern.compile(
-                                    ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
-                                    ".*" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches() );
-                    try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                             .getClientSocket()
-                                                                                             .getOutputStream() ) ;
-                         DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                                      .getClientSocket()
-                                                                                      .getInputStream() ) ){
-                        dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                        data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                        //noinspection CodeBlock2Expr
-                        data.withoutExceptionOrWith( data1 -> {
-                            data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
-                        } , ClientMain::showWarningByError );
-                    }catch( IOException | NullPointerException ex ){
-                        System.out.println( ex.getMessage() );
-                        ex.printStackTrace();
-                        System.out.println( "Yep" );
-                    }
-                    Controller.getInstance().getUserInformation().setPredicate( null );
+                    handleSearchRouteAction();
                 }
                 routeTable.setDisable( false );
             }

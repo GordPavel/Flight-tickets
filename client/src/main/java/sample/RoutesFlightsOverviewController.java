@@ -358,7 +358,7 @@ abstract class RoutesFlightsOverviewController{
     /**
      Update flight list
      */
-    private void handleUpdateFlightAction(){
+    void handleUpdateFlightAction(){
         Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createFlightPredicate(
                 "*","","","","","","","","",""));
         requestUpdate();
@@ -368,7 +368,7 @@ abstract class RoutesFlightsOverviewController{
     /**
      Update route list
      */
-    private void handleUpdateRouteAction(){
+    void handleUpdateRouteAction(){
         Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createRoutePredicate("*","*"));
         requestUpdate();
     }
@@ -444,7 +444,7 @@ abstract class RoutesFlightsOverviewController{
     /**
      Search for routes
      */
-    private void handleSearchRouteAction(){
+    void handleSearchRouteAction(){
         Controller.getInstance().getUserInformation().setPredicate(PredicateParser.createRoutePredicate(
                 departure.getText(),destination.getText()));
         requestUpdate();
