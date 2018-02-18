@@ -1,6 +1,8 @@
 package transport;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import model.Flight;
 import model.Route;
 
@@ -14,58 +16,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PredicateParser{
-    @Override
-    public boolean equals( Object obj ){
-        if( !( obj instanceof PredicateParser ) ) return false;
-        PredicateParser predicateParser = ( PredicateParser ) obj;
-        if( isRoutePredicate ){
-            return routeFrom.equals( predicateParser.routeFrom ) && routeTo.equals( predicateParser.routeTo );
-        }else{
-            return flightNumber.equals( predicateParser.flightNumber ) &&
-                   flightPlane.equals( predicateParser.flightPlane ) &&
-                   flightDepartureFromDate.equals( predicateParser.flightPlane ) &&
-                   flightDepartureToDate.equals( predicateParser.flightDepartureToDate ) &&
-                   flightArriveFromDate.equals( predicateParser.flightArriveFromDate ) &&
-                   flightArriveToDate.equals( predicateParser.flightArriveToDate ) &&
-                   flightTimeFrom.equals( predicateParser.flightTimeFrom ) &&
-                   flightTimeTo.equals( predicateParser.flightTimeTo ) &&
-                   flightFrom.equals( predicateParser.flightFrom ) &&
-                   flightTo.equals( predicateParser.flightTo );
-        }
-    }
-
-    @Override
-    public int hashCode(){
-        if( isRoutePredicate ){
-            return routeFrom.hashCode() ^ routeTo.hashCode();
-        }else{
-            return flightNumber.hashCode() ^
-                   flightPlane.hashCode() ^
-                   flightDepartureFromDate.hashCode() ^
-                   flightDepartureToDate.hashCode() ^
-                   flightArriveFromDate.hashCode() ^
-                   flightArriveToDate.hashCode() ^
-                   flightTimeFrom.hashCode() ^
-                   flightTimeTo.hashCode() ^
-                   flightFrom.hashCode() ^
-                   flightTo.hashCode();
-        }
-    }
-
     private String routeFrom;
-    private String routeTo;
-    private String flightNumber;
-    private String flightPlane;
-    private String flightDepartureFromDate;
-    private String flightDepartureToDate;
-    private String flightArriveFromDate;
-    private String flightArriveToDate;
-    private String flightTimeFrom;
-    private String flightTimeTo;
-    private String flightFrom;
-    private String flightTo;
-    //    If false, it's flight predicate
 
+    private String  routeTo;
+    private String  flightNumber;
+    private String  flightPlane;
+    private String  flightDepartureFromDate;
+    private String  flightDepartureToDate;
+    private String  flightArriveFromDate;
+    private String  flightArriveToDate;
+    private String  flightTimeFrom;
+    private String  flightTimeTo;
+    private String  flightFrom;
+    private String  flightTo;
+    //    If false, it's flight predicate
     private Boolean isRoutePredicate;
 
     public PredicateParser(){
@@ -307,7 +271,51 @@ public class PredicateParser{
         this.flightTo = flightTo;
     }
 
+    @JsonSetter( "isRoutePredicate" )
     public void setRoutePredicate( Boolean routePredicate ){
         isRoutePredicate = routePredicate;
+    }
+
+    @JsonGetter( "isRoutePredicate" )
+    public Boolean isRoutePredicate(){
+        return isRoutePredicate;
+    }
+
+    @Override
+    public boolean equals( Object obj ){
+        if( !( obj instanceof PredicateParser ) ) return false;
+        PredicateParser predicateParser = ( PredicateParser ) obj;
+        if( isRoutePredicate ){
+            return routeFrom.equals( predicateParser.routeFrom ) && routeTo.equals( predicateParser.routeTo );
+        }else{
+            return flightNumber.equals( predicateParser.flightNumber ) &&
+                   flightPlane.equals( predicateParser.flightPlane ) &&
+                   flightDepartureFromDate.equals( predicateParser.flightPlane ) &&
+                   flightDepartureToDate.equals( predicateParser.flightDepartureToDate ) &&
+                   flightArriveFromDate.equals( predicateParser.flightArriveFromDate ) &&
+                   flightArriveToDate.equals( predicateParser.flightArriveToDate ) &&
+                   flightTimeFrom.equals( predicateParser.flightTimeFrom ) &&
+                   flightTimeTo.equals( predicateParser.flightTimeTo ) &&
+                   flightFrom.equals( predicateParser.flightFrom ) &&
+                   flightTo.equals( predicateParser.flightTo );
+        }
+    }
+
+    @Override
+    public int hashCode(){
+        if( isRoutePredicate ){
+            return routeFrom.hashCode() ^ routeTo.hashCode();
+        }else{
+            return flightNumber.hashCode() ^
+                   flightPlane.hashCode() ^
+                   flightDepartureFromDate.hashCode() ^
+                   flightDepartureToDate.hashCode() ^
+                   flightArriveFromDate.hashCode() ^
+                   flightArriveToDate.hashCode() ^
+                   flightTimeFrom.hashCode() ^
+                   flightTimeTo.hashCode() ^
+                   flightFrom.hashCode() ^
+                   flightTo.hashCode();
+        }
     }
 }
