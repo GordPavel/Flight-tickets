@@ -1,9 +1,17 @@
 package sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import model.DataModelInstanceSaver;
+import model.Route;
+import org.danekja.java.util.function.serializable.SerializablePredicate;
+import transport.Data;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -16,17 +24,16 @@ import java.util.regex.Pattern;
  */
 class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
 
-    public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
-        super( thisStage );
-    }
-
     final Timer timer = new Timer();
-    TimerTask task  = new TimerTask(){
+    TimerTask task = new TimerTask(){
         @Override
         public void run(){
             System.out.println( "test" );
         }
     };
+    public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
+        super( thisStage );
+    }
 
     /**
      initialization of view
@@ -52,32 +59,68 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         destinationColumn.setPrefWidth( 300 );
 
 
-        Controller.getInstance().setThread( new ReadOnlyThread(this) );
+        Controller.getInstance().setThread( new ReadOnlyThread( this ) );
         thisStage.setOnHidden( event -> timer.cancel() );
         Controller.getInstance().startThread();
         infoMenuButton.setOnAction( event -> handleAboutAction() );
 
-        departure.textProperty().addListener( observable -> restartTask());
-        destination.textProperty().addListener( observable -> restartTask());
+        departure.textProperty().addListener( observable -> restartTask() );
+        destination.textProperty().addListener( observable -> restartTask() );
     }
 
     public void restartTask(){
-        restartTask(new TimerTask() {
+        restartTask( new TimerTask(){
             @Override
-            public void run() {
-                requestRoutes(route ->
-                        Pattern.compile( ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
-                                Pattern.compile( ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) + ".*" ,
-                                        Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches());
+            public void run(){
+                routeTable.setDisable( true );
+                if( Controller.getInstance().getClientSocket().isClosed() ){
+                    Controller.getInstance().reconnect();
+                }
+                if( !Controller.getInstance().getClientSocket().isConnected() ){
+                    routeConnectLabel.setText( "Offline" );
+                    flightConnectLabel.setText( "Offline" );
+                    Controller.getInstance().reconnect();
+                }
+                if( Controller.getInstance().getClientSocket().isConnected() ){
+                    routeConnectLabel.setText( "Online" );
+                    flightConnectLabel.setText( "Online" );
+                    Data data;
+                    ObjectMapper mapper = new ObjectMapper();
+                    Controller.getInstance().getUserInformation().setPredicate( ( SerializablePredicate<Route> ) route ->
+                            Pattern.compile(
+                                    ".*" + departure.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
+                                    ".*" , Pattern.CASE_INSENSITIVE ).matcher( route.getFrom().getId() ).matches() &&
+                            Pattern.compile(
+                                    ".*" + destination.getText().replaceAll( "\\*" , ".*" ).replaceAll( "\\?" , "." ) +
+                                    ".*" , Pattern.CASE_INSENSITIVE ).matcher( route.getTo().getId() ).matches() );
+                    try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                             .getClientSocket()
+                                                                                             .getOutputStream() ) ;
+                         DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                                      .getClientSocket()
+                                                                                      .getInputStream() ) ){
+                        dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                        data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                        //noinspection CodeBlock2Expr
+                        data.withoutExceptionOrWith( data1 -> {
+                            data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                        } , ClientMain::showWarningByError );
+                    }catch( IOException | NullPointerException ex ){
+                        System.out.println( ex.getMessage() );
+                        ex.printStackTrace();
+                        System.out.println( "Yep" );
+                    }
+                    Controller.getInstance().getUserInformation().setPredicate( null );
+                }
+                routeTable.setDisable( false );
             }
-        });
+        } );
     }
 
-    public void restartTask(TimerTask timerTask){
+    public void restartTask( TimerTask timerTask ){
         task.cancel();
         task = timerTask;
-        timer.schedule(task,5000);
+        timer.schedule( task , 5000 );
     }
 
     /**

@@ -12,12 +12,6 @@ import model.Flight;
 
 class MergeOverviewController{
 
-    private Stage thisStage;
-
-    MergeOverviewController( Stage thisStage ){
-        this.thisStage = thisStage;
-    }
-
     @FXML TableView<Flight>           flightTable;
     @FXML TableColumn<Flight, String> numberColumn;
     @FXML TextArea                    newTextArea;
@@ -26,8 +20,12 @@ class MergeOverviewController{
     @FXML JFXButton                   acceptThisNew;
     @FXML JFXButton                   acceptAllOld;
     @FXML JFXButton                   acceptThisOld;
-
+    private Stage thisStage;
     private Controller controller = Controller.getInstance();
+
+    MergeOverviewController( Stage thisStage ){
+        this.thisStage = thisStage;
+    }
 
     /**
      initialization of view
@@ -105,8 +103,11 @@ class MergeOverviewController{
     private void handleAcceptAllNew(){
         for( Flight flight : flightTable.getItems() ){
             DataModelInstanceSaver.getInstance()
-                                  .editFlight( flight , flight.getRoute() , flight.getPlaneID() ,
-                                               flight.getDepartureDateTime() , flight.getArriveDateTime() );
+                                  .editFlight( flight ,
+                                               flight.getRoute() ,
+                                               flight.getPlaneID() ,
+                                               flight.getDepartureDateTime() ,
+                                               flight.getArriveDateTime() );
         }
         flightTable.setItems( null );
         flightTable.refresh();

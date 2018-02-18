@@ -2,6 +2,8 @@ package exceptions;
 
 @SuppressWarnings( "ALL" )
 public class FaRWrongDataBase extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FlightAndRouteException</code> with no
      detail message.
@@ -59,6 +61,4 @@ public class FaRWrongDataBase extends FlightAndRouteException{
     public FaRWrongDataBase( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

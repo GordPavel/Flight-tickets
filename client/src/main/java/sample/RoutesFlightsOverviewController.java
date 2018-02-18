@@ -8,6 +8,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,11 +31,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -224,39 +227,31 @@ abstract class RoutesFlightsOverviewController{
     private void handleMergeAction(){
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try{
-                ArrayList<Serializable> failedInMerge = DataModelInstanceSaver.getInstance()
-                                                                              .mergeData( Files.newInputStream(
-                                                                                      file.toPath() ) )
-                                                                              .collect( ArrayList::new , List::add ,
-                                                                                        List::addAll );
                 Controller.changed = true;
-                Alert alert = new Alert( Alert.AlertType.WARNING );
-                alert.setTitle( "Merge results" );
-                alert.setHeaderText( "Model have this problems with merge:" );
-                StringBuilder errors = new StringBuilder();
+                List<Serializable> failedInMerge = DataModelInstanceSaver.getInstance()
+                                                                         .mergeData( Files.newInputStream( file.toPath() ) )
+                                                                         .collect( toList() );
 
-                ArrayList<Flight> mergeFlights = new ArrayList<>();
-                ArrayList<Route> mergeRoutes = new ArrayList<>();
-                for( Serializable element : failedInMerge ){
-                    errors.append( "-" ).append( element.toString() ).append( "\n" );
-                    if( element instanceof Flight && DataModelInstanceSaver.getInstance()
-                                                                           .listFlightsWithPredicate( flight -> true )
-                                                                           .stream()
-                                                                           .noneMatch( flight -> flight.equals(
-                                                                                   element ) ) ){
-                        mergeFlights.add( ( Flight ) element );
-                    }
-                    if( element instanceof Route ){
-                        mergeRoutes.add( ( Route ) element );
-                    }
-                }
-
+                ObservableList<Flight> mergeFlights = failedInMerge.parallelStream()
+                                                                   .filter( element -> element.getClass()
+                                                                                              .equals( Flight.class ) )
+                                                                   .map( Flight.class::cast )
+                                                                   .collect( Collectors.collectingAndThen( toList() ,
+                                                                                                           FXCollections::observableArrayList ) );
+                ObservableList<Route> mergeRoutes = failedInMerge.parallelStream()
+                                                                 .filter( element -> element.getClass()
+                                                                                            .equals( Route.class ) )
+                                                                 .map( Route.class::cast )
+                                                                 .collect( Collectors.collectingAndThen( toList() ,
+                                                                                                         FXCollections::observableArrayList ) );
+                String errors = failedInMerge.stream()
+                                             .map( Serializable::toString )
+                                             .collect( Collectors.joining( "\n-" , "-" , "\n" ) );
                 Controller.getInstance().setMergeFlights( FXCollections.observableArrayList( mergeFlights ) );
                 Controller.getInstance().setMergeRoutes( FXCollections.observableArrayList( mergeRoutes ) );
 
                 if( !failedInMerge.isEmpty() ){
-                    alert.setContentText( errors.toString() );
-                    alert.showAndWait();
+                    ClientMain.showWarning( "Merge results" , "Model have this problems with merge:" , errors );
                 }
 
                 if( !mergeFlights.isEmpty() ){
@@ -304,10 +299,12 @@ abstract class RoutesFlightsOverviewController{
             Controller.getInstance().getClientSocket().isConnected() ){
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setDataBase( null );
-            try( DataOutputStream dataOutputStream = new DataOutputStream(
-                    Controller.getInstance().getClientSocket().getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream(
-                         Controller.getInstance().getClientSocket().getInputStream() ) ){
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
             }catch( IOException | NullPointerException ex ){
@@ -332,7 +329,7 @@ abstract class RoutesFlightsOverviewController{
                     System.out.println( "load problem" );
                     System.out.println( e.getMessage() );
                 }
-            } , ClientMain::showWarningServerError );
+            } , ClientMain::showWarningByError );
         }
     }
 
@@ -364,7 +361,7 @@ abstract class RoutesFlightsOverviewController{
         requestFlights( flight -> true );
     }
 
-    public void requestFlights( SerializablePredicate<Flight> predicate ){
+    private void requestFlights( SerializablePredicate<Flight> predicate ){
         flightTable.setDisable( true );
         requestUpdate( predicate );
         flightTable.setDisable( false );
@@ -377,13 +374,13 @@ abstract class RoutesFlightsOverviewController{
         requestRoutes( route -> true );
     }
 
-    public void requestRoutes( SerializablePredicate<Route> predicate ){
+    private void requestRoutes( SerializablePredicate<Route> predicate ){
         routeTable.setDisable( true );
         requestUpdate( predicate );
         routeTable.setDisable( false );
     }
 
-    public void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
+    private void requestUpdate( SerializablePredicate<? extends FlightOrRoute> predicate ){
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
@@ -397,18 +394,19 @@ abstract class RoutesFlightsOverviewController{
             flightConnectLabel.setText( "Online" );
             Data data;
             ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setPredicate(  route -> getRoutePattern( departure.getText() ).matcher( ((Route)route).getFrom().getId() ).matches() &&
-                    getRoutePattern( destination.getText() ).matcher( ((Route)route).getTo().getId() ).matches() );
-            try( DataOutputStream dataOutputStream = new DataOutputStream(
-                    Controller.getInstance().getClientSocket().getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream(
-                         Controller.getInstance().getClientSocket().getInputStream() ) ){
+            Controller.getInstance().getUserInformation().setPredicate( predicate );
+            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                                                                                     .getClientSocket()
+                                                                                     .getOutputStream() ) ;
+                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                                                                              .getClientSocket()
+                                                                              .getInputStream() ) ){
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
-                } , ClientMain::showWarningServerError );
+                } , ClientMain::showWarningByError );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--suppress ALL -->
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
-<!--suppress ALL -->
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="601.0"
-            prefWidth="461.0" snapToPixel="false" style="caspian" xmlns="http://javafx.com/javafx/9"
-            xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="601.0" prefWidth="461.0" snapToPixel="false" style="caspian"
+            xmlns="http://javafx.com/javafx/9">
     <Label fx:id="numberLabel" layoutX="30.0" layoutY="63.0" prefWidth="100.0" text="Number:" textFill="#282c86"
            underline="true">
         <font>

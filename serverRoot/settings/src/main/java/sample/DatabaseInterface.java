@@ -52,7 +52,9 @@ public class DatabaseInterface{
         if( !privilege.equals( "rw" ) && !privilege.equals( "r" ) ){
             throw new IllegalArgumentException( "User privilege must be just r (read) or rw (read & write)." );
         }
-        SettingsManager.addNewClient( base.getName() , name , password ,
+        SettingsManager.addNewClient( base.getName() ,
+                                      name ,
+                                      password ,
                                       privilege.equals( "r" ) ? UserPrivileges.Read : UserPrivileges.ReadWrite );
         System.out.println(
                 "To accept all changes please restart server. ( exit from this submenu <exit> and then command <restart> )" );

@@ -4,6 +4,8 @@ package exceptions;
  When data-object has a link to another data-object, that doesn't exist in database.
  */
 public class FaRNotRelatedData extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FaRNotRelatedData</code> with no
      detail message.
@@ -61,6 +63,4 @@ public class FaRNotRelatedData extends FlightAndRouteException{
     public FaRNotRelatedData( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

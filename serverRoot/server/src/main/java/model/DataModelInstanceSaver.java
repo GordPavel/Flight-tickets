@@ -28,7 +28,8 @@ public abstract class DataModelInstanceSaver{
 
     static{
         bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
-                                         0.75f , 32 );
+                                         0.75f ,
+                                         32 );
         Executors.newSingleThreadScheduledExecutor( r -> {
             Thread thread = new Thread( r );
             thread.setDaemon( true );
@@ -39,7 +40,8 @@ public abstract class DataModelInstanceSaver{
                                                   .peek( DataModelInstanceSaver::saveChanges )
                                                   .filter( DataModelInstanceSaver::isLongAgoRequested )
                                                   .forEach( DataModelInstanceSaver::clearCache ) ,
-                                       Server.settings.getCacheTimeout() , Server.settings.getCacheTimeout() ,
+                                       Server.settings.getCacheTimeout() ,
+                                       Server.settings.getCacheTimeout() ,
                                        TimeUnit.MILLISECONDS );
     }
 
@@ -64,8 +66,8 @@ public abstract class DataModelInstanceSaver{
     private static void saveChanges( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
         try{
             dataModel.getValue().lock.writeLock().lock();
-            dataModel.getValue().model.saveTo(
-                    Files.newOutputStream( Paths.get( basesFolder + dataModel.getKey().key + ".far" ) ) );
+            dataModel.getValue().model.saveTo( Files.newOutputStream( Paths.get(
+                    basesFolder + dataModel.getKey().key + ".far" ) ) );
             dataModel.getValue().lock.writeLock().unlock();
         }catch( IOException e ){
             System.err.println( "Database " + dataModel.getKey().key + " has problems" );
@@ -118,11 +120,13 @@ public abstract class DataModelInstanceSaver{
                     };
                     dataModel.addRoutesListener( routeListener );
                     dataModel.addFlightsListener( flightListener );
-                    DataModelWithLockAndListener modelWithLock =
-                            new DataModelWithLockAndListener( dataModel , new ReentrantReadWriteLock( true ) ,
-                                                              routeListener , flightListener );
-                    bases.put( new CacheKey<>( baseName ) , modelWithLock );
-                    return Optional.of( modelWithLock );
+                    DataModelWithLockAndListener modelWithLockAndListener =
+                            new DataModelWithLockAndListener( dataModel ,
+                                                              new ReentrantReadWriteLock( true ) ,
+                                                              routeListener ,
+                                                              flightListener );
+                    bases.put( new CacheKey<>( baseName ) , modelWithLockAndListener );
+                    return Optional.of( modelWithLockAndListener );
                 }catch( FlightAndRouteException e ){
                     System.err.println( "Some troubles with load database " + baseName );
                     SettingsManager.startStopBase( baseName , false );
@@ -148,8 +152,10 @@ public abstract class DataModelInstanceSaver{
              .filter( path -> path.toString().matches( "^" + basesCacheFiles + baseName + "_.+$" ) )
              .forEach( path -> {
                  try{
-                     Files.write( path , change.getUpdate().getBytes( Charset.forName( "UTF-8" ) ) ,
-                                  StandardOpenOption.APPEND , StandardOpenOption.CREATE );
+                     Files.write( path ,
+                                  change.getUpdate().getBytes( Charset.forName( "UTF-8" ) ) ,
+                                  StandardOpenOption.APPEND ,
+                                  StandardOpenOption.CREATE );
                  }catch( IOException e ){
                      e.printStackTrace();
                  }

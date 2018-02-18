@@ -4,6 +4,8 @@ package exceptions;
  When edited data hasn't previous version in database
  */
 public class FaRIllegalEditedData extends FlightAndRouteException{
+    private static final long serialVersionUID = -5365630128856068164L;
+
     /**
      Constructs an <code>FaRIllegalEditedData</code> with no
      detail message.
@@ -61,6 +63,4 @@ public class FaRIllegalEditedData extends FlightAndRouteException{
     public FaRIllegalEditedData( Throwable cause ){
         super( cause );
     }
-
-    private static final long serialVersionUID = -5365630128856068164L;
 }

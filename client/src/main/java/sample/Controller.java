@@ -12,29 +12,23 @@ import java.net.Socket;
 /**
  Support class for controllers
  */
-class Controller{
+public class Controller{
 
-    private Controller(){}
-
-    private static class InstanceHolder{
-        private static final Controller instance = new Controller();
-    }
-
-    static synchronized Controller getInstance(){
-        return Controller.InstanceHolder.instance;
-    }
-
+    static Boolean changed = false;
+    static File   savingFile;
+    static String ip;
+    static int    port;
     private static boolean flightSearchActive = false;
+    private static Socket          clientSocket;
+    private static UserInformation userInformation;
     private ObservableList<Flight> mergeFlights;
     private ObservableList<Route>  mergeRoutes;
     private FaRThread              thread;
-    static Boolean changed = false;
-    static File savingFile;
-    static String ip;
-    static int port;
+    private Controller(){}
 
-    private static Socket clientSocket;
-    private static UserInformation userInformation;
+    public static synchronized Controller getInstance(){
+        return Controller.InstanceHolder.instance;
+    }
 
     public Socket getClientSocket(){
         return clientSocket;
@@ -44,17 +38,17 @@ class Controller{
         this.clientSocket = clientSocket;
     }
 
-    public void setUserInformation(UserInformation userInformation) {
-        this.userInformation = userInformation;
+    public UserInformation getUserInformation(){
+        return userInformation;
     }
 
-    public UserInformation getUserInformation() {
-        return userInformation;
+    public void setUserInformation( UserInformation userInformation ){
+        this.userInformation = userInformation;
     }
 
     void setThread( FaRThread thread ){
         this.thread = thread;
-        this.thread.setDaemon(true);
+        this.thread.setDaemon( true );
     }
 
     void startThread(){
@@ -65,53 +59,53 @@ class Controller{
         thread.setStop();
     }
 
-    void setMergeFlights( ObservableList<Flight> mergeFlights ){
-        this.mergeFlights = mergeFlights;
-    }
-
     ObservableList<Flight> getMergeFlights(){
         return mergeFlights;
     }
 
-    void setMergeRoutes( ObservableList<Route> mergeRoutes ){
-        this.mergeRoutes = mergeRoutes;
+    void setMergeFlights( ObservableList<Flight> mergeFlights ){
+        this.mergeFlights = mergeFlights;
     }
 
     ObservableList<Route> getMergeRoutes(){
         return mergeRoutes;
     }
 
-    void setFlightSearchActive( boolean flightSearchActive ){
-        Controller.flightSearchActive = flightSearchActive;
+    void setMergeRoutes( ObservableList<Route> mergeRoutes ){
+        this.mergeRoutes = mergeRoutes;
     }
 
     boolean isFlightSearchActive(){
         return flightSearchActive;
     }
 
-    public void setIp(String ip) {
-        Controller.ip = ip;
+    void setFlightSearchActive( boolean flightSearchActive ){
+        Controller.flightSearchActive = flightSearchActive;
     }
 
-    public String getIp() {
+    public String getIp(){
         return ip;
     }
 
-    public void setPort(int port) {
-        Controller.port = port;
+    public void setIp( String ip ){
+        Controller.ip = ip;
     }
 
-    public int getPort() {
+    public int getPort(){
         return port;
     }
 
-    public void connectToServer(String ip, int port) {
+    public void setPort( int port ){
+        Controller.port = port;
+    }
+
+    public void connectToServer( String ip , int port ){
         try{
-            System.out.println("Connection...");
+            System.out.println( "Connection..." );
             Socket socket = new Socket( ip , port );
-            System.out.println("socket.isClosed = "+socket.isClosed());
-            setIp(ip);
-            setPort(port);
+            System.out.println( "socket.isClosed = " + socket.isClosed() );
+            setIp( ip );
+            setPort( port );
             Controller.getInstance().setClientSocket( socket );
         }catch( IOException e ){
             System.out.println( "Connection failed" );
@@ -120,7 +114,11 @@ class Controller{
     }
 
     public void reconnect(){
-        connectToServer(ip,port);
+        connectToServer( ip , port );
+    }
+
+    private static class InstanceHolder{
+        private static final Controller instance = new Controller();
     }
 }
 

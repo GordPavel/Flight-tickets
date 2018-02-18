@@ -25,9 +25,21 @@ import java.util.stream.Stream;
 
  @author pavelgordeev */
 public class DataModel{
-    public DataModel(){
+    private final ReentrantReadWriteLock flightsLock = new ReentrantReadWriteLock( true );
+    private final ObservableList<Flight> flights     = FXCollections.observableList( new ArrayList<>() );
+    private final ReentrantReadWriteLock routesLock  = new ReentrantReadWriteLock( true );
+    private final ObservableList<Route>  routes      = FXCollections.observableList( new ArrayList<>() );
+    private final Pattern legalSymbolsChecker = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
+    private final Semaphore         keysGeneratorSemaphore     = new Semaphore( 1 , true );
+    private       Iterator<Integer> routesPrimaryKeysGenerator =
+            IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
+
+    DataModel(){
     }
 
+    /**
+     Methods to manage listeners for each collection
+     */
     public void addFlightsListener( ListChangeListener<Flight> listener ){
         flights.addListener( listener );
     }
@@ -52,90 +64,6 @@ public class DataModel{
         return routes;
     }
 
-    private final ReentrantReadWriteLock flightsLock = new ReentrantReadWriteLock( true );
-    private final ObservableList<Flight> flights     = FXCollections.observableList( new ArrayList<>() );
-    private final ReentrantReadWriteLock routesLock  = new ReentrantReadWriteLock( true );
-    private final ObservableList<Route>  routes      = FXCollections.observableList( new ArrayList<>() );
-
-    /**
-     List all unique airport, that stores in routes
-
-     @param predicate specifies names of all airports
-
-     @return specified names of airports
-     */
-    public List<ZoneId> listAllAirportsWithPredicate( Predicate<ZoneId> predicate ){
-        Stream<ZoneId> from = routes.stream().map( Route::getFrom );
-        Stream<ZoneId> to = routes.stream().map( Route::getTo );
-        routesLock.readLock().lock();
-        List<ZoneId> airports =
-                Stream.concat( from , to ).distinct().filter( predicate ).collect( Collectors.toList() );
-        routesLock.readLock().unlock();
-        return airports;
-    }
-
-    /**
-     @param predicate specifies flights what to choose
-
-     @return specified flights
-     */
-    public List<Flight> listFlightsWithPredicate( Predicate<Flight> predicate ){
-        flightsLock.readLock().lock();
-        List<Flight> flights = this.flights.stream().filter( predicate ).collect( Collectors.toList() );
-        flightsLock.readLock().unlock();
-        return flights;
-    }
-
-    private final Pattern legalSymbolsChecker = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
-
-    /**
-     Add new flight in current database in specified index, if it's correct, and immediately saves all changes
-
-     @param flight create new flight, which has unique number, instead it won't be added
-     @param index  future index of adding flight
-
-     @throws FaRUnacceptableSymbolException if flight has illegal symbols
-     @throws FaRDateMismatchException       if flight has incorrect dates
-     @throws FaRNotRelatedData              it has route, that doesn't exist in database
-     @throws FaRSameNameException           it duplicates in (planeID && route && ( departure date || arrive date ) ) or
-     <p>
-     duplicates number
-     */
-    private void addFlight( Integer index , Flight flight ) throws FlightAndRouteException{
-        if( !( legalSymbolsChecker.matcher( flight.getNumber() ).matches() &&
-               legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
-            throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
-        }
-        if( flight.getTravelTime() <= 0 ){
-            throw new FaRDateMismatchException( "Flight has incorrect dates" );
-        }
-        try{
-            flightsLock.readLock().lock();
-            if( flights.stream()
-                       .map( Flight::getNumber )
-                       .map( String::toUpperCase )
-                       .anyMatch( Predicate.isEqual( flight.getNumber().toUpperCase() ) ) ){
-                throw new FaRSameNameException( "Flight duplicates someone's number" );
-            }
-            if( routes.stream().map( Route::getId ).noneMatch( Predicate.isEqual( flight.getRoute().getId() ) ) ){
-                throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
-            }
-            if( flights.stream()
-                       .anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
-                                                             flight.getPlaneID().toUpperCase() ) &&
-                                             Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
-                                             flight1.departureDateTime.isEqual( flight.departureDateTime ) &&
-                                             flight1.arriveDateTime.isEqual( flight.arriveDateTime ) ) ){
-                throw new FaRSameNameException( "Flight duplicates someone from database" );
-            }
-        }finally{
-            flightsLock.readLock().unlock();
-        }
-        flightsLock.writeLock().lock();
-        flights.add( index , flight );
-        flightsLock.writeLock().unlock();
-    }
-
     /**
      Add new flight in current database, if it's correct, and immediately saves all changes
 
@@ -149,9 +77,44 @@ public class DataModel{
      duplicates number
      */
     public void addFlight( Flight flight ) throws FlightAndRouteException{
-        addFlight( flights.size() , flight );
+        //        Check legal symbols in data
+        if( !( legalSymbolsChecker.matcher( flight.getNumber() ).matches() &&
+               legalSymbolsChecker.matcher( flight.getPlaneID() ).matches() ) ){
+            throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
+        }
+//        Check departure and arrival times of flight
+        if( flight.getTravelTime() <= 0 ){
+            throw new FaRDateMismatchException( "Flight has incorrect dates" );
+        }
+        try{
+            flightsLock.readLock().lock();
+//            Try to find any flight's number duplicates
+            if( flights.stream()
+                       .map( Flight::getNumber )
+                       .map( String::toUpperCase )
+                       .anyMatch( Predicate.isEqual( flight.getNumber().toUpperCase() ) ) ){
+                throw new FaRSameNameException( "Flight duplicates someone's number" );
+            }
+//            If flight has route reference not from routes collection
+            if( routes.stream().map( Route::getId ).noneMatch( Predicate.isEqual( flight.getRoute().getId() ) ) ){
+                throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
+            }
+//            If new flight copies someone's else data
+            if( flights.stream()
+                       .anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
+                                                             flight.getPlaneID().toUpperCase() ) &&
+                                             Objects.equals( flight1.getRoute() , flight.getRoute() ) &&
+                                             flight1.departureDateTime.isEqual( flight.departureDateTime ) &&
+                                             flight1.arriveDateTime.isEqual( flight.arriveDateTime ) ) ){
+                throw new FaRSameNameException( "Flight duplicates someone from database" );
+            }
+        }finally{
+            flightsLock.readLock().unlock();
+        }
+        flightsLock.writeLock().lock();
+        flights.add( flight );
+        flightsLock.writeLock().unlock();
     }
-
 
     /**
      Delete specified flight from current database and immediately saves all changes
@@ -201,8 +164,9 @@ public class DataModel{
         try{
             routesLock.readLock().lock();
             if( routes.stream()
-                      .noneMatch( route -> Objects.equals( route.getId() , ( newRoute != null ? newRoute :
-                                                                             flight.getRoute() ).getId() ) ) ){
+                      .noneMatch( route -> Objects.equals( route.getId() ,
+                                                           ( newRoute != null ? newRoute :
+                                                             flight.getRoute() ).getId() ) ) ){
                 throw new FaRNotRelatedData( "FLight's route doesn't exist in database" );
             }
         }finally{
@@ -213,9 +177,9 @@ public class DataModel{
             if( flights.stream()
                        .anyMatch( flight1 -> Objects.equals( flight1.getPlaneID().toUpperCase() ,
                                                              newPlaneId != null ? newPlaneId.toUpperCase() :
-                                                             flight.getPlaneID().toUpperCase() ) &&
-                                             Objects.equals( flight1.getRoute() ,
-                                                             newRoute != null ? newRoute : flight.getRoute() ) &&
+                                                             flight.getPlaneID().toUpperCase() ) && Objects.equals(
+                               flight1.getRoute() ,
+                               newRoute != null ? newRoute : flight.getRoute() ) &&
                                              Objects.equals( flight1.getDepartureDateTime() ,
                                                              newDepartureDate != null ? newDepartureDate :
                                                              flight.getDepartureDateTime() ) &&
@@ -235,9 +199,11 @@ public class DataModel{
                                           .findFirst()
                                           .orElseThrow( () -> new FaRIllegalEditedData(
                                                   "Database doesn't contain previous version of flight" ) );
-            Flight newFlight = new Flight( editingFlight.getNumber() , newRoute != null ? newRoute : editingFlight.getRoute() ,
+            Flight newFlight = new Flight( editingFlight.getNumber() ,
+                                           newRoute != null ? newRoute : editingFlight.getRoute() ,
                                            newPlaneId != null ? newPlaneId : editingFlight.getPlaneID() ,
-                                           newDepartureDate != null ? newDepartureDate : editingFlight.getDepartureDateTime() ,
+                                           newDepartureDate != null ? newDepartureDate :
+                                           editingFlight.getDepartureDateTime() ,
                                            newArriveDate != null ? newArriveDate : editingFlight.getArriveDateTime() );
 //        To produce update event on list
             flights.set( flights.indexOf( editingFlight ) , newFlight );
@@ -246,30 +212,16 @@ public class DataModel{
         }
     }
 
-
     /**
-     @param predicate to specify the routes that to choose
-
-     @return specified routes
-     */
-    public List<Route> listRoutesWithPredicate( Predicate<Route> predicate ){
-        routesLock.readLock().lock();
-        List<Route> routes = this.routes.stream().filter( predicate ).collect( Collectors.toList() );
-        routesLock.readLock().unlock();
-        return routes;
-    }
-
-    /**
-     Add new route in current database in specified index, if it's correct, and immediately saves all changes
+     Add new route in current database, if it's correct, and immediately saves all changes
 
      @param route unique route to be added
-     @param index future index of route
 
      @throws FaRSameNameException           if new route's arrival and departure points duplicate someone another in database
      @throws IllegalArgumentException       if departure and destination airports are similar
      @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
      */
-    private void addRoute( Integer index , Route route ){
+    public void addRoute( Route route ){
         if( route.getFrom().equals( route.getTo() ) ){
             throw new FaRSameNameException( "Departure and destination airports are similar" );
         }
@@ -285,23 +237,15 @@ public class DataModel{
         }
         setId( route );
         routesLock.writeLock().lock();
-        routes.add( index , route );
+        routes.add( route );
         routesLock.writeLock().unlock();
     }
 
     /**
-     Add new route in current database, if it's correct, and immediately saves all changes
+     Method acquires id for new route. keysGeneratorSemaphore must give new id sequential for each new route
 
-     @param route unique route to be added
-
-     @throws FaRSameNameException           if new route's arrival and departure points duplicate someone another in database
-     @throws IllegalArgumentException       if departure and destination airports are similar
-     @throws FaRUnacceptableSymbolException if airports name contain illegal symbols
+     @param route new route without id
      */
-    public void addRoute( Route route ){
-        addRoute( routes.size() , route );
-    }
-
     private void setId( Route route ){
         try{
             keysGeneratorSemaphore.acquire();
@@ -313,10 +257,6 @@ public class DataModel{
         }
     }
 
-    private final Semaphore         keysGeneratorSemaphore     = new Semaphore( 1 , true );
-    private       Iterator<Integer> routesPrimaryKeysGenerator =
-            IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
-
     /**
      Delete specified flight from current database and immediately saves all changes
 
@@ -326,8 +266,9 @@ public class DataModel{
         try{
             routesLock.readLock().lock();
             if( !routes.contains( route ) ){
-                throw new FaRNotRelatedData(
-                        String.format( "Database doesn't contain route %s->%s" , route.getFrom() , route.getTo() ) );
+                throw new FaRNotRelatedData( String.format( "Database doesn't contain route %s->%s" ,
+                                                            route.getFrom() ,
+                                                            route.getTo() ) );
             }
         }finally{
             routesLock.readLock().unlock();
@@ -378,9 +319,9 @@ public class DataModel{
                                        .findFirst()
                                        .orElseThrow( () -> new FaRIllegalEditedData(
                                                "Database doesn't contain previous version of route" ) );
-            Route newRoute =
-                    new Route( editingRoute.id , newDepartureAirport != null ? newDepartureAirport : route.getFrom() ,
-                               editingRoute.getTo() );
+            Route newRoute = new Route( editingRoute.id ,
+                                        newDepartureAirport != null ? newDepartureAirport : route.getFrom() ,
+                                        editingRoute.getTo() );
 //        To produce update event on list
             flights.stream()
                    .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() ) )
@@ -429,6 +370,9 @@ public class DataModel{
         }
         try{
             keysGeneratorSemaphore.acquire();
+            /*key generator starts from max id from routes collection + 1. if collection is empty, key generator
+            starts from 1
+             */
             routesPrimaryKeysGenerator =
                     IntStream.rangeClosed( routes.stream().mapToInt( Route::getId ).max().orElse( 0 ) + 1 ,
                                            Integer.MAX_VALUE ).iterator();
@@ -521,15 +465,15 @@ public class DataModel{
                 data.add( ( Serializable ) input.readObject() );
             }
             return data.stream()
-                       .collect( Collectors.partitioningBy(
-                               serializable -> serializable.getClass().equals( Route.class ) ) );
+                       .collect( Collectors.partitioningBy( serializable -> serializable.getClass()
+                                                                                        .equals( Route.class ) ) );
         }catch( ClassNotFoundException e ){
             throw new IllegalArgumentException( "File contains illegal data" , e );
         }
     }
 
     /**
-     Look at method {@code void exportSpecifiedData( Collection<Serializable> , File )}. Export all data in database
+     Look at method {@code void exportSpecifiedDataTo( Collection<Serializable> , File )}. Export all data in database
      */
     public void saveTo( OutputStream outputStream ) throws IOException{
         routesLock.readLock().lock();
@@ -538,7 +482,7 @@ public class DataModel{
                 Stream.concat( this.routes.stream() , this.flights.stream() ).collect( Collectors.toList() );
         routesLock.readLock().unlock();
         flightsLock.readLock().unlock();
-        exportSpecifiedData( data , outputStream );
+        exportSpecifiedDataTo( data , outputStream );
     }
 
     /**
@@ -551,7 +495,7 @@ public class DataModel{
      @throws IllegalArgumentException if collection contains not just flights and routes
      */
     @SuppressWarnings( "WeakerAccess" )
-    public void exportSpecifiedData( Collection<Serializable> data , OutputStream outputStream ) throws IOException{
+    public void exportSpecifiedDataTo( Collection<Serializable> data , OutputStream outputStream ) throws IOException{
         if( !data.parallelStream()
                  .allMatch( serializable -> serializable.getClass().equals( Route.class ) ||
                                             serializable.getClass().equals( Flight.class ) ) ){

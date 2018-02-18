@@ -19,7 +19,7 @@ public class ExceptionSerializer extends StdSerializer<FlightAndRouteException>{
     @Override
     public void serialize( FlightAndRouteException e , JsonGenerator jsonGenerator ,
                            SerializerProvider serializerProvider ) throws IOException{
-        try( ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try( ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream() ;
              ObjectOutputStream outputStream = new ObjectOutputStream( byteArrayOutputStream ) ){
             outputStream.writeObject( e );
             jsonGenerator.writeBinary( byteArrayOutputStream.toByteArray() );

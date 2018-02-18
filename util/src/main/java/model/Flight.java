@@ -17,6 +17,26 @@ import java.time.temporal.ChronoUnit;
 public class Flight implements FlightOrRoute, Serializable, Cloneable{
 
     private static final long serialVersionUID = 1L;
+    /**
+     Stores date and time, when plane have to take off
+     */
+    ZonedDateTime departureDateTime;
+    /**
+     Stores date and time, when plane have to launch
+     */
+    ZonedDateTime arriveDateTime;
+    /**
+     Stores unique number of each flight
+     */
+    private String number;
+    /**
+     Stores route that this flight connects
+     */
+    private Route route;
+    /**
+     Stores unique ID of plane that makes this flight
+     */
+    private String planeID;
 
     @JsonCreator
     public Flight(
@@ -41,23 +61,9 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
         this.arriveDateTime = arriveDateTime;
     }
 
-    /**
-     Stores unique number of each flight
-     */
-    private String number;
-
     @JsonGetter( "number" )
     public String getNumber(){
         return number;
-    }
-
-    /**
-     Stores route that this flight connects
-     */
-    private Route route;
-
-    public void setRoute( Route route ){
-        this.route = route;
     }
 
     @JsonGetter( "route" )
@@ -65,30 +71,19 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
         return route;
     }
 
-    /**
-     Stores unique ID of plane that makes this flight
-     */
-    private String planeID;
+    public void setRoute( Route route ){
+        this.route = route;
+    }
 
     @JsonGetter( "planeID" )
     public String getPlaneID(){
         return planeID;
     }
 
-    /**
-     Stores date and time, when plane have to take off
-     */
-    ZonedDateTime departureDateTime;
-
     @JsonGetter( "departureDateTime" )
     public ZonedDateTime getDepartureDateTime(){
         return departureDateTime;
     }
-
-    /**
-     Stores date and time, when plane have to launch
-     */
-    ZonedDateTime arriveDateTime;
 
     @JsonGetter( "arriveDateTime" )
     public ZonedDateTime getArriveDateTime(){
@@ -108,8 +103,8 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
         long startMilli = getTravelTime();
         startMilli /= 1000; // sum of second
         long sumMinute = startMilli / 60; // sum of minute
-        long minute    = sumMinute % 60; // minute
-        long hour      = sumMinute / 60; // hour
+        long minute = sumMinute % 60; // minute
+        long hour = sumMinute / 60; // hour
         return String.format( "%d:%02d" , hour , minute );
     }
 
@@ -152,8 +147,14 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm z" );
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
-                "plane" , number , departureDateTime.format( formatter ) , route.getFrom() ,
-                arriveDateTime.format( formatter ) , route.getTo() , getTravelTimeString() , planeID );
+                "plane" ,
+                number ,
+                departureDateTime.format( formatter ) ,
+                route.getFrom() ,
+                arriveDateTime.format( formatter ) ,
+                route.getTo() ,
+                getTravelTimeString() ,
+                planeID );
     }
 
 }
