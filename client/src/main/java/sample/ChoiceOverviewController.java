@@ -89,12 +89,14 @@ class ChoiceOverviewController{
                 Controller.getInstance().reconnect();
             }
             ObjectMapper mapper = new ObjectMapper();
-            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                     .getClientSocket()
-                                                                                     .getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                              .getClientSocket()
-                                                                              .getInputStream() ) ){
+
+            try{
+                DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getOutputStream() ) ;
+                DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getInputStream() ) ;
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 System.out.println( "Ушло" );
                 String testString = inputStream.readUTF();

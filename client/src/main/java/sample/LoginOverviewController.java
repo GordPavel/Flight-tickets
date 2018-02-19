@@ -105,6 +105,7 @@ class LoginOverviewController{
                                                                                     .getUserInformation() ) );
                     System.out.println( "Ушло" );
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                    Controller.getInstance().getClientSocket().close();
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }
