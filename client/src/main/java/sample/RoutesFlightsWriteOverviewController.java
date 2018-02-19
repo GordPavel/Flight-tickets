@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
@@ -18,6 +20,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  Controller for routes and flights view, client write application.
@@ -29,6 +32,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         super( thisStage );
     }
 
+    private CopyOnWriteArrayList<ListChangeAdapter> changes = new CopyOnWriteArrayList<>();
     /**
      initialization of view
      Hiding menus, add listeners, start thread
@@ -113,7 +117,17 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      Delete route from local DB
      */
     private void handleDeleteRouteAction(){
-        Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
+
+        Alert alert = new Alert( Alert.AlertType.CONFIRMATION );
+        alert.setTitle( " Delete a route " );
+        alert.setHeaderText( " Are you sure that you want to delete this route? " );
+        alert.setContentText( routeTable.getSelectionModel().getSelectedItem().toString() );
+
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if ( option.get() == ButtonType.OK ){
+
+            Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataOutputStream outClient =
                         new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
@@ -125,16 +139,45 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                                   selectedRoute ) ) ) );
 
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                changes.add ( ListChangeAdapter.removeRoute( Collections.singletonList( selectedRoute ) ) );
+
+                DataInputStream inClient =
+                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+
                 // get Data
+                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+                changes.forEach( listChangeAdapter -> {
+                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+                                if ( listChangeAdapter.equals(listChangeAdapter1) ) {
+                                    if ( data.hasNotException() ) {
+
+                                        Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+                                        alert1.setTitle( " Delete a route" );
+                                        alert1.setHeaderText( " Deleting a route was successful! " );
+                                        alert1.setContentText( listChangeAdapter.getUpdate() );
+                                        changes.remove( listChangeAdapter );
+                                    } else{
+                                        Alert alert1 = new Alert( Alert.AlertType.ERROR );
+                                        alert1.setTitle( " Delete a route" );
+                                        alert1.setHeaderText( " Error while deleting a route on a server! " );
+                                        alert1.setContentText( listChangeAdapter.getUpdate() );
+                                    }
+                                }
+                            }
+                        }
+                );
+                outClient.close();
+                inClient.close();
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
         } );
+        }
         /*
           TODO: set message to delete route to server
-         */
+        */
     }
 
     /**
@@ -192,6 +235,14 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
 
     private void handleDeleteFlightAction(){
+        Alert alert = new Alert( Alert.AlertType.CONFIRMATION );
+        alert.setTitle( " Delete a flight " );
+        alert.setHeaderText( " Are you sure that you want to delete this flight? " );
+        alert.setContentText( flightTable.getSelectionModel().getSelectedItem().toString() );
+
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if ( option.get() == ButtonType.OK ){
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataOutputStream outClient =
@@ -204,14 +255,41 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                                   selectedFlight ) ) ) );
 
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+
+                changes.add ( ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) );
+
+                DataInputStream inClient =
+                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+
                 // get Data
+                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+                changes.forEach( listChangeAdapter -> {
+                    for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+                        if ( listChangeAdapter.equals(listChangeAdapter1) ) {
+                            if ( data.hasNotException() ) {
+                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+                                alert1.setTitle( " Delete a flight" );
+                                alert1.setHeaderText( " Deleting a flight was successful! " );
+                                alert1.setContentText( listChangeAdapter.getUpdate() );
+                                changes.remove( listChangeAdapter );
+                            } else{
+                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
+                                alert1.setTitle( " Delete a flight" );
+                                alert1.setHeaderText( " Error while deleting a flight on a server! " );
+                                alert1.setContentText( listChangeAdapter.getUpdate() );
+                                changes.remove( listChangeAdapter );
+                            }
+                        }
+                    }
+                }
+                );
 
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
-        } );
+        } );}
         /*
           TODO: add message to server to delete flight
          */
