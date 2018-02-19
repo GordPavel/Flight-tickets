@@ -525,4 +525,14 @@ public class DataModel{
             flightsLock.writeLock().unlock();
         }
     }
+
+    public boolean containRoute(Route route)
+    {
+        return routes.contains(route);
+    }
+
+    public boolean containFlight(Flight flight)
+    {
+        return flights.contains(flight);
+    }
 }
