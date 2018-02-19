@@ -1,6 +1,7 @@
 package sample;
 
 import com.jfoenix.controls.JFXButton;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -12,19 +13,20 @@ import model.Flight;
 
 class MergeOverviewController{
 
-    @FXML TableView<Flight>           flightTable;
-    @FXML TableColumn<Flight, String> numberColumn;
-    @FXML TextArea                    newTextArea;
-    @FXML TextArea                    oldTextArea;
-    @FXML JFXButton                   acceptAllNew;
-    @FXML JFXButton                   acceptThisNew;
-    @FXML JFXButton                   acceptAllOld;
-    @FXML JFXButton                   acceptThisOld;
-    private Stage thisStage;
-    private Controller controller = Controller.getInstance();
+    @FXML   TableView<Flight>           flightTable;
+    @FXML   TableColumn<Flight, String> numberColumn;
+    @FXML   TextArea                    newTextArea;
+    @FXML   TextArea                    oldTextArea;
+    @FXML   JFXButton                   acceptAllNew;
+    @FXML   JFXButton                   acceptThisNew;
+    @FXML   JFXButton                   acceptAllOld;
+    @FXML   JFXButton                   acceptThisOld;
+    private Stage                       thisStage;
+    private ObservableList<Flight>      failedFlights;
 
-    MergeOverviewController( Stage thisStage ){
+    MergeOverviewController( Stage thisStage , ObservableList<Flight> failedFlights ){
         this.thisStage = thisStage;
+        this.failedFlights = failedFlights;
     }
 
     /**
@@ -33,7 +35,7 @@ class MergeOverviewController{
     @FXML
     private void initialize(){
         numberColumn.setCellValueFactory( new PropertyValueFactory<>( "number" ) );
-        flightTable.setItems( controller.getMergeFlights() );
+        flightTable.setItems( failedFlights );
         flightTable.getSelectionModel()
                    .selectedItemProperty()
                    .addListener( ( observable , oldValue , newValue ) -> showFlightDetails( newValue ) );

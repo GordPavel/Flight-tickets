@@ -16,6 +16,18 @@ import java.util.function.Consumer;
  */
 
 public class Data{
+
+    //    to say client, what was wrong in his request
+    private ListChangeAdapter errorUpdateRequest;
+
+    public ListChangeAdapter getErrorUpdateRequest(){
+        return errorUpdateRequest;
+    }
+
+    public void setErrorUpdateRequest( ListChangeAdapter errorUpdateRequest ){
+        this.errorUpdateRequest = errorUpdateRequest;
+    }
+
     private Collection<Route>       routes;
     private Collection<Flight>      flights;
     private Map<String, String>     bases;

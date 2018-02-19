@@ -6,14 +6,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import model.DataModelInstanceSaver;
-import model.FlightOrRoute;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
-import transport.Data;
 import transport.ListChangeAdapter;
-import transport.PredicateParser;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -43,9 +37,6 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         routeConnectLabel.setVisible( false );
         flightConnectLabel.setVisible( false );
 
-        Controller.getInstance().setThread( new WriteThread() );
-        Controller.getInstance().startThread();
-
         addRouteButton.setOnAction( event -> handleAddRouteAction() );
         editRouteButton.setOnAction( event -> handleEditRouteAction() );
         deleteRouteButton.setOnAction( event -> handleDeleteRouteAction() );
@@ -62,8 +53,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddRouteAction(){
         try{
-            Stage popUp = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            Stage                              popUp      = new Stage();
+            FXMLLoader                         loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
             loader.setController( controller );
             popUp.initModality( Modality.APPLICATION_MODAL );
@@ -73,7 +65,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             popUp.setScene( new Scene( loader.load() ) );
             popUp.setResizable( false );
 
-            thisStage.setOpacity( 0.9 );
+            thisStage.setOpacity( 0.8 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
         }catch( IOException e ){
@@ -88,7 +80,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-                Stage popUp = new Stage();
+                Stage      popUp  = new Stage();
                 AddAndEditRoutesOverviewController controller =
                         new AddAndEditRoutesOverviewController( selectedRoute , popUp );
                 loader.setController( controller );
@@ -115,8 +107,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleDeleteRouteAction(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
-                DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
+                DataOutputStream outClient = new DataOutputStream( Controller.updatingStream );
                 ObjectMapper mapper = new ObjectMapper();
 
                 Controller.getInstance()
@@ -142,8 +133,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddFlightAction(){
         try{
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-            Stage popUp = new Stage();
+            FXMLLoader                          loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
 
@@ -169,7 +161,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-                Stage popUp = new Stage();
+                Stage      popUp  = new Stage();
                 AddAndEditFlightsOverviewController controller =
                         new AddAndEditFlightsOverviewController( selectedFlight , popUp );
                 loader.setController( controller );
@@ -195,7 +187,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
+                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
                 ObjectMapper mapper = new ObjectMapper();
 
                 Controller.getInstance()

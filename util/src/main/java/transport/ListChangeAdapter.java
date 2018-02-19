@@ -3,6 +3,7 @@ package transport;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.ListChangeListener;
@@ -18,6 +19,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ListChangeAdapter{
+
+    //    For working with update requests in client
+    private String id;
+
+
+    @JsonGetter( "id" )
+    public String getId(){
+        return id;
+    }
+
+    @JsonSetter( "id" )
+    public void setId( String id ){
+        this.id = id;
+    }
+
     private static final ObjectMapper mapper = new ObjectMapper();
     private final String update;
     private final Pattern updatePattern = Pattern.compile(
@@ -109,9 +125,9 @@ public class ListChangeAdapter{
         if( !matcher.matches() ){
             throw new IllegalArgumentException( "Error while parsing update" );
         }
-        String type = matcher.group( "type" );
-        String entity = matcher.group( "entity" );
-        String list = matcher.group( "list" );
+        String type    = matcher.group( "type" );
+        String entity  = matcher.group( "entity" );
+        String list    = matcher.group( "list" );
         String newList = matcher.group( "new" );
         try{
             switch( type ){

@@ -10,11 +10,11 @@ import java.util.List;
  */
 
 public class UserInformation{
+    private String          login;
+    private String          password;
+    private String          dataBase;
+    private PredicateParser predicateParser;
 
-    private String                  login;
-    private String                  password;
-    private String                  dataBase;
-    private PredicateParser         predicateParser;
     private List<ListChangeAdapter> changes;
 
     public UserInformation(){}
@@ -28,6 +28,12 @@ public class UserInformation{
     public UserInformation( String login , String password ){
         this.login = login;
         this.password = password;
+    }
+
+    public UserInformation( String login , String password , String dataBase ){
+        this.login = login;
+        this.password = password;
+        this.dataBase = dataBase;
     }
 
     @JsonGetter( "login" )

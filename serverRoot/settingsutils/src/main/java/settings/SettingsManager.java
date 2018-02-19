@@ -31,9 +31,9 @@ public class SettingsManager{
 
     static{
         rootFolderPath =
-//                "/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot"
-                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-                           "UTF-8" ).getParent().getParent().getParent().toString()
+                "/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot"
+//                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
+//                           "UTF-8" ).getParent().getParent().getParent().toString()
 
                 + "/target";
         settingsFilePath = rootFolderPath + "/serverfiles/settings.xml";
