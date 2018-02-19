@@ -32,23 +32,27 @@ public class WriteThread extends FaRThread{
     public void run(){
         while( !stop ){
             System.out.println( 123 );
-            if( Controller.getInstance().getClientSocket().isClosed() ){
-                Controller.getInstance().reconnect();
-            }
-            if( Controller.getInstance().getClientSocket().isConnected() ){
-                Data data;
-                ObjectMapper mapper = new ObjectMapper();
-                try( DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                                  .getClientSocket()
-                                                                                  .getInputStream() ) ){
-                    data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                    data.withoutExceptionOrWith( data1 -> data1.getChanges()
-                                                               .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) ) ,
-                                                 ClientMain::showWarningByError );
-                }catch( IOException | NullPointerException ex ){
-                    System.out.println( ex.getMessage() );
-                }
-            }
+//            if( Controller.getInstance().getClientSocket().isClosed() ){
+//                Controller.getInstance().reconnect();
+//            }
+//            if( Controller.getInstance().getClientSocket().isConnected() ){
+//                Data data;
+//                ObjectMapper mapper = new ObjectMapper();
+//                try{
+//                    DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+//                            .getClientSocket()
+//                            .getInputStream() );
+//                    data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+//                    System.out.println(mapper.writeValueAsString(data));
+//                    data.withoutExceptionOrWith( data1 -> data1.getChanges()
+//                                                               .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) ) ,
+//                                                 ClientMain::showWarningByError );
+//                }catch( IOException | NullPointerException ex ){
+//                    System.out.println( ex.getMessage() );
+//                    ex.printStackTrace();
+//                    System.out.println(ex.getClass());
+//                }
+//            }
             try{
                 Thread.sleep( 5000 );
             }catch( InterruptedException ex ){

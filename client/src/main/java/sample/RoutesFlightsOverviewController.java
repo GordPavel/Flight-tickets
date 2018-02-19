@@ -300,12 +300,13 @@ abstract class RoutesFlightsOverviewController{
             Controller.getInstance().getClientSocket().isConnected() ){
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setDataBase( null );
-            try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                     .getClientSocket()
-                                                                                     .getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                              .getClientSocket()
-                                                                              .getInputStream() ) ){
+            try{
+                DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getOutputStream() ) ;
+                DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getInputStream() ) ;
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
             }catch( IOException | NullPointerException ex ){
@@ -391,11 +392,13 @@ abstract class RoutesFlightsOverviewController{
             Data data;
             ObjectMapper mapper = new ObjectMapper();
 
-            try( DataOutputStream dataOutputStream = new DataOutputStream(
-                    Controller.getInstance().getClientSocket().getOutputStream() ) ;
-                 DataInputStream inputStream = new DataInputStream(
-                         Controller.getInstance().getClientSocket().getInputStream() ) ){
+            try{
+                DataOutputStream dataOutputStream = new DataOutputStream(
+                        Controller.getInstance().getClientSocket().getOutputStream() );
+                DataInputStream inputStream = new DataInputStream(
+                        Controller.getInstance().getClientSocket().getInputStream() );
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                System.out.println(mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
