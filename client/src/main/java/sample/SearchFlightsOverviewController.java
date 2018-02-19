@@ -1,6 +1,5 @@
 package sample;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTimePicker;
@@ -16,12 +15,8 @@ import model.DataModelInstanceSaver;
 import model.Flight;
 import model.Route;
 import org.danekja.java.util.function.serializable.SerializablePredicate;
-import transport.Data;
 import transport.PredicateParser;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -249,6 +244,7 @@ class SearchFlightsOverviewController{
                     @Override
                     public void run(){
                         handleSearchAction();
+                        mainController.receiveUpdate();
                     }
                 } );
             }

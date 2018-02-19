@@ -20,9 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.DataModelInstanceSaver;
 import model.Flight;
-import model.FlightOrRoute;
 import model.Route;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.PredicateParser;
 import transport.UserInformation;
@@ -377,7 +375,27 @@ abstract class RoutesFlightsOverviewController{
     /**
      * Method used for updates and searches. PredicateParser setuped by other methods, after operation cleared.
      */
-    void requestUpdate(  ){
+    void requestUpdate(){
+        if( Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Online" );
+            flightConnectLabel.setText( "Online" );
+            ObjectMapper mapper = new ObjectMapper();
+
+            try{
+                DataOutputStream dataOutputStream = new DataOutputStream(
+                        Controller.getInstance().getClientSocket().getOutputStream() );
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                System.out.println(mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+            }catch( IOException | NullPointerException ex ){
+                System.out.println( ex.getMessage() );
+                ex.printStackTrace();
+                System.out.println( "Yep" );
+            }
+            Controller.getInstance().getUserInformation().setPredicate( null );
+        }
+    }
+
+    void receiveUpdate( ){
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
@@ -403,13 +421,14 @@ abstract class RoutesFlightsOverviewController{
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
                     data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                    data1.getRoutes().forEach( DataModelInstanceSaver.getInstance()::addRoute );
+                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                 } , ClientMain::showWarningByError );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();
                 System.out.println( "Yep" );
             }
-            Controller.getInstance().getUserInformation().setPredicate( null );
         }
     }
 

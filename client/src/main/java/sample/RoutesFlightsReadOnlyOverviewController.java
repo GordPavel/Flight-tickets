@@ -84,6 +84,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
                     routeConnectLabel.setText( "Online" );
                     flightConnectLabel.setText( "Online" );
                     handleSearchRouteAction();
+                    receiveUpdate();
                 }
                 routeTable.setDisable( false );
             }
