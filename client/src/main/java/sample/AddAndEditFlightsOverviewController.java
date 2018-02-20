@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -262,7 +261,7 @@ class AddAndEditFlightsOverviewController{
             try{
                 DataOutputStream
                         outClient =
-                        new DataOutputStream( Controller.getInstance().connection.getOutputStream() );
+                        new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
                 List<ListChangeAdapter> changes;
 
                 if( isAdd ){
@@ -295,7 +294,7 @@ class AddAndEditFlightsOverviewController{
                 System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
             }
-            Controller.changed = true;
+            Controller.getInstance().changed = true;
             closeWindow();
         }
     }

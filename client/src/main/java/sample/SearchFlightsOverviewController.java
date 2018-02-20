@@ -73,7 +73,7 @@ class SearchFlightsOverviewController{
         mainController.flightTable.setItems( flightFilteredList );
         flightFilteredList.predicateProperty().bind( flightsPredicate );
         flightsPredicate.addListener( ( observable , oldValue , newValue ) -> {
-            Controller.getInstance().flightPredicate.set( newValue );
+            Controller.getInstance().flightPredicate = newValue;
         } );
 
         routeFilteredList.predicateProperty().bind( routesPredicate );
@@ -143,7 +143,7 @@ class SearchFlightsOverviewController{
                          .addListener( ( observable , oldValue , newValue ) -> formatCheck( searchToTextField ) );
         thisStage.setOnCloseRequest( event -> {
             mainController.flightTable.setItems( DataModelInstanceSaver.getInstance().getFlightObservableList() );
-            Controller.getInstance().flightPredicate.set( flight -> true );
+            Controller.getInstance().flightPredicate = flight -> true;
         } );
         if( mainController instanceof RoutesFlightsReadOnlyOverviewController ){
             searchButton.setVisible( false );

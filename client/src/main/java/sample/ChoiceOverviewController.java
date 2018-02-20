@@ -71,14 +71,18 @@ class ChoiceOverviewController{
                 .ifPresent( selectedItem -> {
                     try{
                         Socket socket = new Socket( Controller.getInstance().host , Controller.getInstance().port );
-                        Controller.getInstance().connection = socket;
+                        Controller.getInstance().connection.set( socket );
                         ObjectMapper mapper = new ObjectMapper();
                         Controller.getInstance().base = selectedItem.getKey();
                         UserInformation request = new UserInformation( Controller.getInstance().login ,
                                                                        Controller.getInstance().password ,
                                                                        Controller.getInstance().base );
-                        DataOutputStream outputStream = new DataOutputStream( socket.getOutputStream() );
-                        DataInputStream  inputStream  = new DataInputStream( socket.getInputStream() );
+//                        todo : Если соединение разорвано
+                        DataOutputStream outputStream =
+                                new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
+
+                        DataInputStream inputStream =
+                                new DataInputStream( Controller.getInstance().connection.get().getInputStream() );
                         outputStream.writeUTF( mapper.writeValueAsString( request ) );
                         Data response = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                         response.withoutExceptionOrWith( data -> {

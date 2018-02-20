@@ -155,7 +155,8 @@ class AddAndEditRoutesOverviewController{
 
     private void addOrEdit( Boolean isAdd ){
         try{
-            DataOutputStream outClient = new DataOutputStream( Controller.getInstance().connection.getOutputStream() );
+            DataOutputStream outClient = new DataOutputStream( Controller.getInstance().connection.get()
+                                                                                                  .getOutputStream() );
             List<ListChangeAdapter> changes;
 
             if( isAdd ){
@@ -183,7 +184,7 @@ class AddAndEditRoutesOverviewController{
             System.out.println( "Connection problem" );
             System.out.println( e.getMessage() );
         }
-        Controller.changed = true;
+        Controller.getInstance().changed = true;
         closeWindow();
     }
 
