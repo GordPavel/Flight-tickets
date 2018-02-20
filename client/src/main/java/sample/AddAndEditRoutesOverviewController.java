@@ -6,6 +6,7 @@ import exceptions.FlightAndRouteException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -13,6 +14,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.Route;
 import transport.ListChangeAdapter;
+import transport.UserInformation;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -44,18 +46,16 @@ class AddAndEditRoutesOverviewController{
     private Route editingRoute;
 
     private Stage thisStage;
-    private Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private       Pattern      pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
     //    Collect all zones to map by country
-    private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds()
-                                                      .stream()
-                                                      .sorted()
-                                                      .filter( Pattern.compile( "(Etc|SystemV)/.+" )
-                                                                      .asPredicate()
-                                                                      .negate()
-                                                                      .and( pattern.asPredicate() ) )
-                                                      .collect( Collector.of( HashMap::new ,
-                                                                              this::putNewZoneToMap ,
-                                                                              this::mergeTwoMaps ) );
+    private       Map<String, List<ZoneId>>
+                               zones   =
+            ZoneId.getAvailableZoneIds()
+                  .stream()
+                  .sorted()
+                  .filter( Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate().and( pattern.asPredicate() ) )
+                  .collect( Collector.of( HashMap::new , this::putNewZoneToMap , this::mergeTwoMaps ) );
+    private final ObjectMapper mapper  = new ObjectMapper();
 
     private Map<String, List<ZoneId>> mergeTwoMaps( Map<String, List<ZoneId>> map1 , Map<String, List<ZoneId>> map2 ){
         map1.forEach( ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
@@ -66,7 +66,7 @@ class AddAndEditRoutesOverviewController{
         Matcher matcher = pattern.matcher( zone );
         //noinspection ResultOfMethodCallIgnored
         matcher.find();
-        String key = matcher.group( 1 );
+        String       key    = matcher.group( 1 );
         final ZoneId zoneId = ZoneId.of( zone );
         if( map.containsKey( key ) ){
             map.get( key ).add( zoneId );
@@ -88,14 +88,13 @@ class AddAndEditRoutesOverviewController{
     @SuppressWarnings( "ResultOfMethodCallIgnored" )
     @FXML
     private void initialize(){
-        departureCountryChoice.setItems( zones.keySet()
-                                              .stream()
-                                              .collect( Collectors.collectingAndThen( toList() ,
-                                                                                      FXCollections::observableList ) ) );
-        destinationCountryChoice.setItems( zones.keySet()
-                                                .stream()
-                                                .collect( Collectors.collectingAndThen( toList() ,
-                                                                                        FXCollections::observableList ) ) );
+        final ObservableList<String>
+                countries =
+                zones.keySet()
+                     .stream()
+                     .collect( Collectors.collectingAndThen( toList() , FXCollections::observableList ) );
+        departureCountryChoice.setItems( countries );
+        destinationCountryChoice.setItems( countries );
         StringConverter<ZoneId> zoneIdStringConverter = new StringConverter<ZoneId>(){
             @Override
             public String toString( ZoneId zone ){
@@ -120,9 +119,12 @@ class AddAndEditRoutesOverviewController{
                                 .addListener( ( observable , oldValue , newValue ) -> countrySelected( newValue ,
                                                                                                        destinationCityChoice ) );
 
-        BooleanProperty addAvailable = new SimpleBooleanProperty(
-                Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() ).isPresent() &&
-                Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() ).isPresent() );
+        BooleanProperty
+                addAvailable =
+                new SimpleBooleanProperty( Optional.ofNullable( departureCityChoice.getSelectionModel()
+                                                                                   .getSelectedItem() ).isPresent() &&
+                                           Optional.ofNullable( destinationCityChoice.getSelectionModel()
+                                                                                     .getSelectedItem() ).isPresent() );
         addAvailable.bind( departureCityChoice.getSelectionModel()
                                               .selectedItemProperty()
                                               .isNotNull()
@@ -153,59 +155,38 @@ class AddAndEditRoutesOverviewController{
 
     private void addOrEdit( Boolean isAdd ){
         try{
-//            if( isAdd ){
-//                DataModelInstanceSaver.getInstance()
-//                                      .addRoute( new Route( Optional.ofNullable( departureCityChoice.getSelectionModel()
-//                                                                                                    .getSelectedItem() )
-//                                                                    .orElseThrow( IllegalStateException::new ) ,
-//                                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
-//                                                                                                      .getSelectedItem() )
-//                                                                    .orElseThrow( IllegalStateException::new ) ) );
-//            }else{
-//                DataModelInstanceSaver.getInstance()
-//                                      .editRoute( editingRoute ,
-//                                                  Optional.ofNullable( departureCityChoice.getSelectionModel()
-//                                                                                          .getSelectedItem() )
-//                                                          .orElseThrow( IllegalStateException::new ) ,
-//                                                  Optional.ofNullable( destinationCityChoice.getSelectionModel()
-//                                                                                            .getSelectedItem() )
-//                                                          .orElseThrow( IllegalStateException::new ) );
-//            }
-//            TODO: put here request to server to add route
-            try{
-                DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper mapper = new ObjectMapper();
-                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+            DataOutputStream outClient = new DataOutputStream( Controller.getInstance().connection.getOutputStream() );
+            List<ListChangeAdapter> changes;
 
-                if( isAdd ){
-                    changes.add( ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                      .getSelectedItem() ,
-                                                                                                   destinationCityChoice
-                                                                                                           .getSelectionModel()
-                                                                                                           .getSelectedItem() ) ) ) );
-                }else{
-                    changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                              Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                       .getSelectedItem() ,
-                                                                                                    destinationCityChoice
-                                                                                                            .getSelectionModel()
-                                                                                                            .getSelectedItem() ) ) ) );
-                }
-
-                Controller.getInstance().getUserInformation().setChanges( changes );
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                Controller.getInstance().getUserInformation().setChanges( null );
-            }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
+            if( isAdd ){
+                changes =
+                        Collections.singletonList( ListChangeAdapter.addRoute( Collections.singletonList( new Route(
+                                departureCityChoice.getSelectionModel().getSelectedItem() ,
+                                destinationCityChoice.getSelectionModel().getSelectedItem() ) ) ) );
+            }else{
+                changes =
+                        Collections.singletonList( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
+                                                                                Collections.singletonList( new Route(
+                                                                                        departureCityChoice.getSelectionModel()
+                                                                                                           .getSelectedItem() ,
+                                                                                        destinationCityChoice.getSelectionModel()
+                                                                                                             .getSelectedItem() ) ) ) );
             }
-            Controller.changed = true;
-            closeWindow();
+
+            UserInformation request = new UserInformation();
+            request.setChanges( changes );
+            outClient.writeUTF( mapper.writeValueAsString( request ) );
+            //        todo : Данные между принимающим и передающим потоком
         }catch( FlightAndRouteException e ){
-            RoutesFlightsOverviewController.showModelAlert( e );
+            ClientMain.showWarningByError( e );
+        }catch( IOException e ){
+            System.out.println( "Connection problem" );
+            System.out.println( e.getMessage() );
         }
+        Controller.changed = true;
+        closeWindow();
     }
+
 
     private void countrySelected( String newValue , ChoiceBox<ZoneId> cityBox ){
         Optional<String> chosenCorty = Optional.ofNullable( newValue );

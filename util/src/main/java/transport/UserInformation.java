@@ -19,12 +19,6 @@ public class UserInformation{
 
     public UserInformation(){}
 
-    public UserInformation( UserInformation user ){
-        this.login = user.getLogin();
-        this.password = user.getPassword();
-        this.dataBase = user.getDataBase();
-    }
-
     public UserInformation( String login , String password ){
         this.login = login;
         this.password = password;
@@ -90,9 +84,8 @@ public class UserInformation{
         if( !( obj instanceof UserInformation ) ) return false;
         UserInformation information = ( UserInformation ) obj;
         return login.equals( information.login ) && password.equals( information.password ) && dataBase == null ?
-               information.dataBase == null :
-               dataBase.equals( information.dataBase ) &&
-               ( predicateParser == null && information.predicateParser == null ) ||
-               ( predicateParser != null && information.predicateParser != null );
+               information.dataBase == null : dataBase.equals( information.dataBase ) &&
+                                              ( predicateParser == null && information.predicateParser == null ) ||
+                                              ( predicateParser != null && information.predicateParser != null );
     }
 }

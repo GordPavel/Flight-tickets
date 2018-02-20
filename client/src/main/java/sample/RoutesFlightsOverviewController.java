@@ -48,7 +48,6 @@ abstract class RoutesFlightsOverviewController{
     static final         String EDIT_ROUTE_WINDOW    = "Edit a route";
     static final         String EDIT_FLIGHT_WINDOW   = "Edit a flight";
     static final         String ADD_FLIGHT_WINDOW    = "Add a flight";
-    SearchFlightsOverviewController searchFlights;
 
     @FXML Menu     fileMenu;
     @FXML MenuItem openMenuButton;
@@ -134,7 +133,8 @@ abstract class RoutesFlightsOverviewController{
             }
         } );
 
-        ChangeListener<String> routeSearchListener =
+        ChangeListener<String>
+                routeSearchListener =
                 ( observable , oldValue , newValue ) -> routesPredicate.setValue( route -> {
                     return getRoutePattern( departure.getText() ).matcher( route.getFrom().getId() ).matches() &&
                            getRoutePattern( destination.getText() ).matcher( route.getTo().getId() ).matches();
@@ -153,6 +153,10 @@ abstract class RoutesFlightsOverviewController{
         updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
         searchRouteButton.setOnAction( event -> handleSearchRouteAction() );
         updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
+
+        routesPredicate.addListener( ( observable , oldValue , newValue ) -> {
+            Controller.getInstance().routePredicate.set( newValue );
+        } );
     }
 
     /**
@@ -209,18 +213,22 @@ abstract class RoutesFlightsOverviewController{
         Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
             try( InputStream mergingFile = Files.newInputStream( file.toPath() ) ){
                 Controller.changed = true;
-                List<Serializable> failedInMerge =
+                List<Serializable>
+                        failedInMerge =
                         DataModelInstanceSaver.getInstance().mergeData( mergingFile ).collect( toList() );
 
-                ObservableList<Flight> failedFlights = failedInMerge.parallelStream()
-                                                                    .filter( element -> element.getClass()
-                                                                                               .equals( Flight.class ) )
-                                                                    .map( Flight.class::cast )
-                                                                    .collect( Collectors.collectingAndThen( toList() ,
-                                                                                                            FXCollections::observableArrayList ) );
-                String errors = failedInMerge.stream()
-                                             .map( Serializable::toString )
-                                             .collect( Collectors.joining( "\n-" , "-" , "\n" ) );
+                ObservableList<Flight>
+                        failedFlights =
+                        failedInMerge.parallelStream()
+                                     .filter( element -> element.getClass().equals( Flight.class ) )
+                                     .map( Flight.class::cast )
+                                     .collect( Collectors.collectingAndThen( toList() ,
+                                                                             FXCollections::observableArrayList ) );
+                String
+                        errors =
+                        failedInMerge.stream()
+                                     .map( Serializable::toString )
+                                     .collect( Collectors.joining( "\n-" , "-" , "\n" ) );
 
                 if( !failedInMerge.isEmpty() ){
                     ClientMain.showWarning( "Merge results" , "Model have this problems with merge:" , errors );
@@ -229,7 +237,8 @@ abstract class RoutesFlightsOverviewController{
                 if( !failedFlights.isEmpty() ){
                     Stage      popUp  = new Stage();
                     FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/MergeOverview.fxml" ) );
-                    MergeOverviewController mergeOverviewController =
+                    MergeOverviewController
+                            mergeOverviewController =
                             new MergeOverviewController( popUp , failedFlights );
                     loader.setController( mergeOverviewController );
                     Scene scene = new Scene( loader.load() );
@@ -268,7 +277,8 @@ abstract class RoutesFlightsOverviewController{
                  DataOutputStream outputStream = new DataOutputStream( socket.getOutputStream() ) ;
                  DataInputStream inputStream = new DataInputStream( socket.getInputStream() ) ){
 
-                UserInformation request =
+                UserInformation
+                        request =
                         new UserInformation( Controller.getInstance().login , Controller.getInstance().password );
                 outputStream.writeUTF( mapper.writeValueAsString( request ) );
                 Data response = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
@@ -318,9 +328,11 @@ abstract class RoutesFlightsOverviewController{
         try( Socket socket = new Socket( Controller.getInstance().host , Controller.getInstance().port ) ;
              DataOutputStream outputStream = new DataOutputStream( socket.getOutputStream() ) ;
              DataInputStream inputStream = new DataInputStream( socket.getInputStream() ) ){
-            UserInformation request = new UserInformation( Controller.getInstance().login ,
-                                                           Controller.getInstance().password ,
-                                                           Controller.getInstance().base );
+            UserInformation
+                    request =
+                    new UserInformation( Controller.getInstance().login ,
+                                         Controller.getInstance().password ,
+                                         Controller.getInstance().base );
             request.setPredicate( PredicateParser.createRoutePredicate( departure.getText() , destination.getText() ) );
             outputStream.writeUTF( mapper.writeValueAsString( request ) );
             Data response = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
@@ -338,9 +350,11 @@ abstract class RoutesFlightsOverviewController{
      */
     private void handleSearchFlightAction(){
         try{
-            Stage      popUp  = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
-            searchFlights = new SearchFlightsOverviewController( this , popUp );
+            Stage                           popUp         = new Stage();
+            FXMLLoader
+                                            loader        =
+                    new FXMLLoader( getClass().getResource( "/fxml/SearchFlightsOverview.fxml" ) );
+            SearchFlightsOverviewController searchFlights = new SearchFlightsOverviewController( this , popUp );
             loader.setController( searchFlights );
             Scene scene = new Scene( loader.load() );
 
@@ -366,7 +380,6 @@ abstract class RoutesFlightsOverviewController{
      */
     void handleSearchRouteAction(){
 //        todo: Поиск маршрутов
-        Controller.getInstance().routePredicate = routesPredicate.get();
     }
 
 

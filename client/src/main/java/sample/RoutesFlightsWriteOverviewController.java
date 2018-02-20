@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import transport.ListChangeAdapter;
+import transport.UserInformation;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -19,6 +20,9 @@ import java.util.Optional;
  */
 class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
+//    todo :Поток прёма обновлений от сервера
     RoutesFlightsWriteOverviewController( Stage thisStage ){
         super( thisStage );
     }
@@ -107,25 +111,18 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleDeleteRouteAction(){
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
-                DataOutputStream outClient = new DataOutputStream( Controller.updatingStream );
-                ObjectMapper mapper = new ObjectMapper();
-
-                Controller.getInstance()
-                          .getUserInformation()
-                          .setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( Collections.singletonList(
-                                  selectedRoute ) ) ) );
-
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                // get Data
-                Controller.getInstance().getUserInformation().setChanges( null );
+                DataOutputStream outClient =
+                        new DataOutputStream( Controller.getInstance().connection.getOutputStream() );
+                UserInformation request = new UserInformation();
+                request.setChanges( Collections.singletonList(
+                        ListChangeAdapter.removeRoute( Collections.singletonList( selectedRoute ) ) ) );
+                outClient.writeUTF( mapper.writeValueAsString( request ) );
+//        todo : Данные между принимающим и передающим потоком
             }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
+                System.err.println( "Socket error" );
+                e.printStackTrace();
             }
         } );
-        /*
-          TODO: set message to delete route to server
-         */
     }
 
     /**
@@ -187,26 +184,16 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataOutputStream outClient =
-                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper mapper = new ObjectMapper();
-
-                Controller.getInstance()
-                          .getUserInformation()
-                          .setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( Collections.singletonList(
-                                  selectedFlight ) ) ) );
-
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                // get Data
-
-                Controller.getInstance().getUserInformation().setChanges( null );
+                        new DataOutputStream( Controller.getInstance().connection.getOutputStream() );
+                UserInformation request = new UserInformation();
+                request.setChanges( Collections.singletonList(
+                        ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) ) );
+                outClient.writeUTF( mapper.writeValueAsString( request ) );
+//        todo : Данные между принимающим и передающим потоком
             }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
+                System.err.println( "Socket error" );
+                e.printStackTrace();
             }
         } );
-        /*
-          TODO: add message to server to delete flight
-         */
     }
-
 }

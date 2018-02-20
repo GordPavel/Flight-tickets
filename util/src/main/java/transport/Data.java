@@ -17,15 +17,14 @@ import java.util.function.Consumer;
 
 public class Data{
 
-    //    to say client, what was wrong in his request
-    private ListChangeAdapter errorUpdateRequest;
+    private ListChangeAdapter wrongUpdate;
 
-    public ListChangeAdapter getErrorUpdateRequest(){
-        return errorUpdateRequest;
+    public ListChangeAdapter getWrongUpdate(){
+        return wrongUpdate;
     }
 
-    public void setErrorUpdateRequest( ListChangeAdapter errorUpdateRequest ){
-        this.errorUpdateRequest = errorUpdateRequest;
+    public void setWrongUpdate( ListChangeAdapter wrongUpdate ){
+        this.wrongUpdate = wrongUpdate;
     }
 
     private Collection<Route>       routes;
