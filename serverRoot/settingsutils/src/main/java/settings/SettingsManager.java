@@ -31,11 +31,11 @@ public class SettingsManager{
 
     static{
         rootFolderPath =
-//                "/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot"
-                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-                           "UTF-8" ).getParent().getParent().getParent().toString()
-
-                + "/target";
+                "/Volumes/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot";
+//                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
+//                           "UTF-8" ).getParent().getParent().getParent().toString()
+//
+//                + "/target";
         settingsFilePath = rootFolderPath + "/serverfiles/settings.xml";
         basesCacheFiles = rootFolderPath + "/serverfiles/clientUpdates/";
         basesFolder = rootFolderPath + "/serverfiles/bases/";
