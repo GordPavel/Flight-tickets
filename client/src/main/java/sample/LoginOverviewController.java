@@ -93,12 +93,13 @@ class LoginOverviewController{
                 Controller.getInstance().getUserInformation().setPassword( passwordField.getText() );
                 ObjectMapper mapper = new ObjectMapper();
 
-                try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                                                                                         .getClientSocket()
-                                                                                         .getOutputStream() ) ;
-                     DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                                                                                  .getClientSocket()
-                                                                                  .getInputStream() ) ){
+                try{
+                    DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                            .getClientSocket()
+                            .getOutputStream() ) ;
+                    DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                            .getClientSocket()
+                            .getInputStream() ) ;
                     System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
                     dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance()
