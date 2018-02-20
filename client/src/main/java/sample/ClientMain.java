@@ -22,6 +22,24 @@ public class ClientMain extends Application{
         alert.showAndWait();
     }
 
+    static void showError ( String header , String content ){
+
+        Alert alert = new Alert( Alert.AlertType.ERROR);
+        alert.setTitle( "Error" );
+        alert.setHeaderText( header );
+        alert.setContentText( content );
+        alert.showAndWait();
+    }
+
+    static void showInformation ( String title , String header , String content ){
+
+        Alert alert = new Alert( Alert.AlertType.INFORMATION );
+        alert.setTitle( title );
+        alert.setHeaderText( header );
+        alert.setContentText( content );
+        alert.showAndWait();
+    }
+
     public static void main( String[] args ){
         launch( args );
     }

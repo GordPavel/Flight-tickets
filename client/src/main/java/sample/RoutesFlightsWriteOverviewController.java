@@ -32,7 +32,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         super( thisStage );
     }
 
-    private CopyOnWriteArrayList<ListChangeAdapter> changes = new CopyOnWriteArrayList<>();
+
     /**
      initialization of view
      Hiding menus, add listeners, start thread
@@ -139,35 +139,34 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                                   selectedRoute ) ) ) );
 
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                changes.add ( ListChangeAdapter.removeRoute( Collections.singletonList( selectedRoute ) ) );
+                RoutesFlightsOverviewController.getChanges().add ( ListChangeAdapter.removeRoute( Collections.singletonList( selectedRoute ) ) );
 
-                DataInputStream inClient =
-                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-
-                // get Data
-                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-                changes.forEach( listChangeAdapter -> {
-                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-                                if ( listChangeAdapter.equals(listChangeAdapter1) ) {
-                                    if ( data.hasNotException() ) {
-
-                                        Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                        alert1.setTitle( " Delete a route" );
-                                        alert1.setHeaderText( " Deleting a route was successful! " );
-                                        alert1.setContentText( listChangeAdapter.getUpdate() );
-                                        changes.remove( listChangeAdapter );
-                                    } else{
-                                        Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                        alert1.setTitle( " Delete a route" );
-                                        alert1.setHeaderText( " Error while deleting a route on a server! " );
-                                        alert1.setContentText( listChangeAdapter.getUpdate() );
-                                    }
-                                }
-                            }
-                        }
-                );
+//                DataInputStream inClient =
+//                       new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+//
+//                // get Data
+//                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+//                changes.forEach( listChangeAdapter -> {
+//                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+//                               if ( listChangeAdapter.equals(listChangeAdapter1) ) {
+//                                    if ( data.hasNotException() ) {
+//
+//                                        Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                        alert1.setTitle( " Delete a route" );
+//                                        alert1.setHeaderText( " Deleting a route was successful! " );
+//                                        alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                        changes.remove( listChangeAdapter );
+//                                    } else{
+//                                        Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                        alert1.setTitle( " Delete a route" );
+//                                        alert1.setHeaderText( " Error while deleting a route on a server! " );
+//                                        alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                    }
+//                               }
+//                            }
+//                        }
+//                );
                 outClient.close();
-                inClient.close();
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
@@ -256,34 +255,34 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
-                changes.add ( ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) );
+                RoutesFlightsOverviewController.getChanges().add ( ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) );
 
-                DataInputStream inClient =
-                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+//                               DataInputStream inClient =
+//                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
 
                 // get Data
-                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-                changes.forEach( listChangeAdapter -> {
-                    for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-                        if ( listChangeAdapter.equals(listChangeAdapter1) ) {
-                            if ( data.hasNotException() ) {
-                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                alert1.setTitle( " Delete a flight" );
-                                alert1.setHeaderText( " Deleting a flight was successful! " );
-                                alert1.setContentText( listChangeAdapter.getUpdate() );
-                                changes.remove( listChangeAdapter );
-                            } else{
-                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                alert1.setTitle( " Delete a flight" );
-                                alert1.setHeaderText( " Error while deleting a flight on a server! " );
-                                alert1.setContentText( listChangeAdapter.getUpdate() );
-                                changes.remove( listChangeAdapter );
-                            }
-                        }
-                    }
-                }
-                );
-
+                //Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+//                changes.forEach( listChangeAdapter -> {
+//                    for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+//                        if ( listChangeAdapter.equals(listChangeAdapter1) ) {
+//                            if ( data.hasNotException() ) {
+//                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                alert1.setTitle( " Delete a flight" );
+//                                alert1.setHeaderText( " Deleting a flight was successful! " );
+//                                alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                changes.remove( listChangeAdapter );
+//                            } else{
+//                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                alert1.setTitle( " Delete a flight" );
+//                                alert1.setHeaderText( " Error while deleting a flight on a server! " );
+//                                alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                changes.remove( listChangeAdapter );
+//                            }
+//                        }
+//                    }
+//                }
+//                );
+                outClient.close();
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
