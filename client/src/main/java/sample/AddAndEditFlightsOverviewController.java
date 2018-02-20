@@ -59,7 +59,6 @@ class AddAndEditFlightsOverviewController{
     private BooleanProperty ifFlightTimeRight;
     private BooleanProperty syntaxErrors;
 
-    private CopyOnWriteArrayList<ListChangeAdapter> changesAdapt = new CopyOnWriteArrayList<>();
 
 
     AddAndEditFlightsOverviewController( Flight editingFlight , Stage thisStage ){
@@ -279,30 +278,31 @@ class AddAndEditFlightsOverviewController{
                     DataOutputStream outClient =
                             new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
                     ObjectMapper mapper = new ObjectMapper();
-                    ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+                    ArrayList<ListChangeAdapter> changes1 = new ArrayList<>();
 
                     if( isAdd ){
-                        changes.add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
+                        changes1.add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
                                                                                                          routesBox.getSelectionModel()
                                                                                                                   .getSelectedItem() ,
                                                                                                          planeID.getText() ,
                                                                                                          departureDateTime ,
                                                                                                          arriveDateTime ) ) ) );
-                        changesAdapt.add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
-                                                                                                              routesBox.getSelectionModel()
-                                                                                                                       .getSelectedItem() ,
-                                                                                                              planeID.getText() ,
-                                                                                                              departureDateTime ,
-                                                                                                              arriveDateTime ) ) ) );
+                        RoutesFlightsOverviewController.getChanges().add(
+                                ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
+                                                                                                    routesBox.getSelectionModel()
+                                                                                                             .getSelectedItem() ,
+                                                                                                    planeID.getText() ,
+                                                                                                    departureDateTime ,
+                                                                                                    arriveDateTime ) ) ) );
                     }else{
-                        changes.add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
-                                                                   Collections.singletonList( new Flight( editingFlight.getNumber() ,
-                                                                                                          routesBox.getSelectionModel()
-                                                                                                                   .getSelectedItem() ,
-                                                                                                          planeID.getText() ,
-                                                                                                          departureDateTime ,
-                                                                                                          arriveDateTime ) ) ) );
-                        changesAdapt.add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
+                        changes1.add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
+                                                                    Collections.singletonList( new Flight( editingFlight.getNumber() ,
+                                                                                                           routesBox.getSelectionModel()
+                                                                                                                    .getSelectedItem() ,
+                                                                                                           planeID.getText() ,
+                                                                                                           departureDateTime ,
+                                                                                                           arriveDateTime ) ) ) );
+                        RoutesFlightsOverviewController.getChanges().add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
                                                                         Collections.singletonList( new Flight( editingFlight.getNumber() ,
                                                                                                                routesBox.getSelectionModel()
                                                                                                                         .getSelectedItem() ,
@@ -311,53 +311,52 @@ class AddAndEditFlightsOverviewController{
                                                                                                                arriveDateTime ) ) ) );
                     }
 
-                    Controller.getInstance().getUserInformation().setChanges( changes );
+                    Controller.getInstance().getUserInformation().setChanges( changes1 );
                     outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
 
-                    DataInputStream inClient =
-                            new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-
-                    // get Data
-                    Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-                    changesAdapt.forEach( listChangeAdapter -> {
-                                for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-                                    if ( listChangeAdapter.equals(listChangeAdapter1) ) {
-                                        if ( data.hasNotException() ) {
-                                            if( isAdd ) {
-                                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                                alert1.setTitle(" Add a flight");
-                                                alert1.setHeaderText(" Adding a flight was successful! ");
-                                                alert1.setContentText(listChangeAdapter.getUpdate());
-                                                changesAdapt.remove(listChangeAdapter);
-                                            }else {
-                                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                                alert1.setTitle(" Edit a flight");
-                                                alert1.setHeaderText(" Editing a flight was successful! ");
-                                                alert1.setContentText( listChangeAdapter.getUpdate() );
-                                                changesAdapt.remove( listChangeAdapter );
-                                            }
-                                        } else{
-                                            if (isAdd) {
-                                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                                alert1.setTitle(" Adding flight error ");
-                                                alert1.setHeaderText(" Error while adding a flight on a server! ");
-                                                alert1.setContentText( listChangeAdapter.getUpdate() + "failed" );
-                                                changesAdapt.remove( listChangeAdapter );
-                                            } else {
-                                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                                alert1.setTitle(" Edit a flight");
-                                                alert1.setHeaderText(" Error while editing a flight on a server! ");
-                                                alert1.setContentText( listChangeAdapter.getUpdate() );
-                                                changesAdapt.remove( listChangeAdapter );
-                                            }
-                                        }
-                                    }
-                                }
-                    }
-                    );
+//                    DataInputStream inClient =
+//                            new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+//
+//                    // get Data
+//                    Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+//                    changes.forEach( listChangeAdapter -> {
+//                                for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+//                                    if ( listChangeAdapter.equals(listChangeAdapter1) ) {
+//                                        if ( data.hasNotException() ) {
+//                                            if( isAdd ) {
+//                                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                                alert1.setTitle(" Add a flight");
+//                                                alert1.setHeaderText(" Adding a flight was successful! ");
+//                                                alert1.setContentText(listChangeAdapter.getUpdate());
+//                                                changesAdapt.remove(listChangeAdapter);
+//                                            }else {
+//                                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                                alert1.setTitle(" Edit a flight");
+//                                                alert1.setHeaderText(" Editing a flight was successful! ");
+//                                                alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                                changesAdapt.remove( listChangeAdapter );
+//                                            }
+//                                        } else{
+//                                            if (isAdd) {
+//                                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                                alert1.setTitle(" Adding flight error ");
+//                                                alert1.setHeaderText(" Error while adding a flight on a server! ");
+//                                                alert1.setContentText( listChangeAdapter.getUpdate() + "failed" );
+//                                                changesAdapt.remove( listChangeAdapter );
+//                                            } else {
+//                                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                                alert1.setTitle(" Edit a flight");
+//                                                alert1.setHeaderText(" Error while editing a flight on a server! ");
+//                                                alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                                changesAdapt.remove( listChangeAdapter );
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                    }
+//                    );
                     outClient.close();
-                    inClient.close();
                     Controller.getInstance().getUserInformation().setChanges( null );
                 }catch( IOException e ){
                     System.out.println( "Connection problem" );

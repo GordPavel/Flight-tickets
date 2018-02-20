@@ -36,7 +36,6 @@ import static java.util.stream.Collectors.toList;
 
 class AddAndEditRoutesOverviewController{
 
-    private CopyOnWriteArrayList<ListChangeAdapter> changesAdapt = new CopyOnWriteArrayList<>();
 
     @FXML Label             mainLabel;
     @FXML ChoiceBox<String> departureCountryChoice;
@@ -190,72 +189,72 @@ class AddAndEditRoutesOverviewController{
                                                                                                    destinationCityChoice
                                                                                                            .getSelectionModel()
                                                                                                            .getSelectedItem() ) ) ) );
-                    changesAdapt.add(ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                    RoutesFlightsOverviewController.getChanges().add( ListChangeAdapter.addRoute(Collections.singletonList(new Route(
+                                                                                                       departureCityChoice.getSelectionModel()
                                                                                                                           .getSelectedItem() ,
                                                                                                        destinationCityChoice
-                                                                                                               .getSelectionModel()
-                                                                                                               .getSelectedItem() ) ) ) );
+                                                                                                                          .getSelectionModel()
+                                                                                                                          .getSelectedItem() ) ) ) );
                 }else{
                     changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
                                                               Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
                                                                                                                        .getSelectedItem() ,
                                                                                                     destinationCityChoice
-                                                                                                            .getSelectionModel()
-                                                                                                            .getSelectedItem() ) ) ) );
-                    changesAdapt.add (ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                                   Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                            .getSelectedItem() ,
-                                                                                                         destinationCityChoice
-                                                                                                                 .getSelectionModel()
-                                                                                                                 .getSelectedItem() ) ) ) );
+                                                                                                                       .getSelectionModel()
+                                                                                                                       .getSelectedItem() ) ) ) );
+                    RoutesFlightsOverviewController.getChanges().add (ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
+                                                                       Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                                                                                                .getSelectedItem() ,
+                                                                                                             destinationCityChoice
+                                                                                                                                .getSelectionModel()
+                                                                                                                                .getSelectedItem() ) ) ) );
                 }
 
                 Controller.getInstance().getUserInformation().setChanges( changes );
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
-                DataInputStream inClient =
-                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-
-                // get Data
-                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-                changesAdapt.forEach( listChangeAdapter -> {
-                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-                                if ( listChangeAdapter.equals( listChangeAdapter1 ) ) {
-                                    if ( data.hasNotException() ) {
-                                        if( isAdd ) {
-                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                            alert1.setTitle(" Add a route");
-                                            alert1.setHeaderText(" Adding a route was successful! ");
-                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-                                            changesAdapt.remove( listChangeAdapter );
-                                        }else {
-                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-                                            alert1.setTitle(" Edit a route");
-                                            alert1.setHeaderText(" Editing a route was successful! ");
-                                            alert1.setContentText(listChangeAdapter.getUpdate());
-                                            changesAdapt.remove( listChangeAdapter );
-                                        }
-                                    } else{
-                                        if (isAdd) {
-                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                            alert1.setTitle(" Adding route error ");
-                                            alert1.setHeaderText(" Error while adding a route on a server! ");
-                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-                                            changesAdapt.remove( listChangeAdapter );
-                                        } else {
-                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
-                                            alert1.setTitle(" Editing route error");
-                                            alert1.setHeaderText(" Error while editing a route on a server! ");
-                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-                                            changesAdapt.remove( listChangeAdapter );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                );
+//                DataInputStream inClient =
+//                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
+//
+//                // get Data
+//                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
+//                changesAdapt.forEach( listChangeAdapter -> {
+//                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
+//                                if ( listChangeAdapter.equals( listChangeAdapter1 ) ) {
+//                                    if ( data.hasNotException() ) {
+//                                        if( isAdd ) {
+//                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                            alert1.setTitle(" Add a route");
+//                                            alert1.setHeaderText(" Adding a route was successful! ");
+//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                            changesAdapt.remove( listChangeAdapter );
+//                                        }else {
+//                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
+//                                            alert1.setTitle(" Edit a route");
+//                                            alert1.setHeaderText(" Editing a route was successful! ");
+//                                            alert1.setContentText(listChangeAdapter.getUpdate());
+//                                            changesAdapt.remove( listChangeAdapter );
+//                                        }
+//                                    } else{
+//                                        if (isAdd) {
+//                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                            alert1.setTitle(" Adding route error ");
+//                                            alert1.setHeaderText(" Error while adding a route on a server! ");
+//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                            changesAdapt.remove( listChangeAdapter );
+//                                        } else {
+//                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
+//                                            alert1.setTitle(" Editing route error");
+//                                            alert1.setHeaderText(" Error while editing a route on a server! ");
+//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
+//                                            changesAdapt.remove( listChangeAdapter );
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                );
                 outClient.close();
-                inClient.close();
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
