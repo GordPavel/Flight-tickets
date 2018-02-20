@@ -243,7 +243,7 @@ class SearchFlightsOverviewController{
                 ( ( RoutesFlightsReadOnlyOverviewController ) mainController ).restartTask( new TimerTask(){
                     @Override
                     public void run(){
-                        handleSearchAction();
+                        mainController.requestUpdate();
                         mainController.receiveUpdate();
                     }
                 } );

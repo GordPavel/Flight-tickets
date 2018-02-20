@@ -298,7 +298,7 @@ abstract class RoutesFlightsOverviewController{
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
-        Controller.getInstance().reconnect();
+//        Controller.getInstance().reconnect();
 
         if( !Controller.getInstance().getClientSocket().isConnected() ){
             Controller.getInstance().reconnect();
@@ -316,6 +316,7 @@ abstract class RoutesFlightsOverviewController{
                 DataInputStream
                         inputStream =
                         new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
+                dataOutputStream.writeUTF( "*" );
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
             }catch( IOException | NullPointerException ex ){
@@ -349,6 +350,10 @@ abstract class RoutesFlightsOverviewController{
         Controller.getInstance().stopThread();
         Controller.getInstance().setUserInformation( new UserInformation() );
         try{
+            DataOutputStream
+                    dataOutputStream =
+                    new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+            dataOutputStream.writeUTF( "*" );
             Stage loginStage = new Stage();
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
             LoginOverviewController logInController = new LoginOverviewController( loginStage );
@@ -397,6 +402,14 @@ abstract class RoutesFlightsOverviewController{
      Method used for updates and searches. PredicateParser setuped by other methods, after operation cleared.
      */
     void requestUpdate(){
+        if( Controller.getInstance().getClientSocket().isClosed() ){
+            Controller.getInstance().reconnect();
+        }
+        if( !Controller.getInstance().getClientSocket().isConnected() ){
+            routeConnectLabel.setText( "Offline" );
+            flightConnectLabel.setText( "Offline" );
+            Controller.getInstance().reconnect();
+        }
         if( Controller.getInstance().getClientSocket().isConnected() ){
             routeConnectLabel.setText( "Online" );
             flightConnectLabel.setText( "Online" );
@@ -406,8 +419,10 @@ abstract class RoutesFlightsOverviewController{
                 DataOutputStream
                         dataOutputStream =
                         new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                System.out.println("ready to send");
                 System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                System.out.println( "sended" );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();
@@ -436,11 +451,12 @@ abstract class RoutesFlightsOverviewController{
                 DataInputStream
                         inputStream =
                         new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
-                System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 System.out.println(mapper.writeValueAsString(data));
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
+                    if (this instanceof RoutesFlightsWriteOverviewController)
+                        DataModelInstanceSaver.getInstance().clear();
                     if (!(data1.getChanges()==null))
                         data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
                     if (!(data1.getRoutes()==null))

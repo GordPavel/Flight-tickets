@@ -83,7 +83,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
                 if( Controller.getInstance().getClientSocket().isConnected() ){
                     routeConnectLabel.setText( "Online" );
                     flightConnectLabel.setText( "Online" );
-                    handleSearchRouteAction();
+                    requestUpdate();
                     receiveUpdate();
                 }
                 routeTable.setDisable( false );
@@ -94,7 +94,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
     public void restartTask( TimerTask timerTask ){
         task.cancel();
         task = timerTask;
-        timer.schedule( task , 5000 );
+        timer.schedule( task , 2000 );
     }
 
     /**
