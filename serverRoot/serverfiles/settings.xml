@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!--suppress ALL -->
 <settings>
     <adminName>admin</adminName>
     <base name="test">
@@ -11,6 +10,10 @@
         <users login="reader">
             <password>pass</password>
             <privilege>Read</privilege>
+        </users>
+        <users login="pasha">
+            <password>pass</password>
+            <privilege>ReadWrite</privilege>
         </users>
     </base>
     <cacheTimeout>180000</cacheTimeout>
