@@ -433,18 +433,25 @@ abstract class RoutesFlightsOverviewController{
             ObjectMapper mapper = new ObjectMapper();
 
             try{
-                DataOutputStream
-                        dataOutputStream =
-                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
                 DataInputStream
                         inputStream =
                         new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
-                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                    if (!(data1.getChanges()==null))
+                        data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                    if (!(data1.getRoutes()==null))
+                        for (Route route:data1.getRoutes())
+                            if (!DataModelInstanceSaver.getInstance().containRoute(route))
+                                DataModelInstanceSaver.getInstance().addRoute(route);
+                    //data1.getRoutes().forEach( DataModelInstanceSaver.getInstance()::addRoute );
+                    if (!(data1.getFlights()==null))
+                        for (Flight flight:data1.getFlights())
+                            if (!DataModelInstanceSaver.getInstance().containFlight(flight))
+                                DataModelInstanceSaver.getInstance().addFlight(flight);
+//                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                 } , ClientMain::showWarningByError );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
