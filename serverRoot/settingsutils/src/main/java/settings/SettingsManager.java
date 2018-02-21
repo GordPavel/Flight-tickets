@@ -23,19 +23,17 @@ public class SettingsManager{
     public static final String rootFolderPath;
     public static final String basesCacheFiles;
     public static final String basesFolder;
-    private final static String defaultSettingsFileString =
+    private final static String
+            defaultSettingsFileString =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<settings/>";
     private static final                             String      settingsFilePath;
     public static                                    Settings    settings;
     @SuppressWarnings( "CanBeFinal" ) private static JAXBContext jaxbContext;
 
     static{
-        rootFolderPath =
-                "/Volumes/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot";
+        rootFolderPath = "/Volumes/Users/pavelgordeev/IdeaProjects/Flight-tickets/serverRoot";
 //                Paths.get( SettingsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() ,
-//                           "UTF-8" ).getParent().getParent().getParent().toString()
-//
-//                + "/target";
+//                           "UTF-8" ).getParent().getParent().getParent().toString() + "/target";
         settingsFilePath = rootFolderPath + "/serverfiles/settings.xml";
         basesCacheFiles = rootFolderPath + "/serverfiles/clientUpdates/";
         basesFolder = rootFolderPath + "/serverfiles/bases/";
@@ -63,11 +61,10 @@ public class SettingsManager{
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             settings = ( Settings ) jaxbUnmarshaller.unmarshal( inputStream );
         }catch( JAXBException e ){
-            System.out.println(
-                    "Your settings.xml file is damaged. Do you want to delete it and restart program? [y/n]" +
-                    "All your settings'll be lost." );
+            System.out.println( "Your settings.xml file is damaged. Do you want to delete it and restart program? [y/n]" +
+                                "All your settings'll be lost." );
             Scanner scanner = new Scanner( System.in );
-            String answer;
+            String  answer;
             while( !( answer = scanner.next() ).matches( "[yn]" ) ){
                 System.out.println( "Type y - yes, delete file; or n - no, not delete." );
             }
@@ -144,7 +141,8 @@ public class SettingsManager{
     }
 
     public static void startStopBase( String name , Boolean start ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> base.getName().equals( name ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
@@ -161,9 +159,12 @@ public class SettingsManager{
         }
     }
 
-    public static void addNewClient( String baseName , String clientName , String clientPassword ,
+    public static void addNewClient( String baseName ,
+                                     String clientName ,
+                                     String clientPassword ,
                                      UserPrivileges privileges ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
@@ -182,7 +183,8 @@ public class SettingsManager{
     }
 
     public static void deleteClient( String baseName , String clientName ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
@@ -194,11 +196,13 @@ public class SettingsManager{
     }
 
     public static void changeClientName( String baseName , String oldName , String newName ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            Optional<User> optionalUser =
+            Optional<User>
+                    optionalUser =
                     editingBase.getUsers().stream().filter( user -> userNamesEqual( oldName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setLogin( newName );
@@ -212,11 +216,13 @@ public class SettingsManager{
     }
 
     public static void changeClientPassword( String baseName , String clientName , String newPassword ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> base.getName().equals( baseName ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            Optional<User> optionalUser =
+            Optional<User>
+                    optionalUser =
                     editingBase.getUsers().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 optionalUser.get().setPassword( newPassword );
@@ -230,16 +236,19 @@ public class SettingsManager{
     }
 
     public static void changeClientPrivilege( String baseName , String clientName ){
-        Optional<Base> optionalBase =
+        Optional<Base>
+                optionalBase =
                 settings.getBase().stream().filter( base -> baseNamesEqual( baseName , base ) ).findFirst();
         if( optionalBase.isPresent() ){
             Base editingBase = optionalBase.get();
-            Optional<User> optionalUser =
+            Optional<User>
+                    optionalUser =
                     editingBase.getUsers().stream().filter( user -> userNamesEqual( clientName , user ) ).findFirst();
             if( optionalUser.isPresent() ){
                 User user = optionalUser.get();
-                user.setPrivilege(
-                        user.getPrivilege() == UserPrivileges.Read ? UserPrivileges.ReadWrite : UserPrivileges.Read );
+                user.setPrivilege( user.getPrivilege() == UserPrivileges.Read ?
+                                   UserPrivileges.ReadWrite :
+                                   UserPrivileges.Read );
                 saveSettings();
             }else{
                 throw new CopyUser( "Base " + baseName + " doesn't have this client " + clientName );
