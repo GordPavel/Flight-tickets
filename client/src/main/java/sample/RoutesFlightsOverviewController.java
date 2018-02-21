@@ -473,6 +473,9 @@ abstract class RoutesFlightsOverviewController{
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 System.out.println( mapper.writeValueAsString( data ) );
                 //noinspection CodeBlock2Expr
+                if ( !(data.getChanges() == null) ){
+                    processUpdates(data);
+                }
                 data.withoutExceptionOrWith( data1 -> {
 
                     if (!(data1.getChanges()==null))
