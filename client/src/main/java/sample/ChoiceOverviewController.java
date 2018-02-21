@@ -78,7 +78,8 @@ class ChoiceOverviewController{
                       .getUserInformation()
                       .setDataBase( ( ( Map.Entry<String, String> ) selectedBase ).getKey() );
             Stage primaryStage = new Stage();
-            RoutesFlightsOverviewController controller =
+            RoutesFlightsOverviewController
+                    controller =
                     ( ( Map.Entry<String, String> ) selectedBase ).getValue().toUpperCase().equals( "READWRITE" ) ?
                     new RoutesFlightsWriteOverviewController( primaryStage ) :
                     new RoutesFlightsReadOnlyOverviewController( primaryStage );
@@ -91,12 +92,12 @@ class ChoiceOverviewController{
             ObjectMapper mapper = new ObjectMapper();
 
             try{
-                DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                        .getClientSocket()
-                        .getOutputStream() ) ;
-                DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                        .getClientSocket()
-                        .getInputStream() ) ;
+                DataOutputStream
+                        dataOutputStream =
+                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+                DataInputStream
+                        inputStream =
+                        new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
                 dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 System.out.println( "Ушло" );
                 String testString = inputStream.readUTF();
@@ -112,14 +113,16 @@ class ChoiceOverviewController{
                         ( data1.getRoutes() == null ) &&
                         ( new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" ) ).exists() ){
                         DataModelInstanceSaver.getInstance()
-                                              .importFrom( new FileInputStream(
-                                                      Controller.getInstance().getUserInformation().getDataBase() +
-                                                      ".dm" ) );
-                        data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                                              .importFrom( new FileInputStream( Controller.getInstance()
+                                                                                          .getUserInformation()
+                                                                                          .getDataBase() + ".dm" ) );
+                        data1.getChanges()
+                             .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
                     }else{
-                        System.out.println( ( new File(
-                                Controller.getInstance().getUserInformation().getDataBase() + ".dm" ) ).exists() );
-                        data1.getRoutes().forEach( DataModelInstanceSaver.getInstance()::addRoute );
+                        System.out.println( ( new File( Controller.getInstance().getUserInformation().getDataBase() +
+                                                        ".dm" ) ).exists() );
+                        data1.getRoutes()
+                             .forEach( route -> DataModelInstanceSaver.getInstance().addRoute( route , false ) );
                         data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                     }
                     FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
@@ -164,8 +167,8 @@ class ChoiceOverviewController{
 
     private void handleCancelAction(){
         try{
-            Stage loginStage = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
+            Stage                   loginStage = new Stage();
+            FXMLLoader              loader     = new FXMLLoader( getClass().getResource( "/fxml/LoginOverview.fxml" ) );
             LoginOverviewController controller = new LoginOverviewController( loginStage );
             loader.setController( controller );
             loginStage.setTitle( "Login" );

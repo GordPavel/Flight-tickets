@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,9 +42,16 @@ public class PredicateParser{
         this.isRoutePredicate = isRoutePredicate;
     }
 
-    private PredicateParser( String flightNumber , String flightPlane , String flightDepartureFromDate ,
-                             String flightDepartureToDate , String flightArriveFromDate , String flightArriveToDate ,
-                             String flightTimeFrom , String flightTimeTo , String flightFrom , String flightTo ,
+    private PredicateParser( String flightNumber ,
+                             String flightPlane ,
+                             String flightDepartureFromDate ,
+                             String flightDepartureToDate ,
+                             String flightArriveFromDate ,
+                             String flightArriveToDate ,
+                             String flightTimeFrom ,
+                             String flightTimeTo ,
+                             String flightFrom ,
+                             String flightTo ,
                              Boolean isRoutePredicate ){
         this.flightNumber = flightNumber;
         this.flightPlane = flightPlane;
@@ -62,11 +70,16 @@ public class PredicateParser{
         return new PredicateParser( routeFrom , routeTo , true );
     }
 
-    public static PredicateParser createFlightPredicate( String flightNumber , String flightPlane ,
-                                                         String flightDepartureFromDate , String flightDepartureToDate ,
-                                                         String flightArriveFromDate , String flightArriveToDate ,
-                                                         String flightTimeFrom , String flightTimeTo ,
-                                                         String flightFrom , String flightTo ){
+    public static PredicateParser createFlightPredicate( String flightNumber ,
+                                                         String flightPlane ,
+                                                         String flightDepartureFromDate ,
+                                                         String flightDepartureToDate ,
+                                                         String flightArriveFromDate ,
+                                                         String flightArriveToDate ,
+                                                         String flightTimeFrom ,
+                                                         String flightTimeTo ,
+                                                         String flightFrom ,
+                                                         String flightTo ){
         return new PredicateParser( flightNumber ,
                                     flightPlane ,
                                     flightDepartureFromDate ,
@@ -279,6 +292,16 @@ public class PredicateParser{
     @JsonGetter( "isRoutePredicate" )
     public Boolean isRoutePredicate(){
         return isRoutePredicate;
+    }
+
+    @JsonIgnore
+    public void ifRoutePredicateOrFlightPredicate( Consumer<Predicate<Route>> routeConsumer ,
+                                                   Consumer<Predicate<Flight>> flightConsumer ){
+        if( isRoutePredicate ){
+            routeConsumer.accept( this.getRoutePredicate() );
+        }else{
+            flightConsumer.accept( this.getFlightPredicate() );
+        }
     }
 
     @Override
