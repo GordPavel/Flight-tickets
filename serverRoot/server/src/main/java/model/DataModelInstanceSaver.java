@@ -30,12 +30,12 @@ import static settings.SettingsManager.basesFolder;
 
 public abstract class DataModelInstanceSaver{
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final Map<CacheKey<String>, DataModelWithLockAndListener> bases;
+    private static final Map<CacheKey<String>, DataModelWithLockAndListeners> bases;
 
     public static final Map<String, OutputStream> connectedAdmins = new ConcurrentHashMap<>();
     public static final ReentrantReadWriteLock    adminsLock      = new ReentrantReadWriteLock( true );
 
-    public static void sendChange( ListChangeAdapter adapter ){
+    private static void sendChange( ListChangeAdapter adapter ){
         Data data = new Data();
         data.setChanges( Collections.singletonList( adapter ) );
         adminsLock.readLock().lock();
@@ -76,12 +76,14 @@ public abstract class DataModelInstanceSaver{
                                        TimeUnit.MILLISECONDS );
     }
 
-    private static void clearCache( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+    private static void clearCache( Map.Entry<CacheKey<String>, DataModelWithLockAndListeners> dataModel ){
         saveChanges( dataModel );
         dataModel.getValue().lock.writeLock().lock();
         bases.remove( dataModel.getKey() , dataModel.getValue() );
-        dataModel.getValue().model.getRouteObservableList().removeListener( dataModel.getValue().routeListener );
-        dataModel.getValue().model.getFlightObservableList().removeListener( dataModel.getValue().flightListener );
+        dataModel.getValue().model.getRouteObservableList().removeListener( dataModel.getValue().routeReadListener );
+        dataModel.getValue().model.getFlightObservableList().removeListener( dataModel.getValue().flightReadListener );
+        dataModel.getValue().model.getRouteObservableList().removeListener( dataModel.getValue().routeWriteListener );
+        dataModel.getValue().model.getFlightObservableList().removeListener( dataModel.getValue().flightWriteListener );
         dataModel.getValue().lock.writeLock().unlock();
     }
 
@@ -91,7 +93,7 @@ public abstract class DataModelInstanceSaver{
 
      @param dataModel for saving
      */
-    private static void saveChanges( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+    private static void saveChanges( Map.Entry<CacheKey<String>, DataModelWithLockAndListeners> dataModel ){
         try( OutputStream outputStream = Files.newOutputStream( Paths.get( basesFolder +
                                                                            dataModel.getKey().key +
                                                                            ".far" ) ) ){
@@ -110,12 +112,12 @@ public abstract class DataModelInstanceSaver{
     /**
      @param baseName name of database without extension in the end ( .far )
 
-     @return Optional<DataModelWithLockAndListener> if this name contains in the configs of server and Optional.empty() in other
+     @return Optional<DataModelWithLockAndListeners> if this name contains in the configs of server and Optional.empty() in other
      case
      */
-    public static synchronized Optional<DataModelWithLockAndListener> getInstance( String baseName ){
+    public static synchronized Optional<DataModelWithLockAndListeners> getInstance( String baseName ){
 //        find database in cache table
-        Optional<Map.Entry<CacheKey<String>, DataModelWithLockAndListener>>
+        Optional<Map.Entry<CacheKey<String>, DataModelWithLockAndListeners>>
                 optionalEntity =
                 bases.entrySet().stream().filter( entity -> entity.getKey().key.equals( baseName ) ).findAny();
         if( optionalEntity.isPresent() ){
@@ -134,21 +136,35 @@ public abstract class DataModelInstanceSaver{
                 try{
                     DataModel dataModel = new DataModel();
                     dataModel.importFrom( Files.newInputStream( Paths.get( basesFolder + baseName + ".far" ) ) );
-//                    Save all changes to file of this base
+
+                    //                    Save all changes to file of this base
                     ListChangeListener<Route>
-                            routeListener =
+                            routeReadListener =
                             change -> cacheReaderClientsChanges( baseName , ListChangeAdapter.routeChange( change ) );
                     ListChangeListener<Flight>
-                            flightListener =
+                            flightReadListener =
                             change -> cacheReaderClientsChanges( baseName , ListChangeAdapter.flightChange( change ) );
-                    dataModel.addRoutesListener( routeListener );
-                    dataModel.addFlightsListener( flightListener );
-                    DataModelWithLockAndListener
+
+//                    Send all changes to admins
+                    ListChangeListener<Route>
+                            routeWriteListener =
+                            change -> DataModelInstanceSaver.sendChange( ListChangeAdapter.routeChange( change ) );
+                    ListChangeListener<Flight>
+                            flightWriteListener =
+                            change -> DataModelInstanceSaver.sendChange( ListChangeAdapter.flightChange( change ) );
+
+                    dataModel.addRoutesListener( routeReadListener );
+                    dataModel.addFlightsListener( flightReadListener );
+                    dataModel.addRoutesListener( routeWriteListener );
+                    dataModel.addFlightsListener( flightWriteListener );
+                    DataModelWithLockAndListeners
                             modelWithLockAndListener =
-                            new DataModelWithLockAndListener( dataModel ,
-                                                              new ReentrantReadWriteLock( true ) ,
-                                                              routeListener ,
-                                                              flightListener );
+                            new DataModelWithLockAndListeners( dataModel ,
+                                                               new ReentrantReadWriteLock( true ) ,
+                                                               routeReadListener ,
+                                                               flightReadListener ,
+                                                               routeWriteListener ,
+                                                               flightWriteListener );
                     bases.put( new CacheKey<>( baseName ) , modelWithLockAndListener );
                     return Optional.of( modelWithLockAndListener );
                 }catch( FlightAndRouteException e ){

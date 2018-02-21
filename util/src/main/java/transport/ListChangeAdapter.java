@@ -46,7 +46,7 @@ public class ListChangeAdapter{
     }
 
     public static ListChangeAdapter removeFlight( List<Flight> flights ) throws JsonProcessingException{
-        return new ListChangeAdapter( String.format( "flight { %s removes }" , mapper.writeValueAsString( flights ) ) );
+        return new ListChangeAdapter( String.format( "flight { %s removed }" , mapper.writeValueAsString( flights ) ) );
     }
 
     public static ListChangeAdapter editRoute( List<Route> oldRoutes , List<Route> newRoutes ) throws

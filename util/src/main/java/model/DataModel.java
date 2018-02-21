@@ -344,7 +344,7 @@ public class DataModel{
 //        To produce update event on list
             flights.stream()
                    .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() ) )
-                   .forEach( flight -> flight.setRoute( newRoute ) );
+                   .forEach( flight -> this.editFlight( flight , newRoute , null , null , null ) );
             routes.set( routes.indexOf( editingRoute ) , newRoute );
         }finally{
             routesLock.writeLock().unlock();
