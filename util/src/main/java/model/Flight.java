@@ -144,7 +144,7 @@ public class Flight implements FlightOrRoute, Serializable, Cloneable{
      */
     @Override
     public String toString(){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm z" );
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy HH:mm" );
         return String.format(
                 "Flight number %s\n takes at %s from %s\n launches at %s at %s\n flight time %s\n flies by %s " +
                 "plane" ,

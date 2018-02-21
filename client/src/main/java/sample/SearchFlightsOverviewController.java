@@ -344,6 +344,8 @@ class SearchFlightsOverviewController{
     @FXML
     private void handleSearchAction(){
         mainController.flightTable.setDisable( true );
+        if (mainController instanceof RoutesFlightsWriteOverviewController)
+            DataModelInstanceSaver.getInstance().clear();
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
@@ -365,4 +367,7 @@ class SearchFlightsOverviewController{
         mainController.flightTable.setDisable( false );
     }
 
+    void closeWindow(){
+        thisStage.close();
+    }
 }

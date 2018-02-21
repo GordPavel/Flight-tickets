@@ -107,7 +107,7 @@ public class ListChangeAdapter{
     }
 
     @SuppressWarnings( { "ResultOfMethodCallIgnored" , "unchecked" } )
-    public void apply( DataModel dataModel ) throws IllegalArgumentException{
+    public void apply( DataModel dataModel , Boolean isServer ) throws IllegalArgumentException{
         Matcher matcher = updatePattern.matcher( this.update );
         if( !matcher.matches() ){
             throw new IllegalArgumentException( "Error while parsing update" );
@@ -131,7 +131,8 @@ public class ListChangeAdapter{
                             ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
                                                                       .constructCollectionType( List.class ,
                                                                                                 Route.class ) )
-                                                    .readValue( list ) ).forEach( dataModel::addRoute );
+                                                    .readValue( list ) ).forEach( route -> dataModel.addRoute( route ,
+                                                                                                               isServer ) );
                             break;
                     }
                     break;
