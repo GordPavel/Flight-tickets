@@ -20,6 +20,15 @@ public class Data{
     private Collection<Flight>      flights;
     private Map<String, String>     bases;
     private List<ListChangeAdapter> changes;
+    private ListChangeAdapter       wrongEntity;
+
+    public ListChangeAdapter getWrongEntity(){
+        return wrongEntity;
+    }
+
+    public void setWrongEntity( ListChangeAdapter wrongEntity ){
+        this.wrongEntity = wrongEntity;
+    }
 
     @JsonSerialize( using = ExceptionSerializer.class )
     @JsonDeserialize( using = ExceptionDeserializer.class )

@@ -66,7 +66,7 @@ class ReadOnlyThread extends FaRThread{
         if( Controller.getInstance().getClientSocket().isConnected() ){
             parentController.routeConnectLabel.setText( "Online" );
             parentController.flightConnectLabel.setText( "Online" );
-            Data data;
+            Data         data;
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setPredicate( null );
             try( DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
@@ -79,7 +79,8 @@ class ReadOnlyThread extends FaRThread{
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 //noinspection CodeBlock2Expr
                 data.withoutExceptionOrWith( data1 -> {
-                    data1.getChanges().forEach( update -> update.apply( DataModelInstanceSaver.getInstance() ) );
+                    data1.getChanges()
+                         .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
                 } , ClientMain::showWarningByError );
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
@@ -94,7 +95,8 @@ class ReadOnlyThread extends FaRThread{
         File file = new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" );
         try{
             if( !file.exists() ){
-                BufferedWriter writer =
+                BufferedWriter
+                        writer =
                         new BufferedWriter( new OutputStreamWriter( new FileOutputStream( file ) , "utf-8" ) );
                 writer.write( "temp" );
             }
