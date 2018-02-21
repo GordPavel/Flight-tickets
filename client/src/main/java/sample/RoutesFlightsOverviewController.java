@@ -163,10 +163,6 @@ abstract class RoutesFlightsOverviewController{
         updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
         searchRouteButton.setOnAction( event -> handleSearchRouteAction() );
         updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
-        searchFlightButton.setOnAction(event -> handleSearchFlightAction());
-        updateFlightButton.setOnAction(event -> handleUpdateFlightAction());
-        searchRouteButton.setOnAction(event -> handleSearchRouteAction());
-        updateRouteButton.setOnAction(event -> handleUpdateRouteAction());
 
         thisStage.setOnCloseRequest(event -> searchFlights.closeWindow());
     }
