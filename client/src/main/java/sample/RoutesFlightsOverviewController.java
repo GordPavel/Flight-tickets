@@ -575,18 +575,26 @@ abstract class RoutesFlightsOverviewController{
             for( ListChangeAdapter listChangeAdapter1 : data.getChanges() ){
                 if( listChangeAdapter.equalsEntities( listChangeAdapter1 ) ){
                     if( data.hasNotException() ){
-                        ClientMain.showInformation( " Confirmation " ,
-                                                    " Changes on server " ,
-                                                    listChangeAdapter.getUpdate() );
+
+                        Alert alert = new Alert( Alert.AlertType.INFORMATION );
+                        alert.setTitle( " Confirmation " );
+                        alert.setHeaderText( " Changes on server " );
+                        alert.setContentText( listChangeAdapter.getUpdate() );
+                        alert.showAndWait();
                         changes.remove( listChangeAdapter );
                     }else{
-                        ClientMain.showError( data.getException().getMessage() , listChangeAdapter.getUpdate() );
+                        Alert alert = new Alert( Alert.AlertType.ERROR);
+                        alert.setTitle( "Error" );
+                        alert.setHeaderText( data.getException().getMessage() );
+                        alert.setContentText( listChangeAdapter.getUpdate() );
+                        alert.showAndWait();
                         changes.remove( listChangeAdapter );
                     }
                 }
             }
         } );
     }
+    
 }
 
 
