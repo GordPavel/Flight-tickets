@@ -163,6 +163,8 @@ abstract class RoutesFlightsOverviewController{
         updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
         searchRouteButton.setOnAction( event -> handleSearchRouteAction() );
         updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
+
+        thisStage.setOnCloseRequest( event -> searchFlights.closeWindow() );
     }
 
     private void searchListeners( String departure , String destination ){
@@ -399,6 +401,7 @@ abstract class RoutesFlightsOverviewController{
                                                                         "" ,
                                                                         "" ,
                                                                         "" ) );
+        if( this instanceof RoutesFlightsWriteOverviewController ) DataModelInstanceSaver.getInstance().clear();
         requestUpdate();
     }
 
@@ -408,6 +411,7 @@ abstract class RoutesFlightsOverviewController{
      */
     void handleUpdateRouteAction(){
         Controller.getInstance().getUserInformation().setPredicate( PredicateParser.createRoutePredicate( "*" , "*" ) );
+        if( this instanceof RoutesFlightsWriteOverviewController ) DataModelInstanceSaver.getInstance().clear();
         requestUpdate();
     }
 
@@ -467,10 +471,11 @@ abstract class RoutesFlightsOverviewController{
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 System.out.println( mapper.writeValueAsString( data ) );
                 //noinspection CodeBlock2Expr
+                if( !( data.getChanges() == null ) ){
+                    processUpdates( data );
+                }
                 data.withoutExceptionOrWith( data1 -> {
-                    if( this instanceof RoutesFlightsWriteOverviewController ){
-                        DataModelInstanceSaver.getInstance().clear();
-                    }
+
                     if( !( data1.getChanges() == null ) ){
                         data1.getChanges()
                              .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
@@ -540,6 +545,7 @@ abstract class RoutesFlightsOverviewController{
                   .getUserInformation()
                   .setPredicate( PredicateParser.createRoutePredicate( departure.getText() , destination.getText() ) );
         requestUpdate();
+        if( this instanceof RoutesFlightsWriteOverviewController ) DataModelInstanceSaver.getInstance().clear();
     }
 
 
