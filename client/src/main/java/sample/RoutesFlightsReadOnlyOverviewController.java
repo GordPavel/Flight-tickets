@@ -72,9 +72,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
             @Override
             public void run(){
                 routeTable.setDisable( true );
-                if( Controller.getInstance().getClientSocket().isClosed() ){
-                    Controller.getInstance().reconnect();
-                }
+                Controller.getInstance().reconnect();
                 if( !Controller.getInstance().getClientSocket().isConnected() ){
                     routeConnectLabel.setText( "Offline" );
                     flightConnectLabel.setText( "Offline" );

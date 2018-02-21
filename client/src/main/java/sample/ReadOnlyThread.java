@@ -92,7 +92,7 @@ class ReadOnlyThread extends FaRThread{
     }
 
     private void saveDM(){
-        File file = new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" );
+        File file = new File( Controller.getInstance().getUserInformation().getDataBase() + ".far" );
         try{
             if( !file.exists() ){
                 BufferedWriter

@@ -6,6 +6,7 @@ import transport.Data;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.SocketException;
 
 
 /**
@@ -38,7 +39,8 @@ public class WriteThread extends FaRThread{
             parentController.receiveUpdate( );
             try{
                 Thread.sleep( 100 );
-            }catch( InterruptedException ex ){
+            }
+            catch( InterruptedException ex ){
 
             }
         }

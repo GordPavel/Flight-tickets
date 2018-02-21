@@ -86,9 +86,16 @@ class ChoiceOverviewController{
 //            if( ( ( Map.Entry<String, String> ) selectedBase ).getValue().toUpperCase().equals( "READWRITE" ) ){
 //                controller = new RoutesFlightsWriteOverviewController( primaryStage );
 //            }
-            if( Controller.getInstance().getClientSocket().isClosed() ){
-                Controller.getInstance().reconnect();
-            }
+//            if( Controller.getInstance().getClientSocket().isClosed() ){
+//            try {
+//                Controller.getInstance().getClientSocket().close();
+//            } catch (IOException ex)
+//            {
+//
+//            }
+
+            Controller.getInstance().reconnect();
+//            }
             ObjectMapper mapper = new ObjectMapper();
 
             try{
@@ -111,16 +118,16 @@ class ChoiceOverviewController{
                 try{
                     if( ( controller instanceof RoutesFlightsReadOnlyOverviewController ) &&
                         ( data1.getRoutes() == null ) &&
-                        ( new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" ) ).exists() ){
+                        ( new File( Controller.getInstance().getUserInformation().getDataBase() + ".far" ) ).exists() ){
                         DataModelInstanceSaver.getInstance()
                                               .importFrom( new FileInputStream( Controller.getInstance()
                                                                                           .getUserInformation()
-                                                                                          .getDataBase() + ".dm" ) );
+                                                                                          .getDataBase() + ".far" ) );
                         data1.getChanges()
                              .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
                     }else{
                         System.out.println( ( new File( Controller.getInstance().getUserInformation().getDataBase() +
-                                                        ".dm" ) ).exists() );
+                                                        ".far" ) ).exists() );
                         data1.getRoutes()
                              .forEach( route -> DataModelInstanceSaver.getInstance().addRoute( route , false ) );
                         data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );

@@ -30,6 +30,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
@@ -164,7 +165,9 @@ abstract class RoutesFlightsOverviewController{
         searchRouteButton.setOnAction( event -> handleSearchRouteAction() );
         updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
 
-        thisStage.setOnCloseRequest( event -> closeWindow() );
+        thisStage.setOnCloseRequest( event -> {
+            if (Controller.getInstance().isFlightSearchActive())
+            searchFlights.closeWindow(); });
     }
 
     private void searchListeners( String departure , String destination ){
@@ -309,11 +312,11 @@ abstract class RoutesFlightsOverviewController{
 
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
-//        Controller.getInstance().reconnect();
+        Controller.getInstance().reconnect();
 
-        if( !Controller.getInstance().getClientSocket().isConnected() ){
-            Controller.getInstance().reconnect();
-        }
+//        if( !Controller.getInstance().getClientSocket().isConnected() ){
+//            Controller.getInstance().reconnect();
+//        }
 
         Data data = new Data();
         if( !( Controller.getInstance().getClientSocket() == null ) &&
@@ -321,15 +324,19 @@ abstract class RoutesFlightsOverviewController{
             ObjectMapper mapper = new ObjectMapper();
             Controller.getInstance().getUserInformation().setDataBase( null );
             try{
-                DataOutputStream
-                        dataOutputStream =
-                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-                DataInputStream
-                        inputStream =
-                        new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
-                dataOutputStream.writeUTF( "*" );
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getOutputStream() ) ;
+                DataInputStream inputStream = new DataInputStream( Controller.getInstance()
+                        .getClientSocket()
+                        .getInputStream() ) ;
+                System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
+                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance()
+                        .getUserInformation() ) );
+                System.out.println( "Ушло" );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                Controller.getInstance().getClientSocket().close();
             }catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();
@@ -367,6 +374,7 @@ abstract class RoutesFlightsOverviewController{
                     dataOutputStream =
                     new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
             dataOutputStream.writeUTF( "*" );
+            Controller.getInstance().reconnect();
             Stage                   loginStage      = new Stage();
             FXMLLoader
                                     loader          =
@@ -501,12 +509,15 @@ abstract class RoutesFlightsOverviewController{
                     }
 //                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                 } , ClientMain::showWarningByError );
-            }catch( IOException | NullPointerException ex ){
+            }
+            catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
                 ex.printStackTrace();
                 System.out.println( "Yep" );
             }
             Controller.getInstance().getUserInformation().setPredicate( null );
+            flightTable.refresh();
+            routeTable.refresh();
         }
     }
 
