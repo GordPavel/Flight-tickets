@@ -57,7 +57,7 @@ class ChoiceOverviewController{
         baseTable.setItems( observableList );
         baseTable.getColumns().setAll( nameColumn , rightsColumn );
         baseTable.getSelectionModel().select( 0 );
-        baseTable.setOnKeyReleased( enterHandler );
+        baseTable.setOnKeyPressed( enterHandler );
     }
 
     EventHandler<KeyEvent> enterHandler = event -> {
