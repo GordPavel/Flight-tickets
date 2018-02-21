@@ -1,18 +1,23 @@
 package model;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.FlightAndRouteException;
 import javafx.collections.ListChangeListener;
 import server.Server;
 import settings.Base;
 import settings.SettingsManager;
+import transport.Data;
 import transport.ListChangeAdapter;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,10 +29,34 @@ import static settings.SettingsManager.basesCacheFiles;
 import static settings.SettingsManager.basesFolder;
 
 public abstract class DataModelInstanceSaver{
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static final Map<CacheKey<String>, DataModelWithLockAndListener> bases;
 
+    public static final Map<String, OutputStream> connectedAdmins = new ConcurrentHashMap<>();
+    public static final ReentrantReadWriteLock    adminsLock      = new ReentrantReadWriteLock( true );
+
+    public static void sendChange( ListChangeAdapter adapter ){
+        Data data = new Data();
+        data.setChanges( Collections.singletonList( adapter ) );
+        adminsLock.readLock().lock();
+//            Send changes to all admins
+        connectedAdmins.entrySet()
+                       .stream()
+                       .map( Map.Entry::getValue )
+                       .map( DataOutputStream.class::cast )
+                       .forEach( outputStream -> {
+                           try{
+                               outputStream.writeUTF( mapper.writeValueAsString( data ) );
+                           }catch( IOException e ){
+                               e.printStackTrace();
+                           }
+                       } );
+        adminsLock.readLock().unlock();
+    }
+
     static{
-        bases = new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
+        bases =
+                new ConcurrentHashMap<>( ( int ) Server.settings.getBase().stream().filter( Base::isRunning ).count() ,
                                          0.75f ,
                                          32 );
         Executors.newSingleThreadScheduledExecutor( r -> {
@@ -38,7 +67,9 @@ public abstract class DataModelInstanceSaver{
                  .scheduleAtFixedRate( () -> bases.entrySet()
                                                   .stream()
                                                   .peek( DataModelInstanceSaver::saveChanges )
-                                                  .filter( DataModelInstanceSaver::isLongAgoRequested )
+                                                  .filter( dataModel -> ( System.currentTimeMillis() -
+                                                                          dataModel.getKey().timestamp ) >
+                                                                        Server.settings.getCacheTimeout() )
                                                   .forEach( DataModelInstanceSaver::clearCache ) ,
                                        Server.settings.getCacheTimeout() ,
                                        Server.settings.getCacheTimeout() ,
@@ -46,15 +77,12 @@ public abstract class DataModelInstanceSaver{
     }
 
     private static void clearCache( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
+        saveChanges( dataModel );
         dataModel.getValue().lock.writeLock().lock();
         bases.remove( dataModel.getKey() , dataModel.getValue() );
         dataModel.getValue().model.getRouteObservableList().removeListener( dataModel.getValue().routeListener );
         dataModel.getValue().model.getFlightObservableList().removeListener( dataModel.getValue().flightListener );
         dataModel.getValue().lock.writeLock().unlock();
-    }
-
-    private static boolean isLongAgoRequested( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
-        return System.currentTimeMillis() - dataModel.getKey().timestamp > Server.settings.getCacheTimeout();
     }
 
     /**
@@ -64,10 +92,11 @@ public abstract class DataModelInstanceSaver{
      @param dataModel for saving
      */
     private static void saveChanges( Map.Entry<CacheKey<String>, DataModelWithLockAndListener> dataModel ){
-        try{
+        try( OutputStream outputStream = Files.newOutputStream( Paths.get( basesFolder +
+                                                                           dataModel.getKey().key +
+                                                                           ".far" ) ) ){
             dataModel.getValue().lock.writeLock().lock();
-            dataModel.getValue().model.saveTo( Files.newOutputStream( Paths.get(
-                    basesFolder + dataModel.getKey().key + ".far" ) ) );
+            dataModel.getValue().model.saveTo( outputStream );
             dataModel.getValue().lock.writeLock().unlock();
         }catch( IOException e ){
             System.err.println( "Database " + dataModel.getKey().key + " has problems" );
@@ -86,41 +115,36 @@ public abstract class DataModelInstanceSaver{
      */
     public static synchronized Optional<DataModelWithLockAndListener> getInstance( String baseName ){
 //        find database in cache table
-        Optional<Map.Entry<CacheKey<String>, DataModelWithLockAndListener>> optionalEntity =
+        Optional<Map.Entry<CacheKey<String>, DataModelWithLockAndListener>>
+                optionalEntity =
                 bases.entrySet().stream().filter( entity -> entity.getKey().key.equals( baseName ) ).findAny();
         if( optionalEntity.isPresent() ){
-            optionalEntity.map( Map.Entry::getKey ).get().resetTimeStamp();
+            optionalEntity.map( Map.Entry::getKey ).orElseThrow( IllegalStateException::new ).resetTimeStamp();
             return optionalEntity.map( Map.Entry::getValue );
         }else{
-
-            Optional<Base> optionalBase = Server.settings.getBase()
-                                                         .parallelStream()
-                                                         .filter( base -> base.getName().equals( baseName ) )
-                                                         .filter( Base::isRunning )
-                                                         .findAny();
+            Optional<Base>
+                    optionalBase =
+                    Server.settings.getBase()
+                                   .parallelStream()
+                                   .filter( base -> base.getName().equals( baseName ) )
+                                   .filter( Base::isRunning )
+                                   .findAny();
 //            find settings of database
             if( optionalBase.isPresent() ){
                 try{
                     DataModel dataModel = new DataModel();
                     dataModel.importFrom( Files.newInputStream( Paths.get( basesFolder + baseName + ".far" ) ) );
 //                    Save all changes to file of this base
-                    ListChangeListener<Route> routeListener = change -> {
-                        try{
-                            cacheChanges( baseName , ListChangeAdapter.routeChange( change ) );
-                        }catch( IOException e ){
-                            e.printStackTrace();
-                        }
-                    };
-                    ListChangeListener<Flight> flightListener = change -> {
-                        try{
-                            cacheChanges( baseName , ListChangeAdapter.flightChange( change ) );
-                        }catch( IOException e ){
-                            e.printStackTrace();
-                        }
-                    };
+                    ListChangeListener<Route>
+                            routeListener =
+                            change -> cacheReaderClientsChanges( baseName , ListChangeAdapter.routeChange( change ) );
+                    ListChangeListener<Flight>
+                            flightListener =
+                            change -> cacheReaderClientsChanges( baseName , ListChangeAdapter.flightChange( change ) );
                     dataModel.addRoutesListener( routeListener );
                     dataModel.addFlightsListener( flightListener );
-                    DataModelWithLockAndListener modelWithLockAndListener =
+                    DataModelWithLockAndListener
+                            modelWithLockAndListener =
                             new DataModelWithLockAndListener( dataModel ,
                                                               new ReentrantReadWriteLock( true ) ,
                                                               routeListener ,
@@ -138,6 +162,14 @@ public abstract class DataModelInstanceSaver{
             }else{
                 return Optional.empty();
             }
+        }
+    }
+
+    private static void cacheReaderClientsChanges( String baseName , ListChangeAdapter listChangeAdapter ){
+        try{
+            cacheChanges( baseName , listChangeAdapter );
+        }catch( IOException e ){
+            e.printStackTrace();
         }
     }
 

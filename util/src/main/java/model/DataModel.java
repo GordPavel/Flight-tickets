@@ -339,8 +339,8 @@ public class DataModel{
             Route
                     newRoute =
                     new Route( editingRoute.id ,
-                               newDepartureAirport != null ? newDepartureAirport : route.getFrom() ,
-                               editingRoute.getTo() );
+                               newDepartureAirport != null ? newDepartureAirport : editingRoute.getFrom() ,
+                               newDestinationAirport != null ? newDestinationAirport : editingRoute.getTo() );
 //        To produce update event on list
             flights.stream()
                    .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() ) )

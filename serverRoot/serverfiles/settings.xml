@@ -15,8 +15,12 @@
             <password>pass</password>
             <privilege>ReadWrite</privilege>
         </users>
+        <users login="nina">
+            <password>pass</password>
+            <privilege>ReadWrite</privilege>
+        </users>
     </base>
-    <cacheTimeout>180000</cacheTimeout>
+    <cacheTimeout>30000</cacheTimeout>
     <logFile>/Volumes/Users/pavelgordeev/Desktop/errors.txt</logFile>
     <rootPassword>pass</rootPassword>
 </settings>

@@ -164,7 +164,7 @@ abstract class RoutesFlightsOverviewController{
         searchRouteButton.setOnAction( event -> handleSearchRouteAction() );
         updateRouteButton.setOnAction( event -> handleUpdateRouteAction() );
 
-        thisStage.setOnCloseRequest( event -> searchFlights.closeWindow() );
+        thisStage.setOnCloseRequest( event -> closeWindow() );
     }
 
     private void searchListeners( String departure , String destination ){
@@ -349,7 +349,7 @@ abstract class RoutesFlightsOverviewController{
                     primaryStage.setScene( scene );
                     primaryStage.setResizable( false );
                     primaryStage.show();
-                    thisStage.close();
+                    closeWindow();
                 }catch( IOException e ){
                     System.out.println( "load problem" );
                     System.out.println( e.getMessage() );
@@ -378,11 +378,15 @@ abstract class RoutesFlightsOverviewController{
             loginStage.setScene( scene );
             loginStage.setResizable( false );
             loginStage.show();
-            thisStage.close();
+            closeWindow();
         }catch( IOException e ){
             System.out.println( "load problem" );
             System.out.println( e.getMessage() );
         }
+    }
+
+    private void closeWindow(){
+        thisStage.close();
     }
 
     /**
