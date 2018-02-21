@@ -20,6 +20,7 @@ public class Data{
     private Collection<Flight>      flights;
     private Map<String, String>     bases;
     private List<ListChangeAdapter> changes;
+
     @JsonSerialize( using = ExceptionSerializer.class )
     @JsonDeserialize( using = ExceptionDeserializer.class )
     private FlightAndRouteException exception;

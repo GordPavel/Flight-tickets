@@ -40,10 +40,11 @@ class ReadOnlyThread extends FaRThread{
     public void run(){
         while( !stop ){
             saveDM();
+            Controller.getInstance().reconnect();
             parentController.requestUpdate();
             parentController.receiveUpdate();
             try{
-                Thread.sleep( 60000 );
+                Thread.sleep( 10000 );
             }catch( InterruptedException e ){
 
             }

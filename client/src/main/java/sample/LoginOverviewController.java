@@ -43,10 +43,10 @@ class LoginOverviewController{
         ipTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
         portTextField.setText( "5555" );
         portTextField.textProperty().addListener( ( observable , oldValue , newValue ) -> fieldCheck() );
-        ipTextField.setOnKeyReleased( enterHandler );
-        loginTextField.setOnKeyReleased( enterHandler );
-        portTextField.setOnKeyReleased( enterHandler );
-        passwordField.setOnKeyReleased( enterHandler );
+        ipTextField.setOnKeyPressed( enterHandler );
+        loginTextField.setOnKeyPressed( enterHandler );
+        portTextField.setOnKeyPressed( enterHandler );
+        passwordField.setOnKeyPressed( enterHandler );
 
 
     }
