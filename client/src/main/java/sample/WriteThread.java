@@ -37,7 +37,7 @@ public class WriteThread extends FaRThread{
             System.out.println( 123 );
             parentController.receiveUpdate( );
             try{
-                Thread.sleep( 5000 );
+                Thread.sleep( 100 );
             }catch( InterruptedException ex ){
 
             }
