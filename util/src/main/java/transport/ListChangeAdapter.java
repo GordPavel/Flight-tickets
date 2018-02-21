@@ -11,10 +11,8 @@ import model.DataModel;
 import model.Flight;
 import model.FlightOrRoute;
 import model.Route;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +22,7 @@ public class ListChangeAdapter{
     private final String update;
 
     private final Pattern updatePattern = Pattern.compile(
-            "^(?<entity>flight|route) \\{ (?<list>\\[.+]) (?<type>changed to|removed|added) (?<new>\\[.+] )?}\n?$" );
+            "^(?<entity>flight|route) \\{ (?<list>\\{.+}) (?<type>changed to|removed|added) (?<new>\\{.+} )?}\n?$" );
 
     @JsonCreator
     public ListChangeAdapter(
@@ -43,9 +41,7 @@ public class ListChangeAdapter{
         try{
             Matcher matcher = updatePattern.matcher( this.update );
             matcher.find();
-            return ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                             .constructCollectionType( List.class , Route.class ) )
-                                           .readValue( matcher.group( "list" ) ) ).get( 0 );
+            return mapper.readerFor( Route.class ).readValue( matcher.group( "list" ) );
         }catch( IOException e ){
             throw new IllegalStateException( "Wrong type casting" , e );
         }
@@ -61,42 +57,38 @@ public class ListChangeAdapter{
         try{
             Matcher matcher = updatePattern.matcher( this.update );
             matcher.find();
-            return ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                              .constructCollectionType( List.class , Flight.class ) )
-                                            .readValue( matcher.group( "list" ) ) ).get( 0 );
+            return mapper.readerFor( Flight.class ).readValue( matcher.group( "list" ) );
         }catch( IOException e ){
             throw new IllegalStateException( "Wrong type casting" , e );
         }
     }
 
-    public static ListChangeAdapter addRoute( List<Route> routes ) throws JsonProcessingException{
-        return new ListChangeAdapter( String.format( "route { %s added }" , mapper.writeValueAsString( routes ) ) );
+    public static ListChangeAdapter addRoute( Route route ) throws JsonProcessingException{
+        return new ListChangeAdapter( String.format( "route { %s added }" , mapper.writeValueAsString( route ) ) );
     }
 
-    public static ListChangeAdapter addFlight( List<Flight> flights ) throws JsonProcessingException{
-        return new ListChangeAdapter( String.format( "flight { %s added }" , mapper.writeValueAsString( flights ) ) );
+    public static ListChangeAdapter addFlight( Flight flight ) throws JsonProcessingException{
+        return new ListChangeAdapter( String.format( "flight { %s added }" , mapper.writeValueAsString( flight ) ) );
     }
 
-    public static ListChangeAdapter removeRoute( List<Route> routes ) throws JsonProcessingException{
-        return new ListChangeAdapter( String.format( "route { %s removed }" , mapper.writeValueAsString( routes ) ) );
+    public static ListChangeAdapter removeRoute( Route route ) throws JsonProcessingException{
+        return new ListChangeAdapter( String.format( "route { %s removed }" , mapper.writeValueAsString( route ) ) );
     }
 
-    public static ListChangeAdapter removeFlight( List<Flight> flights ) throws JsonProcessingException{
-        return new ListChangeAdapter( String.format( "flight { %s removes }" , mapper.writeValueAsString( flights ) ) );
+    public static ListChangeAdapter removeFlight( Flight flight ) throws JsonProcessingException{
+        return new ListChangeAdapter( String.format( "flight { %s removes }" , mapper.writeValueAsString( flight ) ) );
     }
 
-    public static ListChangeAdapter editRoute( List<Route> oldRoutes , List<Route> newRoutes ) throws
-                                                                                               JsonProcessingException{
+    public static ListChangeAdapter editRoute( Route oldRoute , Route newRoute ) throws JsonProcessingException{
         return new ListChangeAdapter( String.format( "route { %s changed to %s }" ,
-                                                     mapper.writeValueAsString( oldRoutes ) ,
-                                                     mapper.writeValueAsString( newRoutes ) ) );
+                                                     mapper.writeValueAsString( oldRoute ) ,
+                                                     mapper.writeValueAsString( newRoute ) ) );
     }
 
-    public static ListChangeAdapter editFlight( List<Flight> oldFlights , List<Flight> newFlights ) throws
-                                                                                                    JsonProcessingException{
+    public static ListChangeAdapter editFlight( Flight oldFlight , Flight newFlight ) throws JsonProcessingException{
         return new ListChangeAdapter( String.format( "flight { %s changed to %s }" ,
-                                                     mapper.writeValueAsString( oldFlights ) ,
-                                                     mapper.writeValueAsString( newFlights ) ) );
+                                                     mapper.writeValueAsString( oldFlight ) ,
+                                                     mapper.writeValueAsString( newFlight ) ) );
     }
 
     public static ListChangeAdapter flightChange( ListChangeListener.Change<? extends Flight> change ){
@@ -157,71 +149,40 @@ public class ListChangeAdapter{
                 case "added":
                     switch( entity ){
                         case "flight":
-                            ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                       .constructCollectionType( List.class ,
-                                                                                                 Flight.class ) )
-                                                     .readValue( list ) ).forEach( dataModel::addFlight );
+                            dataModel.addFlight( mapper.readerFor( Flight.class ).readValue( list ) );
                             break;
                         case "route":
                             //noinspection unchecked
-                            ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                      .constructCollectionType( List.class ,
-                                                                                                Route.class ) )
-                                                    .readValue( list ) ).forEach( dataModel::addRoute );
+                            dataModel.addRoute( mapper.readerFor( Route.class ).readValue( list ) );
                             break;
                     }
                     break;
                 case "removed":
                     switch( entity ){
                         case "flight":
-                            ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                       .constructCollectionType( List.class ,
-                                                                                                 Flight.class ) )
-                                                     .readValue( list ) ).stream()
-                                                                         .map( Flight::getNumber )
-                                                                         .forEach( dataModel::removeFlight );
+                            dataModel.removeFlight( ( ( Flight ) mapper.readerFor( Flight.class )
+                                                                       .readValue( list ) ).getNumber() );
                             break;
                         case "route":
-                            ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                      .constructCollectionType( List.class ,
-                                                                                                Route.class ) )
-                                                    .readValue( list ) ).forEach( dataModel::removeRoute );
+                            dataModel.removeRoute( mapper.readerFor( Route.class ).readValue( list ) );
                             break;
                     }
                     break;
                 case "changed to":
                     switch( entity ){
                         case "flight":
-                            Flux.zip( Flux.fromStream( ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                  .constructCollectionType(
-                                                                                                          List.class ,
-                                                                                                          Flight.class ) )
-                                                                                .readValue( list ) ).stream() ) ,
-                                      Flux.fromStream( ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                  .constructCollectionType(
-                                                                                                          List.class ,
-                                                                                                          Flight.class ) )
-                                                                                .readValue( newList ) ).stream() ) )
-                                .subscribe( tuple2 -> dataModel.editFlight( tuple2.getT1() ,
-                                                                            tuple2.getT2().getRoute() ,
-                                                                            tuple2.getT2().getPlaneID() ,
-                                                                            tuple2.getT2().getDepartureDateTime() ,
-                                                                            tuple2.getT2().getArriveDateTime() ) );
+                            Flight newFlight = mapper.readerFor( Flight.class ).readValue( newList );
+                            dataModel.editFlight( mapper.readerFor( Flight.class ).readValue( list ) ,
+                                                  newFlight.getRoute() ,
+                                                  newFlight.getPlaneID() ,
+                                                  newFlight.getDepartureDateTime() ,
+                                                  newFlight.getArriveDateTime() );
                             break;
                         case "route":
-                            Flux.zip( Flux.fromStream( ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                 .constructCollectionType(
-                                                                                                         List.class ,
-                                                                                                         Route.class ) )
-                                                                               .readValue( list ) ).stream() ) ,
-                                      Flux.fromStream( ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                 .constructCollectionType(
-                                                                                                         List.class ,
-                                                                                                         Route.class ) )
-                                                                               .readValue( newList ) ).stream() ) )
-                                .subscribe( tuple2 -> dataModel.editRoute( tuple2.getT1() ,
-                                                                           tuple2.getT2().getFrom() ,
-                                                                           tuple2.getT2().getTo() ) );
+                            Route newRoute = mapper.readerFor( Route.class ).readValue( newList );
+                            dataModel.editRoute( mapper.readerFor( Route.class ).readValue( list ) ,
+                                                 newRoute.getFrom() ,
+                                                 newRoute.getTo() );
                             break;
                     }
                     break;
@@ -255,16 +216,16 @@ public class ListChangeAdapter{
             switch( thisUpdate.group( "entity" ) ){
                 case "route":
 //                    Check, that in two requests the same routes have same end points
-                    Boolean firstList = checkListInUpdates( thisUpdate , anotherUpdate , Route.class , "list" );
+                    Boolean firstList = checkEntities( thisUpdate , anotherUpdate , Route.class , "list" );
                     if( thisUpdate.group( "type" ).equals( "changed to" ) ){
-                        return firstList && checkListInUpdates( thisUpdate , anotherUpdate , Route.class , "new" );
+                        return firstList && checkEntities( thisUpdate , anotherUpdate , Route.class , "new" );
                     }else{
                         return firstList;
                     }
                 case "flight":
-                    firstList = checkListInUpdates( thisUpdate , anotherUpdate , Flight.class , "list" );
+                    firstList = checkEntities( thisUpdate , anotherUpdate , Flight.class , "list" );
                     if( thisUpdate.group( "type" ).equals( "changed to" ) ){
-                        return firstList && checkListInUpdates( thisUpdate , anotherUpdate , Flight.class , "new" );
+                        return firstList && checkEntities( thisUpdate , anotherUpdate , Flight.class , "new" );
                     }else{
                         return firstList;
                     }
@@ -277,29 +238,18 @@ public class ListChangeAdapter{
         }
     }
 
-    private Boolean checkListInUpdates( Matcher thisUpdate , Matcher anotherUpdate ,
-                                        Class<? extends FlightOrRoute> entityClass , String listName ) throws
-                                                                                                       IOException{
-        Flux<Object> thisList = Flux.fromIterable( mapper.readerFor( mapper.getTypeFactory()
-                                                                           .constructCollectionType( List.class ,
-                                                                                                     entityClass ) )
-                                                         .readValue( thisUpdate.group( listName ) ) );
-        Flux<Object> anotherList = Flux.fromIterable( mapper.readerFor( mapper.getTypeFactory()
-                                                                              .constructCollectionType( List.class ,
-                                                                                                        entityClass ) )
-                                                            .readValue( anotherUpdate.group( listName ) ) );
-        return Flux.zip( thisList , anotherList ).map( tuple -> {
-            if( entityClass.equals( Route.class ) ){
-                return ( ( Route ) tuple.getT1() ).getFrom()
-                                                  .getId()
-                                                  .equals( ( ( Route ) tuple.getT2() ).getFrom().getId() ) &&
-                       ( ( Route ) tuple.getT1() ).getTo()
-                                                  .getId()
-                                                  .equals( ( ( Route ) tuple.getT2() ).getTo().getId() );
-            }else{
-                return ( ( Flight ) tuple.getT1() ).getNumber().equals( ( ( Flight ) tuple.getT2() ).getNumber() );
-            }
-        } ).toStream().allMatch( Boolean::booleanValue );
+    private Boolean checkEntities( Matcher thisUpdate , Matcher anotherUpdate ,
+                                   Class<? extends FlightOrRoute> entityClass , String listName ) throws IOException{
+        if( entityClass.equals( Route.class ) ){
+            Route thisRoute    = mapper.readerFor( entityClass ).readValue( thisUpdate.group( listName ) );
+            Route anotherRoute = mapper.readerFor( entityClass ).readValue( anotherUpdate.group( listName ) );
+            return thisRoute.getFrom().equals( anotherRoute.getFrom() ) &&
+                   thisRoute.getTo().equals( anotherRoute.getTo() );
+        }else{
+            Flight thisRoute    = mapper.readerFor( entityClass ).readValue( thisUpdate.group( listName ) );
+            Flight anotherRoute = mapper.readerFor( entityClass ).readValue( anotherUpdate.group( listName ) );
+            return thisRoute.getNumber().equals( anotherRoute.getNumber() );
+        }
     }
 }
 

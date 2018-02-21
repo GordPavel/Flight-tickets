@@ -56,8 +56,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddRouteAction(){
         try{
-            Stage popUp = new Stage();
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
+            Stage                              popUp      = new Stage();
+            FXMLLoader                         loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
             AddAndEditRoutesOverviewController controller = new AddAndEditRoutesOverviewController( null , popUp );
             loader.setController( controller );
             popUp.initModality( Modality.APPLICATION_MODAL );
@@ -110,10 +111,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 DataOutputStream outClient =
-                        new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
+                        new DataOutputStream( Controller.getInstance().adminConnection.get().getOutputStream() );
                 UserInformation request = new UserInformation();
-                request.setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( Collections.singletonList(
-                        selectedRoute ) ) ) );
+                request.setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( selectedRoute ) ) );
                 outClient.writeUTF( mapper.writeValueAsString( request ) );
 //        todo : Данные между принимающим и передающим потоком
             }catch( IOException e ){
@@ -128,7 +128,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
      */
     private void handleAddFlightAction(){
         try{
-            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
+            FXMLLoader                          loader     =
+                    new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
             Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
@@ -181,10 +182,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 DataOutputStream outClient =
-                        new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
+                        new DataOutputStream( Controller.getInstance().adminConnection.get().getOutputStream() );
                 UserInformation request = new UserInformation();
-                request.setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( Collections.singletonList(
-                        selectedFlight ) ) ) );
+                request.setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( selectedFlight ) ) );
                 outClient.writeUTF( mapper.writeValueAsString( request ) );
 //        todo : Данные между принимающим и передающим потоком
             }catch( IOException e ){

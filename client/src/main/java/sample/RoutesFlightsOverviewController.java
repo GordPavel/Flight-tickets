@@ -265,7 +265,7 @@ abstract class RoutesFlightsOverviewController{
     private void handleChangeDBAction(){
         try{
 //            clear
-            Controller.getInstance().connection.get().close();
+            Controller.getInstance().adminConnection.get().close();
             DataModelInstanceSaver.getInstance().clear();
 
             try( Socket socket = new Socket( Controller.getInstance().host , Controller.getInstance().port ) ;
@@ -281,7 +281,7 @@ abstract class RoutesFlightsOverviewController{
                     closeWindow();
                 } , ClientMain::showWarningByError );
             }catch( EOFException e ){
-                ClientMain.showWarning( "Error connection" , "НЕизвестная хуйня" , "Server has closed connection" );
+                ClientMain.showWarning( "Error adminConnection" , "НЕизвестная хуйня" , "Server has closed adminConnection" );
             }catch( IOException e ){
                 System.err.println( "load problem" );
                 e.printStackTrace();
@@ -296,7 +296,7 @@ abstract class RoutesFlightsOverviewController{
     private void handleLogOutAction(){
         try{
             //            clear
-            Controller.getInstance().connection.get().close();
+            Controller.getInstance().adminConnection.get().close();
             DataModelInstanceSaver.getInstance().clear();
 
             LoginOverviewController.openLoginScreen( new Stage() );

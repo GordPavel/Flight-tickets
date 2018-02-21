@@ -37,6 +37,7 @@ class ChoiceOverviewController{
     @FXML   TableColumn<Map.Entry<String, String>, String> rightsColumn;
     private Stage                                          thisStage;
     private Data                                           data;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     ChoiceOverviewController( Stage thisStage , Data data ){
         this.thisStage = thisStage;
@@ -69,50 +70,56 @@ class ChoiceOverviewController{
         Optional.ofNullable( baseTable.getSelectionModel().getSelectedItem() )
                 .map( selectedItem -> ( Map.Entry<String, String> ) selectedItem )
                 .ifPresent( selectedItem -> {
+                    Controller.getInstance().base = selectedItem.getKey();
+                    String privilege = selectedItem.getValue();
+                    UserInformation request = new UserInformation( Controller.getInstance().login ,
+                                                                   Controller.getInstance().password ,
+                                                                   Controller.getInstance().base );
                     try{
-                        Socket socket = new Socket( Controller.getInstance().host , Controller.getInstance().port );
-                        Controller.getInstance().connection.set( socket );
-                        ObjectMapper mapper = new ObjectMapper();
-                        Controller.getInstance().base = selectedItem.getKey();
-                        UserInformation request = new UserInformation( Controller.getInstance().login ,
-                                                                       Controller.getInstance().password ,
-                                                                       Controller.getInstance().base );
-//                        todo : Если соединение разорвано
+                        Controller.getInstance().adminConnection.set( new Socket( Controller.getInstance().host ,
+                                                                                  Controller.getInstance().port ) );
                         DataOutputStream outputStream =
-                                new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
-
+                                new DataOutputStream( Controller.getInstance().adminConnection.get()
+                                                                                              .getOutputStream() );
                         DataInputStream inputStream =
-                                new DataInputStream( Controller.getInstance().connection.get().getInputStream() );
+                                new DataInputStream( Controller.getInstance().adminConnection.get().getInputStream() );
                         outputStream.writeUTF( mapper.writeValueAsString( request ) );
-                        Data response = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                        response.withoutExceptionOrWith( data -> {
-                            DataModelInstanceSaver.getInstance()
-                                                  .getRouteObservableList()
-                                                  .setAll( response.getRoutes() );
-                            DataModelInstanceSaver.getInstance()
-                                                  .getFlightObservableList()
-                                                  .setAll( response.getFlights() );
-                            try{
-                                Stage primaryStage = new Stage();
-                                RoutesFlightsOverviewController controller =
-                                        selectedItem.getValue().equalsIgnoreCase( "READWRITE" ) ?
-                                        new RoutesFlightsWriteOverviewController( primaryStage ) :
-                                        new RoutesFlightsReadOnlyOverviewController( primaryStage );
-                                FXMLLoader loader =
-                                        new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-                                loader.setController( controller );
-                                primaryStage.setTitle( "Information system about flights and routes" );
-                                Scene scene = new Scene( loader.load() , 700 , 500 );
-                                primaryStage.setScene( scene );
-                                primaryStage.setResizable( false );
-                                closeWindow();
-                                primaryStage.show();
-                            }catch( IOException e ){
-                                System.err.println( "Loading main screen error" );
-                                e.printStackTrace();
-                            }
-                        } , ClientMain::showWarningByError );
+                        mapper.readerFor( Data.class ).<Data> readValue( inputStream.readUTF() ).withoutExceptionOrWith(
+                                data -> {
+                                    DataModelInstanceSaver.getInstance()
+                                                          .getRouteObservableList()
+                                                          .setAll( data.getRoutes() );
+                                    DataModelInstanceSaver.getInstance()
+                                                          .getFlightObservableList()
+                                                          .setAll( data.getFlights() );
+                                    try{
+                                        Controller.getInstance().startUpdateThread( privilege );
+
+                                        Stage primaryStage = new Stage();
+                                        RoutesFlightsOverviewController controller =
+                                                privilege.equalsIgnoreCase( "READWRITE" ) ?
+                                                new RoutesFlightsWriteOverviewController( primaryStage ) :
+                                                new RoutesFlightsReadOnlyOverviewController( primaryStage );
+                                        FXMLLoader loader = new FXMLLoader( getClass().getResource(
+                                                "/fxml/RoutesFlightsOverview.fxml" ) );
+                                        loader.setController( controller );
+                                        primaryStage.setTitle( "Information system about flights and routes" );
+                                        Scene scene = new Scene( loader.load() , 700 , 500 );
+                                        primaryStage.setScene( scene );
+                                        primaryStage.setResizable( false );
+                                        closeWindow();
+                                        primaryStage.show();
+                                    }catch( IOException e ){
+                                        System.err.println( "Loading main screen error" );
+                                        e.printStackTrace();
+                                    }
+                                } ,
+                                ClientMain::showWarningByError );
+                        if( privilege.equalsIgnoreCase( "Read" ) ){
+                            Controller.getInstance().adminConnection.getAndSet( null ).close();
+                        }
                     }catch( IOException e ){
+//                        todo : Если соединение разорвано
                         System.err.println( "Connection error" );
                         e.printStackTrace();
                     }

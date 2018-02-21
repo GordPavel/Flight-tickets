@@ -51,39 +51,6 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         routeTable.setPrefWidth( 600 );
         departureColumn.setPrefWidth( 300 );
         destinationColumn.setPrefWidth( 300 );
-
-//        todo: ИСПРАВИТЬ!
-
-//        Controller.getInstance().setThread( new ReadOnlyThread( this ) );
-//        thisStage.setOnHidden( event -> timer.cancel() );
-//        Controller.getInstance().startThread();
-//        infoMenuButton.setOnAction( event -> handleAboutAction() );
-//
-//        departure.textProperty().addListener( observable -> restartTask() );
-//        destination.textProperty().addListener( observable -> restartTask() );
-    }
-
-    public void restartTask(){
-//        restartTask( new TimerTask(){
-//            @Override
-//            public void run(){
-//                routeTable.setDisable( true );
-//                if( Controller.getInstance().getClientSocket().isClosed() ){
-//                    Controller.getInstance().reconnect();
-//                }
-//                if( !Controller.getInstance().getClientSocket().isConnected() ){
-//                    routeConnectLabel.setText( "Offline" );
-//                    flightConnectLabel.setText( "Offline" );
-//                    Controller.getInstance().reconnect();
-//                }
-//                if( Controller.getInstance().getClientSocket().isConnected() ){
-//                    routeConnectLabel.setText( "Online" );
-//                    flightConnectLabel.setText( "Online" );
-//                    handleSearchRouteAction();
-//                }
-//                routeTable.setDisable( false );
-//            }
-//        } );
     }
 
     public void restartTask( TimerTask timerTask ){

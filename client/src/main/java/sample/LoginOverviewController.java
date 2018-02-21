@@ -82,7 +82,7 @@ class LoginOverviewController{
                 closeWindow();
             } , ClientMain::showWarningByError );
         }catch( EOFException e ){
-            ClientMain.showWarning( "Error connection" , "НЕизвестная хуйня" , "Server has closed connection" );
+            ClientMain.showWarning( "Error adminConnection" , "НЕизвестная хуйня" , "Server has closed adminConnection" );
         }catch( IOException e ){
             e.printStackTrace();
         }

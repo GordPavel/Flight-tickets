@@ -46,16 +46,19 @@ class AddAndEditRoutesOverviewController{
     private Route editingRoute;
 
     private Stage thisStage;
-    private       Pattern      pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
+    private       Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
     //    Collect all zones to map by country
-    private       Map<String, List<ZoneId>>
-                               zones   =
-            ZoneId.getAvailableZoneIds()
-                  .stream()
-                  .sorted()
-                  .filter( Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate().and( pattern.asPredicate() ) )
-                  .collect( Collector.of( HashMap::new , this::putNewZoneToMap , this::mergeTwoMaps ) );
-    private final ObjectMapper mapper  = new ObjectMapper();
+    private       Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds()
+                                                            .stream()
+                                                            .sorted()
+                                                            .filter( Pattern.compile( "(Etc|SystemV)/.+" )
+                                                                            .asPredicate()
+                                                                            .negate()
+                                                                            .and( pattern.asPredicate() ) )
+                                                            .collect( Collector.of( HashMap::new ,
+                                                                                    this::putNewZoneToMap ,
+                                                                                    this::mergeTwoMaps ) );
+    private final ObjectMapper              mapper  = new ObjectMapper();
 
     private Map<String, List<ZoneId>> mergeTwoMaps( Map<String, List<ZoneId>> map1 , Map<String, List<ZoneId>> map2 ){
         map1.forEach( ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
@@ -88,11 +91,10 @@ class AddAndEditRoutesOverviewController{
     @SuppressWarnings( "ResultOfMethodCallIgnored" )
     @FXML
     private void initialize(){
-        final ObservableList<String>
-                countries =
-                zones.keySet()
-                     .stream()
-                     .collect( Collectors.collectingAndThen( toList() , FXCollections::observableList ) );
+        final ObservableList<String> countries = zones.keySet()
+                                                      .stream()
+                                                      .collect( Collectors.collectingAndThen( toList() ,
+                                                                                              FXCollections::observableList ) );
         departureCountryChoice.setItems( countries );
         destinationCountryChoice.setItems( countries );
         StringConverter<ZoneId> zoneIdStringConverter = new StringConverter<ZoneId>(){
@@ -119,8 +121,7 @@ class AddAndEditRoutesOverviewController{
                                 .addListener( ( observable , oldValue , newValue ) -> countrySelected( newValue ,
                                                                                                        destinationCityChoice ) );
 
-        BooleanProperty
-                addAvailable =
+        BooleanProperty addAvailable =
                 new SimpleBooleanProperty( Optional.ofNullable( departureCityChoice.getSelectionModel()
                                                                                    .getSelectedItem() ).isPresent() &&
                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
@@ -155,23 +156,22 @@ class AddAndEditRoutesOverviewController{
 
     private void addOrEdit( Boolean isAdd ){
         try{
-            DataOutputStream outClient = new DataOutputStream( Controller.getInstance().connection.get()
-                                                                                                  .getOutputStream() );
+            DataOutputStream outClient =
+                    new DataOutputStream( Controller.getInstance().adminConnection.get().getOutputStream() );
             List<ListChangeAdapter> changes;
 
             if( isAdd ){
                 changes =
-                        Collections.singletonList( ListChangeAdapter.addRoute( Collections.singletonList( new Route(
-                                departureCityChoice.getSelectionModel().getSelectedItem() ,
-                                destinationCityChoice.getSelectionModel().getSelectedItem() ) ) ) );
+                        Collections.singletonList( ListChangeAdapter.addRoute( new Route( departureCityChoice.getSelectionModel()
+                                                                                                             .getSelectedItem() ,
+                                                                                          destinationCityChoice.getSelectionModel()
+                                                                                                               .getSelectedItem() ) ) );
             }else{
-                changes =
-                        Collections.singletonList( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                                                Collections.singletonList( new Route(
-                                                                                        departureCityChoice.getSelectionModel()
-                                                                                                           .getSelectedItem() ,
-                                                                                        destinationCityChoice.getSelectionModel()
-                                                                                                             .getSelectedItem() ) ) ) );
+                changes = Collections.singletonList( ListChangeAdapter.editRoute( editingRoute ,
+                                                                                  new Route( departureCityChoice.getSelectionModel()
+                                                                                                                .getSelectedItem() ,
+                                                                                             destinationCityChoice.getSelectionModel()
+                                                                                                                  .getSelectedItem() ) ) );
             }
 
             UserInformation request = new UserInformation();

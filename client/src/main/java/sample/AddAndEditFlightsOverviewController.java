@@ -192,21 +192,20 @@ class AddAndEditFlightsOverviewController{
     private void setMinimalOffsetBetweenDepartureAndArrival( Route oldValue , Route newValue ){
         Optional.ofNullable( newValue ).ifPresent( newRoute -> {
             ZonedDateTime arriveTimeWithOffset;
-            long
-                    flightTimeInMinutes =
-                    Optional.ofNullable( oldValue )
-                            .map( oldRoute -> ChronoUnit.MINUTES.between( LocalDateTime.of( departureDate.getValue() ,
-                                                                                            departureTime.getValue() )
-                                                                                       .atZone( oldRoute.getFrom() ) ,
-                                                                          LocalDateTime.of( arrivingDate.getValue() ,
-                                                                                            arrivingTime.getValue() )
-                                                                                       .atZone( oldRoute.getTo() ) ) )
-                            .orElse( 60L );
-            arriveTimeWithOffset =
-                    LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                                 .atZone( newRoute.getFrom() )
-                                 .withZoneSameInstant( newRoute.getTo() )
-                                 .plusMinutes( flightTimeInMinutes );
+            long flightTimeInMinutes = Optional.ofNullable( oldValue )
+                                               .map( oldRoute -> ChronoUnit.MINUTES.between( LocalDateTime.of(
+                                                       departureDate.getValue() ,
+                                                       departureTime.getValue() ).atZone( oldRoute.getFrom() ) ,
+                                                                                             LocalDateTime.of(
+                                                                                                     arrivingDate.getValue() ,
+                                                                                                     arrivingTime.getValue() )
+                                                                                                          .atZone(
+                                                                                                                  oldRoute.getTo() ) ) )
+                                               .orElse( 60L );
+            arriveTimeWithOffset = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                .atZone( newRoute.getFrom() )
+                                                .withZoneSameInstant( newRoute.getTo() )
+                                                .plusMinutes( flightTimeInMinutes );
             arrivingDate.setValue( arriveTimeWithOffset.toLocalDate() );
             arrivingTime.setValue( arriveTimeWithOffset.toLocalTime() );
         } );
@@ -214,15 +213,12 @@ class AddAndEditFlightsOverviewController{
 
     private void departureDateTimeMoved( String oldDate , String oldTime , String newDate , String newTime ){
         if( !oldDate.equals( "" ) && !oldTime.equals( "" ) ){
-            LocalDateTime
-                    oldDepartureDateTime =
-                    LocalDateTime.of( departureDate.getConverter().fromString( oldDate ) ,
-                                      departureTime.getConverter().fromString( oldTime ) ),
-                    newDepartureDateTime =
-                            LocalDateTime.of( departureDate.getConverter().fromString( newDate ) ,
-                                              departureTime.getConverter().fromString( newTime ) ),
-                    oldArriveDateTime =
-                            LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() ), newArriveDateTime;
+            LocalDateTime oldDepartureDateTime = LocalDateTime.of( departureDate.getConverter().fromString( oldDate ) ,
+                                                                   departureTime.getConverter().fromString( oldTime ) ),
+                    newDepartureDateTime = LocalDateTime.of( departureDate.getConverter().fromString( newDate ) ,
+                                                             departureTime.getConverter().fromString( newTime ) ),
+                    oldArriveDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() ),
+                    newArriveDateTime;
             Long departureMovedInMinutes = ChronoUnit.MINUTES.between( oldDepartureDateTime , newDepartureDateTime );
             newArriveDateTime = oldArriveDateTime.plusMinutes( departureMovedInMinutes );
             arrivingDate.setValue( newArriveDateTime.toLocalDate() );
@@ -231,58 +227,51 @@ class AddAndEditFlightsOverviewController{
     }
 
     private void checkFlightTime(){
-        ZonedDateTime
-                departureDateTime =
-                LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                             .atZone( Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
-                                              .map( Route::getFrom )
-                                              .orElse( ZoneId.systemDefault() ) ),
-                arrivalDateTime =
-                        LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                     .atZone( Optional.ofNullable( routesBox.getSelectionModel().getSelectedItem() )
-                                                      .map( Route::getTo )
-                                                      .orElse( ZoneId.systemDefault() ) );
+        ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                       .atZone( Optional.ofNullable( routesBox.getSelectionModel()
+                                                                                              .getSelectedItem() )
+                                                                        .map( Route::getFrom )
+                                                                        .orElse( ZoneId.systemDefault() ) ),
+                arrivalDateTime = LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                                               .atZone( Optional.ofNullable( routesBox.getSelectionModel()
+                                                                                      .getSelectedItem() )
+                                                                .map( Route::getTo )
+                                                                .orElse( ZoneId.systemDefault() ) );
         ifFlightTimeRight.setValue( !departureDateTime.isAfter( arrivalDateTime ) );
     }
 
     private void addOrEdit( Boolean isAdd ){
-        ZonedDateTime
-                departureDateTime =
-                LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                             .atZone( routesBox.getSelectionModel().getSelectedItem().getFrom() ),
-                arriveDateTime =
-                        LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                     .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
+        ZonedDateTime departureDateTime = LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
+                                                       .atZone( routesBox.getSelectionModel()
+                                                                         .getSelectedItem()
+                                                                         .getFrom() ), arriveDateTime =
+                LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
+                             .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
         if( routesBox.getValue() == null ){
             ClientMain.showWarning( "Route isn`t chosen" , "Flight must have route" , "Choose route" );
         }else if( planeID.getText().equals( "" ) ){
             ClientMain.showWarning( "You have no plain" , "Flight must have plain" , "Write plain data" );
         }else{
             try{
-                DataOutputStream
-                        outClient =
-                        new DataOutputStream( Controller.getInstance().connection.get().getOutputStream() );
+                DataOutputStream outClient =
+                        new DataOutputStream( Controller.getInstance().adminConnection.get().getOutputStream() );
                 List<ListChangeAdapter> changes;
 
                 if( isAdd ){
-                    changes =
-                            Collections.singletonList( ListChangeAdapter.addFlight( Collections.singletonList( new Flight(
-                                    number.getText() ,
-                                    routesBox.getSelectionModel().getSelectedItem() ,
-                                    planeID.getText() ,
-                                    departureDateTime ,
-                                    arriveDateTime ) ) ) );
+                    changes = Collections.singletonList( ListChangeAdapter.addFlight( new Flight( number.getText() ,
+                                                                                                  routesBox.getSelectionModel()
+                                                                                                           .getSelectedItem() ,
+                                                                                                  planeID.getText() ,
+                                                                                                  departureDateTime ,
+                                                                                                  arriveDateTime ) ) );
                 }else{
-                    changes =
-                            Collections.singletonList( ListChangeAdapter.editFlight( Collections.singletonList(
-                                    editingFlight ) ,
-                                                                                     Collections.singletonList( new Flight(
-                                                                                             editingFlight.getNumber() ,
-                                                                                             routesBox.getSelectionModel()
-                                                                                                      .getSelectedItem() ,
-                                                                                             planeID.getText() ,
-                                                                                             departureDateTime ,
-                                                                                             arriveDateTime ) ) ) );
+                    changes = Collections.singletonList( ListChangeAdapter.editFlight( editingFlight ,
+                                                                                       new Flight( editingFlight.getNumber() ,
+                                                                                                   routesBox.getSelectionModel()
+                                                                                                            .getSelectedItem() ,
+                                                                                                   planeID.getText() ,
+                                                                                                   departureDateTime ,
+                                                                                                   arriveDateTime ) ) );
                 }
                 UserInformation request = new UserInformation();
                 request.setChanges( changes );
