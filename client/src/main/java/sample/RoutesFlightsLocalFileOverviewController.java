@@ -35,10 +35,14 @@ class RoutesFlightsLocalFileOverviewController extends RoutesFlightsOverviewCont
         deleteRouteButton.setOnAction( event -> handleDeleteRouteButton() );
         deleteFlightButton.setOnAction( event -> handleDeleteFlightButton() );
         mergeMenuButton.setOnAction( event -> handleMergeAction() );
+        searchRouteButton.setVisible( false );
         searchFlightButton.setOnAction( event -> handleSearchFlightButton() );
 
         updateRouteButton.setVisible( false );
         updateFlightButton.setVisible( false );
+
+        thisStage.setOnCloseRequest( event -> closeWindow() );
+        logoutMenuButton.setOnAction( event -> handleLogOutAction() );
     }
 
     @FXML
@@ -274,37 +278,28 @@ class RoutesFlightsLocalFileOverviewController extends RoutesFlightsOverviewCont
         }
     }
 
-    void closeWindow(){
-//        if( Controller.changed ){
-//            if( Controller.savingFile == null ){
-//                final Optional<ButtonType>
-//                        buttonType =
-//                        new Alert( Alert.AlertType.CONFIRMATION ,
-//                                   "Do you want to save changes?" ,
-//                                   ButtonType.YES ,
-//                                   ButtonType.NO ,
-//                                   new  ).showAndWait();
-//            }else{
-//                final Optional<ButtonType>
-//                        buttonType =
-//                        new Alert( Alert.AlertType.CONFIRMATION ,
-//                                   "Do you want to save changes?" ,
-//                                   ButtonType.YES ,
-//                                   ButtonType.NO ,
-//                                   ButtonType.CANCEL ).showAndWait();
-//                if( buttonType.isPresent() ){
-//                    if( buttonType.get() == ButtonType.YES ){
-//                        try( OutputStream save = Files.newOutputStream( Controller.savingFile.toPath() ) ){
-//                            DataModelInstanceSaver.getInstance().saveTo( save );
-//                        }catch( IOException e ){
-////                          todo : Не удалось открыть файл
-//                        }
-//                    }else if( buttonType.get() == ButtonType.CANCEL ){
-//                        return;
-//                    }
-//                }
-//            }
-//        }
-//        thisStage.close();
+    private void closeWindow(){
+        if( Controller.changed ){
+            final Optional<ButtonType>
+                    buttonType =
+                    new Alert( Alert.AlertType.CONFIRMATION ,
+                               "Do you want to save changes?" ,
+                               ButtonType.YES ,
+                               ButtonType.NO ,
+                               ButtonType.CANCEL ).showAndWait();
+            if( buttonType.isPresent() ){
+                if( buttonType.get() == ButtonType.YES ){
+                    try( OutputStream save = Files.newOutputStream( Controller.savingFile.toPath() ) ){
+                        DataModelInstanceSaver.getInstance().saveTo( save );
+                    }catch( IOException e ){
+//                          todo : Не удалось открыть файл
+                    }
+                }else if( buttonType.get() == ButtonType.CANCEL ){
+                    return;
+                }
+            }
+        }
+
+        thisStage.close();
     }
 }

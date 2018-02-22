@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import exceptions.FlightAndRouteException;
 import javafx.collections.ListChangeListener;
 import model.DataModel;
 import model.Flight;
@@ -15,6 +14,7 @@ import model.Route;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -158,43 +158,44 @@ public class ListChangeAdapter{
                 case "changed to":
                     switch( entity ){
                         case "flight":
-
-                            Flux.zip( Flux.fromStream( ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                  .constructCollectionType(
-                                                                                                          List.class ,
-                                                                                                          Flight.class ) )
-                                                                                .readValue( list ) ).stream() ) ,
-                                      Flux.fromStream( ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                  .constructCollectionType(
-                                                                                                          List.class ,
-                                                                                                          Flight.class ) )
-                                                                                .readValue( newList ) ).stream() ) )
-                                .subscribe( tuple2 -> dataModel.editFlight( tuple2.getT1() ,
-                                                                            tuple2.getT2().getRoute() ,
-                                                                            tuple2.getT2().getPlaneID() ,
-                                                                            tuple2.getT2().getDepartureDateTime() ,
-                                                                            tuple2.getT2().getArriveDateTime() ) );
+                            final Iterator<Flight>
+                                    oldFlightIterator =
+                                    ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
+                                                                               .constructCollectionType( List.class ,
+                                                                                                         Flight.class ) )
+                                                             .readValue( list ) ).iterator();
+                            final Iterator<Flight>
+                                    newFlightIterator =
+                                    ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
+                                                                               .constructCollectionType( List.class ,
+                                                                                                         Flight.class ) )
+                                                             .readValue( newList ) ).iterator();
+                            while( oldFlightIterator.hasNext() ){
+                                Flight newFlight = newFlightIterator.next();
+                                dataModel.editFlight( oldFlightIterator.next() ,
+                                                      newFlight.getRoute() ,
+                                                      newFlight.getPlaneID() ,
+                                                      newFlight.getDepartureDateTime() ,
+                                                      newFlight.getArriveDateTime() );
+                            }
                             break;
                         case "route":
-                            Flux.zip( Flux.fromStream( ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                 .constructCollectionType(
-                                                                                                         List.class ,
-                                                                                                         Route.class ) )
-                                                                               .readValue( list ) ).stream() ) ,
-                                      Flux.fromStream( ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
-                                                                                                 .constructCollectionType(
-                                                                                                         List.class ,
-                                                                                                         Route.class ) )
-                                                                               .readValue( newList ) ).stream() ) )
-                                .subscribe( tuple2 -> {
-                                    try{
-                                        dataModel.editRoute( tuple2.getT1() ,
-                                                             tuple2.getT2().getFrom() ,
-                                                             tuple2.getT2().getTo() );
-                                    }catch( FlightAndRouteException e ){
-                                        throw e;
-                                    }
-                                } );
+                            final Iterator<Route>
+                                    oldRouteIterator =
+                                    ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
+                                                                              .constructCollectionType( List.class ,
+                                                                                                        Route.class ) )
+                                                            .readValue( list ) ).iterator();
+                            final Iterator<Route>
+                                    newRouteIterator =
+                                    ( ( List<Route> ) mapper.readerFor( mapper.getTypeFactory()
+                                                                              .constructCollectionType( List.class ,
+                                                                                                        Route.class ) )
+                                                            .readValue( newList ) ).iterator();
+                            while( oldRouteIterator.hasNext() ){
+                                Route newRoute = newRouteIterator.next();
+                                dataModel.editRoute( oldRouteIterator.next() , newRoute.getFrom() , newRoute.getTo() );
+                            }
                             break;
                     }
                     break;

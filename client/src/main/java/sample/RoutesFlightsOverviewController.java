@@ -145,7 +145,7 @@ abstract class RoutesFlightsOverviewController{
         saveMenuButton.setOnAction( event -> handleSaveAction() );
         saveAsMenuButton.setOnAction( event -> handleSaveAsAction() );
         infoMenuButton.setOnAction( event -> handleAboutAction() );
-        logoutMenuButton.setOnAction( event1 -> handleLogOutAction() );
+        logoutMenuButton.setOnAction( event -> handleLogOutAction() );
         changeMenuButton.setOnAction( event -> handleChangeDBAction() );
 
         searchFlightButton.setOnAction( event -> handleSearchFlightAction() );
