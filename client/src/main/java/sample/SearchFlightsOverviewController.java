@@ -344,38 +344,24 @@ class SearchFlightsOverviewController{
 
 
     private void handleSearchAction(){
-        mainController.flightTable.setDisable( true );
-        if( mainController instanceof RoutesFlightsWriteOverviewController ){
-            DataModelInstanceSaver.getInstance().clear();
-        }
-        if( Controller.getInstance().getClientSocket().isClosed() ){
-            Controller.getInstance().reconnect();
-        }
-        if( !Controller.getInstance().getClientSocket().isConnected() ){
-            mainController.routeConnectLabel.setText( "Offline" );
-            mainController.flightConnectLabel.setText( "Offline" );
-            Controller.getInstance().reconnect();
-        }
-        if( Controller.getInstance().getClientSocket().isConnected() ){
-            mainController.routeConnectLabel.setText( "Online" );
-            mainController.flightConnectLabel.setText( "Online" );
-            Controller.getInstance()
-                      .getUserInformation()
-                      .setPredicate( PredicateParser.createFlightPredicate( numberTextField.getText() ,
-                                                                            planeIdTextField.getText() ,
-                                                                            departureFromDatePicker.getEditor()
-                                                                                                   .getText() ,
-                                                                            departureToDatePicker.getEditor()
-                                                                                                 .getText() ,
-                                                                            arriveFromDatePicker.getEditor().getText() ,
-                                                                            arriveToDatePicker.getEditor().getText() ,
-                                                                            flightTimeFrom.getEditor().getText() ,
-                                                                            flightTimeTo.getEditor().getText() ,
-                                                                            searchFromTextField.getText() ,
-                                                                            searchToTextField.getText() ) );
-            mainController.requestUpdate();
-        }
-        mainController.flightTable.setDisable( false );
+
+        Controller.getInstance()
+                .getUserInformation()
+                .setPredicate( PredicateParser.createFlightPredicate( numberTextField.getText() ,
+                        planeIdTextField.getText() ,
+                        departureFromDatePicker.getEditor()
+                                .getText() ,
+                        departureToDatePicker.getEditor()
+                                .getText() ,
+                        arriveFromDatePicker.getEditor().getText() ,
+                        arriveToDatePicker.getEditor().getText() ,
+                        flightTimeFrom.getEditor().getText() ,
+                        flightTimeTo.getEditor().getText() ,
+                        searchFromTextField.getText() ,
+                        searchToTextField.getText() ) );
+        mainController.requestUpdate();
+
+
     }
 
     void closeWindow(){

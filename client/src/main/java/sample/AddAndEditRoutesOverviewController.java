@@ -7,6 +7,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
@@ -157,40 +158,59 @@ class AddAndEditRoutesOverviewController{
             DataOutputStream
                     outClient =
                     new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-            ObjectMapper                 mapper  = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
             ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
             if( isAdd ){
                 changes.add( ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                  .getSelectedItem() ,
-                                                                                               destinationCityChoice.getSelectionModel()
-                                                                                                                    .getSelectedItem() ) ) ) );
+                        .getSelectedItem() ,
+                        destinationCityChoice.getSelectionModel()
+                                .getSelectedItem() ) ) ) );
                 RoutesFlightsOverviewController.getChanges()
-                                               .add( ListChangeAdapter.addRoute( Collections.singletonList( new Route(
-                                                       departureCityChoice.getSelectionModel().getSelectedItem() ,
-                                                       destinationCityChoice.getSelectionModel()
-                                                                            .getSelectedItem() ) ) ) );
+                        .add( ListChangeAdapter.addRoute( Collections.singletonList( new Route(
+                                departureCityChoice.getSelectionModel().getSelectedItem() ,
+                                destinationCityChoice.getSelectionModel()
+                                        .getSelectedItem() ) ) ) );
+                Controller.getInstance().getUserInformation().setChanges( changes );
+                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                Controller.getInstance().getUserInformation().setChanges( null );
+                closeWindow();
             }else{
-                changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                          Collections.singletonList( new Route( editingRoute.getId(),departureCityChoice.getSelectionModel()
-                                                                                                                   .getSelectedItem() ,
-                                                                                                destinationCityChoice.getSelectionModel()
-                                                                                                                     .getSelectedItem() ) ) ) );
-                RoutesFlightsOverviewController.getChanges()
-                                               .add( ListChangeAdapter.editRoute( Collections.singletonList(
-                                                       editingRoute ) ,
-                                                                                  Collections.singletonList( new Route( editingRoute.getId(),
-                                                                                          departureCityChoice.getSelectionModel()
-                                                                                                             .getSelectedItem() ,
-                                                                                          destinationCityChoice.getSelectionModel()
-                                                                                                               .getSelectedItem() ) ) ) );
+
+                if ( editingRoute.equals( new Route ( editingRoute.getId(),departureCityChoice.getSelectionModel()
+                        .getSelectedItem() ,
+                        destinationCityChoice.getSelectionModel()
+                                .getSelectedItem() ) ) ){
+                    Alert alert = new Alert ( Alert.AlertType.WARNING );
+                    alert.setTitle( " Warning ");
+                    alert.setHeaderText( " Necessary to change at least one field ");
+                    alert.setContentText(" You need to change one or few fields in order to edit the route ");
+                    alert.showAndWait();
+
+                }else {
+                    changes.add(ListChangeAdapter.editRoute(Collections.singletonList(editingRoute),
+                            Collections.singletonList(new Route(editingRoute.getId(), departureCityChoice.getSelectionModel()
+                                    .getSelectedItem(),
+                                    destinationCityChoice.getSelectionModel()
+                                            .getSelectedItem()))));
+                    RoutesFlightsOverviewController.getChanges()
+                            .add(ListChangeAdapter.editRoute(Collections.singletonList(
+                                    editingRoute),
+                                    Collections.singletonList(new Route(editingRoute.getId(),
+                                            departureCityChoice.getSelectionModel()
+                                                    .getSelectedItem(),
+                                            destinationCityChoice.getSelectionModel()
+                                                    .getSelectedItem()))));
+                    Controller.getInstance().getUserInformation().setChanges( changes );
+                    outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    Controller.getInstance().getUserInformation().setChanges( null );
+                    closeWindow();
+                }
             }
 
-            Controller.getInstance().getUserInformation().setChanges( changes );
-            outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
-            Controller.getInstance().getUserInformation().setChanges( null );
-            closeWindow();
+//Controller.getInstance().getUserInformation().setChanges( null );
+// closeWindow();
         }catch( FlightAndRouteException e ){
             RoutesFlightsOverviewController.showModelAlert( e );
         }catch( IOException e ){

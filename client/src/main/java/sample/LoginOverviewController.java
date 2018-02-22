@@ -28,6 +28,10 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+/**
+ * Controller for login view. Let user choose IP, Port, Login, password, check symbols, if everything correct - send request to server to get list of DM
+ */
 @SuppressWarnings( "WeakerAccess" )
 class LoginOverviewController{
 
@@ -114,18 +118,19 @@ class LoginOverviewController{
                                                                                     .getUserInformation() ) );
                     System.out.println( "Ушло" );
                     data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
+                    System.out.println(mapper.writeValueAsString(data));
                     Controller.getInstance().getClientSocket().close();
                 }catch( IOException | NullPointerException ex ){
                     System.out.println( ex.getMessage() );
                 }
 
-                data.withoutExceptionOrWith( data1 -> {
+                if (!(data.getBases().isEmpty())) {
                     try{
                         Stage                    primaryStage = new Stage();
                         FXMLLoader
                                                  loader       =
                                 new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
-                        ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data1 );
+                        ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data );
                         loader.setController( controller );
                         primaryStage.setTitle( "Select DB" );
                         Scene scene = new Scene( loader.load() );
@@ -137,7 +142,9 @@ class LoginOverviewController{
                         System.out.println( "load problem" );
                         System.out.println( e.getMessage() );
                     }
-                } , ClientMain::showWarningByError );
+                }else {
+                    ClientMain.showWarning( "Error" , "Unacceptable symbols" , "Check your login, password" );
+                }
             }else{
                 ClientMain.showWarning( "Error" , "Unacceptable symbols" , "Check your login, password" );
             }

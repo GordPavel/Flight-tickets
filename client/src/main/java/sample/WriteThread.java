@@ -37,7 +37,7 @@ public class WriteThread extends FaRThread{
         while( !stop ){
             System.out.println( 123 );
             Data data = parentController.receiveUpdate( );
-            if (!(RoutesFlightsOverviewController.getChanges()==null)){
+            if (!(RoutesFlightsOverviewController.getChanges().isEmpty())){
                 FaRExchanger.exchange(data);
             }
             try{

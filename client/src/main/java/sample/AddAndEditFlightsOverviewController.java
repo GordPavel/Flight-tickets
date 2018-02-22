@@ -249,10 +249,10 @@ class AddAndEditFlightsOverviewController{
         ZonedDateTime
                 departureDateTime =
                 LocalDateTime.of( departureDate.getValue() , departureTime.getValue() )
-                             .atZone( routesBox.getSelectionModel().getSelectedItem().getFrom() ),
+                        .atZone( routesBox.getSelectionModel().getSelectedItem().getFrom() ),
                 arriveDateTime =
                         LocalDateTime.of( arrivingDate.getValue() , arrivingTime.getValue() )
-                                     .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
+                                .atZone( routesBox.getSelectionModel().getSelectedItem().getTo() );
         if( routesBox.getValue() == null ){
             ClientMain.showWarning( "Route isn`t chosen" , "Flight must have route" , "Choose route" );
         }else if( planeID.getText().equals( "" ) ){
@@ -262,47 +262,65 @@ class AddAndEditFlightsOverviewController{
                 DataOutputStream
                         outClient =
                         new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper                 mapper   = new ObjectMapper();
+                ObjectMapper mapper = new ObjectMapper();
                 ArrayList<ListChangeAdapter> changes1 = new ArrayList<>();
 
                 if( isAdd ){
                     changes1.add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight( number.getText() ,
-                                                                                                      routesBox.getSelectionModel()
-                                                                                                               .getSelectedItem() ,
-                                                                                                      planeID.getText() ,
-                                                                                                      departureDateTime ,
-                                                                                                      arriveDateTime ) ) ) );
+                            routesBox.getSelectionModel()
+                                    .getSelectedItem() ,
+                            planeID.getText() ,
+                            departureDateTime ,
+                            arriveDateTime ) ) ) );
                     RoutesFlightsOverviewController.getChanges()
-                                                   .add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight(
-                                                           number.getText() ,
-                                                           routesBox.getSelectionModel().getSelectedItem() ,
-                                                           planeID.getText() ,
-                                                           departureDateTime ,
-                                                           arriveDateTime ) ) ) );
+                            .add( ListChangeAdapter.addFlight( Collections.singletonList( new Flight(
+                                    number.getText() ,
+                                    routesBox.getSelectionModel().getSelectedItem() ,
+                                    planeID.getText() ,
+                                    departureDateTime ,
+                                    arriveDateTime ) ) ) );
+                    Controller.getInstance().getUserInformation().setChanges( changes1 );
+                    outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    Controller.getInstance().getUserInformation().setChanges( null );
+                    closeWindow();
                 }else{
-                    changes1.add( ListChangeAdapter.editFlight( Collections.singletonList( editingFlight ) ,
-                                                                Collections.singletonList( new Flight( editingFlight.getNumber() ,
-                                                                                                       routesBox.getSelectionModel()
-                                                                                                                .getSelectedItem() ,
-                                                                                                       planeID.getText() ,
-                                                                                                       departureDateTime ,
-                                                                                                       arriveDateTime ) ) ) );
-                    RoutesFlightsOverviewController.getChanges()
-                                                   .add( ListChangeAdapter.editFlight( Collections.singletonList(
-                                                           editingFlight ) ,
-                                                                                       Collections.singletonList( new Flight(
-                                                                                               editingFlight.getNumber() ,
-                                                                                               routesBox.getSelectionModel()
-                                                                                                        .getSelectedItem() ,
-                                                                                               planeID.getText() ,
-                                                                                               departureDateTime ,
-                                                                                               arriveDateTime ) ) ) );
+
+                    if ( editingFlight.equals( new Flight( editingFlight.getNumber() , routesBox.getSelectionModel()
+                            .getSelectedItem() ,
+                            planeID.getText() , departureDateTime , arriveDateTime ) ) ){
+                        Alert alert = new Alert ( Alert.AlertType.WARNING );
+                        alert.setTitle( " Warning ");
+                        alert.setHeaderText( " Necessary to change at least one field ");
+                        alert.setContentText(" You need to change one or few fields in order to edit the flight ");
+                        alert.showAndWait();
+
+                    }else {
+                        changes1.add(ListChangeAdapter.editFlight(Collections.singletonList(editingFlight),
+                                Collections.singletonList(new Flight(editingFlight.getNumber(),
+                                        routesBox.getSelectionModel()
+                                                .getSelectedItem(),
+                                        planeID.getText(),
+                                        departureDateTime,
+                                        arriveDateTime))));
+                        RoutesFlightsOverviewController.getChanges()
+                                .add(ListChangeAdapter.editFlight(Collections.singletonList(
+                                        editingFlight),
+                                        Collections.singletonList(new Flight(
+                                                editingFlight.getNumber(),
+                                                routesBox.getSelectionModel()
+                                                        .getSelectedItem(),
+                                                planeID.getText(),
+                                                departureDateTime,
+                                                arriveDateTime))));
+                        Controller.getInstance().getUserInformation().setChanges(changes1);
+                        outClient.writeUTF(mapper.writeValueAsString(Controller.getInstance().getUserInformation()));
+                        Controller.getInstance().getUserInformation().setChanges( null );
+                        closeWindow();
+                    }
                 }
 
-                Controller.getInstance().getUserInformation().setChanges( changes1 );
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                Controller.getInstance().getUserInformation().setChanges( null );
-                closeWindow();
+// Controller.getInstance().getUserInformation().setChanges( null );
+//closeWindow();
             }catch( FlightAndRouteException e ){
                 RoutesFlightsOverviewController.showModelAlert( e );
             }catch( IOException e ){
