@@ -349,18 +349,21 @@ class SearchFlightsOverviewController{
 
         Controller.getInstance()
                 .getUserInformation()
-                .setPredicate( PredicateParser.createFlightPredicate( numberTextField.getText() ,
-                        planeIdTextField.getText() ,
+                .setPredicate( PredicateParser.createFlightPredicate( numberTextField.getText().equals("")? null : numberTextField.getText(),
+                        planeIdTextField.getText().equals("")? null : planeIdTextField.getText() ,
                         departureFromDatePicker.getEditor()
-                                .getText() ,
+                                .getText().equals("")? null : departureFromDatePicker.getEditor().getText() ,
                         departureToDatePicker.getEditor()
-                                .getText() ,
-                        arriveFromDatePicker.getEditor().getText() ,
-                        arriveToDatePicker.getEditor().getText() ,
-                        flightTimeFrom.getEditor().getText() ,
-                        flightTimeTo.getEditor().getText() ,
-                        searchFromTextField.getText() ,
-                        searchToTextField.getText() ) );
+                                .getText().equals("")? null : departureToDatePicker.getEditor().getText() ,
+                        arriveFromDatePicker.getEditor().getText().equals("")? null : arriveFromDatePicker.getEditor().getText() ,
+                        arriveToDatePicker.getEditor().getText().equals("")? null : arriveToDatePicker.getEditor().getText() ,
+                        flightTimeFrom.getEditor().getText().equals("")? null : flightTimeFrom.getEditor().getText() ,
+                        flightTimeTo.getEditor().getText().equals("")? null : flightTimeTo.getEditor().getText() ,
+                        searchFromTextField.getText().equals("")? null : searchFromTextField.getText() ,
+                        searchToTextField.getText().equals("")? null : searchToTextField.getText() ) );
+//        if (mainController instanceof RoutesFlightsWriteOverviewController) {
+//            DataModelInstanceSaver.getInstance().clear();
+//        }
         mainController.requestUpdate();
 
 
