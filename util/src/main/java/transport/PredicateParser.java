@@ -90,7 +90,7 @@ public class PredicateParser{
                                     flightTimeTo ,
                                     flightFrom ,
                                     flightTo ,
-                                    true );
+                                    false );
     }
 
     @JsonIgnore
