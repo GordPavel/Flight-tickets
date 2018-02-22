@@ -21,7 +21,9 @@ public class FaRExchanger {
         return toExchange;
     }
     static void exchange(Data data){
-        toExchange=data;
-        haveSome=true;
+        if (data.getChanges().get(0).equalsEntities(RoutesFlightsOverviewController.getChanges().get(0))) {
+            toExchange = data;
+            haveSome = true;
+        }
     }
 }

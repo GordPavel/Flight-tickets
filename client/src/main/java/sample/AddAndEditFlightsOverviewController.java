@@ -302,6 +302,7 @@ class AddAndEditFlightsOverviewController{
                 Controller.getInstance().getUserInformation().setChanges( changes1 );
                 outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                 Controller.getInstance().getUserInformation().setChanges( null );
+                closeWindow();
             }catch( FlightAndRouteException e ){
                 RoutesFlightsOverviewController.showModelAlert( e );
             }catch( IOException e ){

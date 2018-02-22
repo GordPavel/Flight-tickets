@@ -37,6 +37,15 @@ class RoutesFlightsLocalFileOverviewController extends RoutesFlightsOverviewCont
         mergeMenuButton.setOnAction( event -> handleMergeAction() );
         searchRouteButton.setVisible( false );
         searchFlightButton.setOnAction( event -> handleSearchFlightButton() );
+        addFlightButton.setOnAction( event -> handleAddFlightButton() );
+        addRouteButton.setOnAction(event -> handleAddRouteButton());
+        editFlightButton.setOnAction( event -> handleEditFlightButton() );
+        editRouteButton.setOnAction(event -> handleEditRouteButton());
+
+        editFlightButton.disableProperty().bind( flightTable.getSelectionModel().selectedItemProperty().isNull() );
+        deleteFlightButton.disableProperty().bind( flightTable.getSelectionModel().selectedItemProperty().isNull() );
+        editRouteButton.disableProperty().bind( routeTable.getSelectionModel().selectedItemProperty().isNull() );
+        deleteRouteButton.disableProperty().bind( routeTable.getSelectionModel().selectedItemProperty().isNull() );
 
         updateRouteButton.setVisible( false );
         updateFlightButton.setVisible( false );
