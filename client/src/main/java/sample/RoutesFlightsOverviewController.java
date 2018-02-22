@@ -99,9 +99,9 @@ abstract class RoutesFlightsOverviewController{
                                                            routesPredicate =
             new SimpleObjectProperty<>( route -> true );
     private        FileChooser                             fileChooser     = new FileChooser();
-    private static CopyOnWriteArrayList<ListChangeAdapter> changes         = new CopyOnWriteArrayList<>();
+    static CopyOnWriteArrayList<ListChangeAdapter> changes         = new CopyOnWriteArrayList<>();
 
-    public static CopyOnWriteArrayList<ListChangeAdapter> getChanges(){
+    static CopyOnWriteArrayList<ListChangeAdapter> getChanges(){
         return changes;
     }
 
@@ -487,8 +487,8 @@ abstract class RoutesFlightsOverviewController{
 //                if( !( data.getChanges() == null ) ){
 //                    processUpdates( data );
 //                }
-                data.withoutExceptionOrWith( data1 -> {
-
+                if (data.hasNotException()) {
+                    Data data1=data;
                     if( !( data1.getChanges() == null ) ){
                         data1.getChanges()
                              .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
@@ -509,7 +509,7 @@ abstract class RoutesFlightsOverviewController{
                         }
                     }
 //                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
-                } , ClientMain::showWarningByError );
+                }
             }
             catch( IOException | NullPointerException ex ){
                 System.out.println( ex.getMessage() );
@@ -571,31 +571,7 @@ abstract class RoutesFlightsOverviewController{
                                 Pattern.CASE_INSENSITIVE );
     }
 
-    private static void processUpdates( Data data ){
 
-        changes.forEach( listChangeAdapter -> {
-            for( ListChangeAdapter listChangeAdapter1 : data.getChanges() ){
-                if( listChangeAdapter.equalsEntities( listChangeAdapter1 ) ){
-                    if( data.hasNotException() ){
-
-                        Alert alert = new Alert( Alert.AlertType.INFORMATION );
-                        alert.setTitle( " Confirmation " );
-                        alert.setHeaderText( " Changes on server " );
-                        alert.setContentText( listChangeAdapter.getUpdate() );
-                        alert.showAndWait();
-                        changes.remove( listChangeAdapter );
-                    }else{
-                        Alert alert = new Alert( Alert.AlertType.ERROR);
-                        alert.setTitle( "Error" );
-                        alert.setHeaderText( data.getException().getMessage() );
-                        alert.setContentText( listChangeAdapter.getUpdate() );
-                        alert.showAndWait();
-                        changes.remove( listChangeAdapter );
-                    }
-                }
-            }
-        } );
-    }
     
 }
 

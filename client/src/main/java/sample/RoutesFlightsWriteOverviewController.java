@@ -81,6 +81,10 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
+            if (!changes.isEmpty()) {
+                Data data = FaRExchanger.exchange();
+                processUpdates(data);
+            }
         }catch( IOException e ){
             e.printStackTrace();
         }
@@ -108,6 +112,10 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
+                if (!changes.isEmpty()) {
+                    Data data = FaRExchanger.exchange();
+                    processUpdates(data);
+                }
             }catch( IOException e ){
                 e.printStackTrace();
             }
@@ -169,6 +177,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 //                );
 
                 Controller.getInstance().getUserInformation().setChanges( null );
+                Data data = FaRExchanger.exchange();
+                processUpdates(data);
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
                 System.out.println( e.getMessage() );
@@ -200,6 +210,10 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
+            if (!changes.isEmpty()) {
+                Data data = FaRExchanger.exchange();
+                processUpdates(data);
+            }
         }catch( IOException e ){
             e.printStackTrace();
         }
@@ -227,6 +241,10 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
+                if (!changes.isEmpty()) {
+                    Data data = FaRExchanger.exchange();
+                    processUpdates(data);
+                }
             }catch( IOException e ){
                 e.printStackTrace();
             }
@@ -258,32 +276,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
                 RoutesFlightsOverviewController.getChanges().add ( ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) );
 
-//                               DataInputStream inClient =
-//                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-
-                // get Data
-                //Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-//                changes.forEach( listChangeAdapter -> {
-//                    for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-//                        if ( listChangeAdapter.equals(listChangeAdapter1) ) {
-//                            if ( data.hasNotException() ) {
-//                                Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-//                                alert1.setTitle( " Delete a flight" );
-//                                alert1.setHeaderText( " Deleting a flight was successful! " );
-//                                alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                changes.remove( listChangeAdapter );
-//                            } else{
-//                                Alert alert1 = new Alert( Alert.AlertType.ERROR );
-//                                alert1.setTitle( " Delete a flight" );
-//                                alert1.setHeaderText( " Error while deleting a flight on a server! " );
-//                                alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                changes.remove( listChangeAdapter );
-//                            }
-//                        }
-//                    }
-//                }
-//                );
-
+                Data data = FaRExchanger.exchange();
+                processUpdates(data);
                 Controller.getInstance().getUserInformation().setChanges( null );
             }catch( IOException e ){
                 System.out.println( "Connection problem" );
@@ -293,6 +287,31 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         /*
           TODO: add message to server to delete flight
          */
+    }
+
+    static void processUpdates( Data data ){
+
+        if( data.hasNotException() ){
+        changes.forEach( listChangeAdapter -> {
+            for( ListChangeAdapter listChangeAdapter1 : data.getChanges() ){
+                if( listChangeAdapter.equalsEntities( listChangeAdapter1 ) ){
+                        Alert alert = new Alert( Alert.AlertType.INFORMATION );
+                        alert.setTitle( " Confirmation " );
+                        alert.setHeaderText( " Changes on server " );
+                        alert.setContentText( listChangeAdapter.getUpdate() );
+                        alert.showAndWait();
+                        changes.remove( listChangeAdapter );
+                    }
+                }
+            } );
+        }else{
+            Alert alert = new Alert( Alert.AlertType.ERROR);
+            alert.setTitle( "Error" );
+            alert.setHeaderText( data.getException().getMessage() );
+            alert.setContentText( changes.get(0).getUpdate() );
+            alert.showAndWait();
+            changes.remove( changes.get(0) );
+        }
     }
 
 }
