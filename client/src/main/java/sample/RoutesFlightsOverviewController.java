@@ -461,7 +461,8 @@ abstract class RoutesFlightsOverviewController{
         }
     }
 
-    void receiveUpdate(){
+    Data receiveUpdate(){
+        Data         data = new Data();
         if( Controller.getInstance().getClientSocket().isClosed() ){
             Controller.getInstance().reconnect();
         }
@@ -473,7 +474,7 @@ abstract class RoutesFlightsOverviewController{
         if( Controller.getInstance().getClientSocket().isConnected() ){
             routeConnectLabel.setText( "Online" );
             flightConnectLabel.setText( "Online" );
-            Data         data;
+
             ObjectMapper mapper = new ObjectMapper();
 
             try{
@@ -519,6 +520,7 @@ abstract class RoutesFlightsOverviewController{
             flightTable.refresh();
             routeTable.refresh();
         }
+        return data;
     }
 
     /**
