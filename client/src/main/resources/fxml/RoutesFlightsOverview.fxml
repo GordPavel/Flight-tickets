@@ -137,7 +137,7 @@
         </Menu>
         <Menu fx:id="userMenu" mnemonicParsing="false" text="User">
             <MenuItem fx:id="logoutMenuButton" mnemonicParsing="false" text="Log out"/>
-            <MenuItem fx:id="changeMenuButton" mnemonicParsing="false" text="Change DB"/>
+            <MenuItem fx:id="informationMenuButton" mnemonicParsing="false" text="Information"/>
         </Menu>
     </MenuBar>
 </AnchorPane>

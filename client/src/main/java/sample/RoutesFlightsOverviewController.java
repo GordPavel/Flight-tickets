@@ -53,7 +53,7 @@ abstract class RoutesFlightsOverviewController{
     @FXML MenuItem mergeMenuButton;
     @FXML MenuItem infoMenuButton;
     @FXML MenuItem logoutMenuButton;
-    @FXML MenuItem changeMenuButton;
+    @FXML MenuItem informationMenuButton;
 
     /**
      Two text fields to filter routes table
@@ -146,7 +146,7 @@ abstract class RoutesFlightsOverviewController{
         saveAsMenuButton.setOnAction( event -> handleSaveAsAction() );
         infoMenuButton.setOnAction( event -> handleAboutAction() );
         logoutMenuButton.setOnAction( event -> handleLogOutAction() );
-        changeMenuButton.setOnAction( event -> handleChangeDBAction() );
+        informationMenuButton.setOnAction( event -> handleInformationAction() );
 
         searchFlightButton.setOnAction( event -> handleSearchFlightAction() );
         updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
@@ -237,59 +237,27 @@ abstract class RoutesFlightsOverviewController{
         alert.showAndWait();
     }
 
-    private void handleChangeDBAction(){
-
-        DataModelInstanceSaver.getInstance().clear();
-        Controller.getInstance().stopThread();
-        Controller.getInstance().reconnect();
-
-//        if( !Controller.getInstance().getClientSocket().isConnected() ){
-//            Controller.getInstance().reconnect();
-//        }
-
-        Data data = new Data();
-        if( !( Controller.getInstance().getClientSocket() == null ) &&
-            Controller.getInstance().getClientSocket().isConnected() ){
-            ObjectMapper mapper = new ObjectMapper();
-            Controller.getInstance().getUserInformation().setDataBase( null );
-            try{
-                DataOutputStream
-                        dataOutputStream =
-                        new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
-                DataInputStream
-                        inputStream =
-                        new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
-                System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
-                dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                System.out.println( "Ушло" );
-                data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
-                Controller.getInstance().getClientSocket().close();
-            }catch( IOException | NullPointerException ex ){
-                System.out.println( ex.getMessage() );
-                ex.printStackTrace();
-            }
-
-            data.withoutExceptionOrWith( data1 -> {
-                try{
-                    Stage                    primaryStage = new Stage();
-                    FXMLLoader
-                                             loader       =
-                            new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
-                    ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data1 );
-                    loader.setController( controller );
-                    primaryStage.setTitle( "Select DB" );
-                    Scene scene = new Scene( loader.load() );
-                    primaryStage.setScene( scene );
-                    primaryStage.setResizable( false );
-                    primaryStage.show();
-                    closeWindow();
-                }catch( IOException e ){
-                    System.out.println( "load problem" );
-                    System.out.println( e.getMessage() );
-                }
-            } , ClientMain::showWarningByError );
+    private void handleInformationAction(){
+        String information="";
+        if (this instanceof RoutesFlightsLocalFileOverviewController)
+        information=information+"Local user\n";
+        if (this instanceof RoutesFlightsReadOnlyOverviewController)
+        {
+            information=information+"Read-only User\n"+
+                    "User: "+Controller.getInstance().getUserInformation().getLogin()+"\n"+
+                    "Base: "+Controller.getInstance().getUserInformation().getDataBase()+"\n";
         }
+        if (this instanceof RoutesFlightsWriteOverviewController)
+        {
+            information=information+"Read-write User\n"+
+                    "User: "+Controller.getInstance().getUserInformation().getLogin()+"\n"+
+                    "Base: "+Controller.getInstance().getUserInformation().getDataBase()+"\n";
+        }
+        Alert alert = new Alert( Alert.AlertType.INFORMATION );
+        alert.setTitle( "User Information" );
+        alert.setHeaderText( information );
+
+        alert.showAndWait();
     }
 
     void handleLogOutAction(){
@@ -436,9 +404,9 @@ abstract class RoutesFlightsOverviewController{
 //                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                 }
             }catch( IOException | NullPointerException ex ){
-                System.out.println( ex.getMessage() );
-                ex.printStackTrace();
-                System.out.println( "Yep" );
+//                System.out.println( ex.getMessage() );
+//                ex.printStackTrace();
+//                System.out.println( "Yep" );
             }
             Controller.getInstance().getUserInformation().setPredicate( null );
             flightTable.refresh();
