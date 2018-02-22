@@ -8,12 +8,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.SocketException;
 
-
-/**
- TODO: change parent thread
- <p>
- create new parent tread, that will leave until stop command... Also, change in Controller "Thread thread" to new parent
- */
 public class WriteThread extends FaRThread{
 
     private boolean stop = false;

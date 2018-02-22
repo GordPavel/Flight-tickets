@@ -8,11 +8,6 @@ import java.io.*;
 import java.net.Socket;
 
 
-/**
- TODO: change parent thread
- <p>
- create new parent tread, that will leave until stop command... Also, change in Controller "Thread thread" to new parent
- */
 class ReadOnlyThread extends FaRThread{
 
     RoutesFlightsOverviewController parentController;

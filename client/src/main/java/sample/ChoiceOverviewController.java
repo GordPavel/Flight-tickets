@@ -27,6 +27,10 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Choice overview controller. Allows user to select DM
+ */
+
 class ChoiceOverviewController{
 
     ObservableMap<String, String>             map;
@@ -68,13 +72,12 @@ class ChoiceOverviewController{
         if( event.getCode() == KeyCode.ENTER ) handleSelectAction();
     };
 
+
+    /**
+     * Select button handler. Allows to select DM, create view related to this type of DM, receive data
+     */
     private void handleSelectAction(){
 
-        /*
-          Send your login and password to server. true? go below : retry message
-          Add view with table of available DB...
-          Load db to dataModel and execute code below
-         */
         Optional.ofNullable( baseTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedBase -> {
             Controller.getInstance()
                       .getUserInformation()
@@ -141,6 +144,9 @@ class ChoiceOverviewController{
         } );
     }
 
+    /**
+     * Cancel button handler. Allow to go back to LogIn view
+     */
     private void handleCancelAction(){
         try{
             Stage                   loginStage = new Stage();

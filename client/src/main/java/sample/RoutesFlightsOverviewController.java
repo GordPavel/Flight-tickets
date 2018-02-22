@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 /**
  Controller for routes and flights view
  Shows the information about all routes and flights
+ Parent class for read-only, write and localFile controllers
  */
 abstract class RoutesFlightsOverviewController{
     static final String SEARCH_FLIGHT_WINDOW = "Search a flight";
@@ -225,6 +226,9 @@ abstract class RoutesFlightsOverviewController{
         } );
     }
 
+    /**
+     * Shows information about programm
+     */
     private void handleAboutAction(){
         Alert alert = new Alert( Alert.AlertType.INFORMATION );
         alert.setTitle( "About" );
@@ -237,6 +241,9 @@ abstract class RoutesFlightsOverviewController{
         alert.showAndWait();
     }
 
+    /**
+     * Shows information about current user
+     */
     private void handleInformationAction(){
         String information="";
         if (this instanceof RoutesFlightsLocalFileOverviewController)
@@ -260,6 +267,9 @@ abstract class RoutesFlightsOverviewController{
         alert.showAndWait();
     }
 
+    /**
+     * Log out button handler. Close current view, open login view
+     */
     void handleLogOutAction(){
         DataModelInstanceSaver.getInstance().clear();
         Controller.getInstance().stopThread();
@@ -355,6 +365,9 @@ abstract class RoutesFlightsOverviewController{
         }
     }
 
+    /**
+    * method, used for receiving updates from server. Checks for socket status, receive data, applt data to current DM
+     */
     Data receiveUpdate(){
         Data data = new Data();
         if( Controller.getInstance().getClientSocket().isClosed() ){
@@ -377,10 +390,6 @@ abstract class RoutesFlightsOverviewController{
                         new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
                 data = mapper.readerFor( Data.class ).readValue( inputStream.readUTF() );
                 System.out.println( mapper.writeValueAsString( data ) );
-                //noinspection CodeBlock2Expr
-//                if( !( data.getChanges() == null ) ){
-//                    processUpdates( data );
-//                }
                 if( data.hasNotException() ){
                     Data data1 = data;
                     if( !( data1.getChanges() == null ) ){
@@ -401,7 +410,6 @@ abstract class RoutesFlightsOverviewController{
                             }
                         }
                     }
-//                    data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
                 }
             }catch( IOException | NullPointerException ex ){
 //                System.out.println( ex.getMessage() );

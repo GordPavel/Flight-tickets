@@ -161,9 +161,6 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             } );
         } );
 
-        /*
-          TODO: set message to delete route to server
-        */
     }
 
     /**
@@ -228,7 +225,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         } );
     }
 
-
+    /**
+     * Deleting flight
+     */
     private void handleDeleteFlightAction(){
         Alert alert = new Alert( Alert.AlertType.CONFIRMATION );
         alert.setTitle( " Delete a flight " );
@@ -265,6 +264,10 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         } );
     }
 
+    /**
+     * Processing received from server data to find messages about changes that was made by user
+     * @param data - Data, that contain information about user`s update (accepted or error)
+     */
     static void processUpdates( Data data ){
 
         if( data.hasNotException() ){

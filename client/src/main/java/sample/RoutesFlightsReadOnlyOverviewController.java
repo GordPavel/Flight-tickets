@@ -60,6 +60,9 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         destination.textProperty().addListener( observable -> restartTask() );
     }
 
+    /**
+     * Method allows to force update, if user search for something in local DM
+     */
     private void restartTask(){
         restartTask( new TimerTask(){
             @Override

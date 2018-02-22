@@ -342,7 +342,9 @@ class SearchFlightsOverviewController{
         searchToTextField.clear();
     }
 
-
+    /**
+     * search button handler. create flight predicate, send it to server.
+     */
     private void handleSearchAction(){
 
         Controller.getInstance()

@@ -77,6 +77,9 @@ class LoginOverviewController{
     }
 
 
+    /**
+     LogIn button action handler. Checks fields, send request to server, receive answer, opens new window if everything correct, show error messages when it must be
+     */
     @FXML
     private void handleLogInAction(){
 
@@ -192,6 +195,10 @@ class LoginOverviewController{
         }
     }
 
+
+    /**
+     OpenFile button action handler. Allows to work with local DM
+     */
     @FXML
     void openFile(){
         FileChooser fileChooser = new FileChooser();
@@ -226,6 +233,7 @@ class LoginOverviewController{
             }
         } );
     }
+
 
     private void closeWindow(){
         thisStage.close();
