@@ -6,10 +6,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
@@ -224,12 +221,21 @@ class LoginOverviewController{
                     primaryStage.show();
                     closeWindow();
                 }catch( IOException e ){
-//                todo : Если око не открылось
+                    Alert alert = new Alert (Alert.AlertType.ERROR);
+                    alert.setHeaderText("ERROR");
+                    alert.setHeaderText(" Error occured ");
+                    alert.showAndWait();
                 }
             }catch( FlightAndRouteException e ){
-//                todo : Показать ошибку в базе
+                Alert alert = new Alert (Alert.AlertType.ERROR);
+                alert.setHeaderText("ERROR");
+                alert.setHeaderText(" Error occured  ");
+                alert.showAndWait();
             }catch( IOException e ){
-//                todo : Если файл не открылся
+                Alert alert = new Alert (Alert.AlertType.ERROR);
+                alert.setHeaderText("ERROR");
+                alert.setHeaderText(" Error occured ");
+                alert.showAndWait();
             }
         } );
     }

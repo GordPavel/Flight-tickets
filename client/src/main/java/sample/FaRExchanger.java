@@ -2,6 +2,9 @@ package sample;
 
 import transport.Data;
 
+/**
+ * Class for exchanging objects between threads
+ */
 public class FaRExchanger {
 
     static boolean haveSome = false;

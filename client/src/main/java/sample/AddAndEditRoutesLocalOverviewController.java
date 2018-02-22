@@ -7,6 +7,9 @@ import model.Route;
 
 import java.util.Optional;
 
+/**
+ * class for local changes (adding and editing) of routes
+ */
 class AddAndEditRoutesLocalOverviewController extends AddAndEditRoutesOverviewController{
     AddAndEditRoutesLocalOverviewController( Route editingRoute , Stage thisStage ){
         super( editingRoute , thisStage );
