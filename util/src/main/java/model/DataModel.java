@@ -31,8 +31,7 @@ public class DataModel{
     private final ObservableList<Route>  routes                     = FXCollections.observableList( new ArrayList<>() );
     private final Pattern                legalSymbolsChecker        = Pattern.compile( "[\\w\\d[^\\s .,*?!]]+" );
     private final Semaphore              keysGeneratorSemaphore     = new Semaphore( 1 , true );
-    private       Iterator<Integer>
-                                         routesPrimaryKeysGenerator =
+    private       Iterator<Integer>      routesPrimaryKeysGenerator =
             IntStream.rangeClosed( 1 , Integer.MAX_VALUE ).iterator();
 
     DataModel(){
@@ -153,10 +152,7 @@ public class DataModel{
      @throws FaRSameNameException     it duplicates in ( planeID && route && arrive date && departure date ).
      */
     @SuppressWarnings( "ConstantConditions" )
-    public void editFlight( Flight flight ,
-                            Route newRoute ,
-                            String newPlaneId ,
-                            ZonedDateTime newDepartureDate ,
+    public void editFlight( Flight flight , Route newRoute , String newPlaneId , ZonedDateTime newDepartureDate ,
                             ZonedDateTime newArriveDate ) throws FlightAndRouteException{
         if( !legalSymbolsChecker.matcher( newPlaneId != null ? newPlaneId : flight.getPlaneID() ).matches() ){
             throw new FaRUnacceptableSymbolException( "Flights has illegal symbols" );
@@ -201,21 +197,19 @@ public class DataModel{
         }
         try{
             flightsLock.writeLock().lock();
-            Flight
-                    editingFlight =
-                    flights.stream()
-                           .filter( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() ,
-                                                               flight.getNumber().toUpperCase() ) )
-                           .findFirst()
-                           .orElseThrow( () -> new FaRIllegalEditedData(
-                                   "Database doesn't contain previous version of flight" ) );
-            Flight
-                    newFlight =
-                    new Flight( editingFlight.getNumber() ,
-                                newRoute != null ? newRoute : editingFlight.getRoute() ,
-                                newPlaneId != null ? newPlaneId : editingFlight.getPlaneID() ,
-                                newDepartureDate != null ? newDepartureDate : editingFlight.getDepartureDateTime() ,
-                                newArriveDate != null ? newArriveDate : editingFlight.getArriveDateTime() );
+            Flight editingFlight = flights.stream()
+                                          .filter( flight1 -> Objects.equals( flight1.getNumber().toUpperCase() ,
+                                                                              flight.getNumber().toUpperCase() ) )
+                                          .findFirst()
+                                          .orElseThrow( () -> new FaRIllegalEditedData(
+                                                  "Database doesn't contain previous version of flight" ) );
+            Flight newFlight = new Flight( editingFlight.getNumber() ,
+                                           newRoute != null ? newRoute : editingFlight.getRoute() ,
+                                           newPlaneId != null ? newPlaneId : editingFlight.getPlaneID() ,
+                                           newDepartureDate != null ?
+                                           newDepartureDate :
+                                           editingFlight.getDepartureDateTime() ,
+                                           newArriveDate != null ? newArriveDate : editingFlight.getArriveDateTime() );
 //        To produce update event on list
             flights.set( flights.indexOf( editingFlight ) , newFlight );
         }finally{
@@ -329,22 +323,17 @@ public class DataModel{
         }
         try{
             routesLock.writeLock().lock();
-            Route
-                    editingRoute =
-                    routes.stream()
-                          .filter( route1 -> Objects.equals( route1.getId() , route.getId() ) )
-                          .findFirst()
-                          .orElseThrow( () -> new FaRIllegalEditedData(
-                                  "Database doesn't contain previous version of route" ) );
-            Route
-                    newRoute =
-                    new Route( editingRoute.id ,
-                               newDepartureAirport != null ? newDepartureAirport : editingRoute.getFrom() ,
-                               newDestinationAirport != null ? newDestinationAirport : editingRoute.getTo() );
+            Route editingRoute = routes.stream()
+                                       .filter( route1 -> Objects.equals( route1.getId() , route.getId() ) )
+                                       .findFirst()
+                                       .orElseThrow( () -> new FaRIllegalEditedData(
+                                               "Database doesn't contain previous version of route" ) );
+            Route newRoute = new Route( editingRoute.id ,
+                                        newDepartureAirport != null ? newDepartureAirport : editingRoute.getFrom() ,
+                                        newDestinationAirport != null ? newDestinationAirport : editingRoute.getTo() );
 //        To produce update event on list
             flights.stream()
-                   .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() )&&!(flight.getRoute().getTo().equals(editingRoute.getTo()))
-                           &&!(flight.getRoute().getFrom().equals(editingRoute.getFrom())))
+                   .filter( flight -> flight.getRoute().getId().equals( editingRoute.getId() ) )
                    .forEach( flight -> this.editFlight( flight , newRoute , null , null , null ) );
             routes.set( routes.indexOf( editingRoute ) , newRoute );
         }finally{
@@ -372,11 +361,9 @@ public class DataModel{
                                                         serializable.getClass().equals( Flight.class ) ) ){
             throw new FaRIllegalDataException( "One object neither Route, nor Flight class" );
         }
-        List<Route>
-                routes =
+        List<Route> routes =
                 routesAndFlights.get( true ).parallelStream().map( Route.class::cast ).collect( Collectors.toList() );
-        List<Flight>
-                flights =
+        List<Flight> flights =
                 routesAndFlights.get( false ).parallelStream().map( Flight.class::cast ).collect( Collectors.toList() );
 //        check routes duplicate
         Set<Route> routeSet = new HashSet<>();
@@ -436,11 +423,9 @@ public class DataModel{
         } );
         List<Route>  failedRoutes  = new ArrayList<>();
         List<Flight> failedFlights = new ArrayList<>();
-        List<Route>
-                routes =
+        List<Route> routes =
                 routesAndFlights.get( true ).parallelStream().map( Route.class::cast ).collect( Collectors.toList() );
-        List<Flight>
-                flights =
+        List<Flight> flights =
                 routesAndFlights.get( false ).parallelStream().map( Flight.class::cast ).collect( Collectors.toList() );
         routesLock.readLock().lock();
         flightsLock.readLock().lock();
@@ -501,8 +486,7 @@ public class DataModel{
     public void saveTo( OutputStream outputStream ) throws IOException{
         routesLock.readLock().lock();
         flightsLock.readLock().lock();
-        List<Serializable>
-                data =
+        List<Serializable> data =
                 Stream.concat( this.routes.stream() , this.flights.stream() ).collect( Collectors.toList() );
         routesLock.readLock().unlock();
         flightsLock.readLock().unlock();

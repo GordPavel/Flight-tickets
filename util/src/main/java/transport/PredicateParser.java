@@ -42,16 +42,9 @@ public class PredicateParser{
         this.isRoutePredicate = isRoutePredicate;
     }
 
-    private PredicateParser( String flightNumber ,
-                             String flightPlane ,
-                             String flightDepartureFromDate ,
-                             String flightDepartureToDate ,
-                             String flightArriveFromDate ,
-                             String flightArriveToDate ,
-                             String flightTimeFrom ,
-                             String flightTimeTo ,
-                             String flightFrom ,
-                             String flightTo ,
+    private PredicateParser( String flightNumber , String flightPlane , String flightDepartureFromDate ,
+                             String flightDepartureToDate , String flightArriveFromDate , String flightArriveToDate ,
+                             String flightTimeFrom , String flightTimeTo , String flightFrom , String flightTo ,
                              Boolean isRoutePredicate ){
         this.flightNumber = flightNumber;
         this.flightPlane = flightPlane;
@@ -70,16 +63,11 @@ public class PredicateParser{
         return new PredicateParser( routeFrom , routeTo , true );
     }
 
-    public static PredicateParser createFlightPredicate( String flightNumber ,
-                                                         String flightPlane ,
-                                                         String flightDepartureFromDate ,
-                                                         String flightDepartureToDate ,
-                                                         String flightArriveFromDate ,
-                                                         String flightArriveToDate ,
-                                                         String flightTimeFrom ,
-                                                         String flightTimeTo ,
-                                                         String flightFrom ,
-                                                         String flightTo ){
+    public static PredicateParser createFlightPredicate( String flightNumber , String flightPlane ,
+                                                         String flightDepartureFromDate , String flightDepartureToDate ,
+                                                         String flightArriveFromDate , String flightArriveToDate ,
+                                                         String flightTimeFrom , String flightTimeTo ,
+                                                         String flightFrom , String flightTo ){
         return new PredicateParser( flightNumber ,
                                     flightPlane ,
                                     flightDepartureFromDate ,
@@ -108,8 +96,6 @@ public class PredicateParser{
     }
 
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern( "dd.MM.yyyy" );
-
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern( "HH:mm" );
 
     @JsonIgnore
     // Each field nullable, means empty predicate
@@ -174,7 +160,7 @@ public class PredicateParser{
     }
 
     private Long getMillisFromHoursAndMinutes( String duration ){
-        Matcher matcher = Pattern.compile( "^(?<hours>[^0]\\d+):(?<minutes>[0-5]\\d)$" ).matcher( duration );
+        Matcher matcher = Pattern.compile( "^(?<hours>\\d+):(?<minutes>[0-5]\\d)$" ).matcher( duration );
         if( !matcher.matches() ){
             throw new IllegalArgumentException( "Bad duration format " + duration );
         }
