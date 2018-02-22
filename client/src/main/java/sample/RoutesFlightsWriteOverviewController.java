@@ -8,30 +8,24 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import model.DataModelInstanceSaver;
-import model.FlightOrRoute;
-import org.danekja.java.util.function.serializable.SerializablePredicate;
 import transport.Data;
 import transport.ListChangeAdapter;
-import transport.PredicateParser;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  Controller for routes and flights view, client write application.
  disables and hides all buttons/menus, that write client must not see
  */
+@SuppressWarnings( "Duplicates" )
 class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewController{
 
     RoutesFlightsWriteOverviewController( Stage thisStage ){
         super( thisStage );
     }
-
 
     /**
      initialization of view
@@ -46,9 +40,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
 
         routeConnectLabel.setVisible( false );
         flightConnectLabel.setVisible( false );
-        fileMenu.setVisible(false);
+        fileMenu.setVisible( false );
 
-        Controller.getInstance().setThread( new WriteThread(this) );
+        Controller.getInstance().setThread( new WriteThread( this ) );
         Controller.getInstance().startThread();
 
         addRouteButton.setOnAction( event -> handleAddRouteAction() );
@@ -60,6 +54,12 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         editFlightButton.setOnAction( event -> handleEditFlightAction() );
         deleteFlightButton.setOnAction( event -> handleDeleteFlightAction() );
         updateFlightButton.setOnAction( event -> handleUpdateFlightAction() );
+
+        mergeMenuButton.setOnAction( event -> handleMergeAction() );
+    }
+
+    private void handleMergeAction(){
+//        todo : запрос на слияние серверу
     }
 
     /**
@@ -81,9 +81,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
-            if (!changes.isEmpty()) {
+            if( !changes.isEmpty() ){
                 Data data = FaRExchanger.exchange();
-                processUpdates(data);
+                processUpdates( data );
             }
         }catch( IOException e ){
             e.printStackTrace();
@@ -97,8 +97,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddRoutesOverview.fxml" ) );
-                Stage popUp = new Stage();
-                AddAndEditRoutesOverviewController controller =
+                Stage      popUp  = new Stage();
+                AddAndEditRoutesOverviewController
+                        controller =
                         new AddAndEditRoutesOverviewController( selectedRoute , popUp );
                 loader.setController( controller );
 
@@ -112,9 +113,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
-                if (!changes.isEmpty()) {
+                if( !changes.isEmpty() ){
                     Data data = FaRExchanger.exchange();
-                    processUpdates(data);
+                    processUpdates( data );
                 }
             }catch( IOException e ){
                 e.printStackTrace();
@@ -132,59 +133,31 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         alert.setHeaderText( " Are you sure that you want to delete this route? " );
         alert.setContentText( routeTable.getSelectionModel().getSelectedItem().toString() );
 
-        Optional<ButtonType> option = alert.showAndWait();
-
-        if ( option.get() == ButtonType.OK ){
-
+        alert.showAndWait().filter( option -> option == ButtonType.OK ).ifPresent( option -> {
             Optional.ofNullable( routeTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedRoute -> {
-            try{
-                DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper mapper = new ObjectMapper();
+                try{
+                    DataOutputStream
+                            outClient =
+                            new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+                    ObjectMapper mapper = new ObjectMapper();
 
-                Controller.getInstance()
-                          .getUserInformation()
-                          .setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( Collections.singletonList(
-                                  selectedRoute ) ) ) );
+                    Controller.getInstance()
+                              .getUserInformation()
+                              .setChanges( Collections.singletonList( ListChangeAdapter.removeRoute( Collections.singletonList(
+                                      selectedRoute ) ) ) );
 
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-                RoutesFlightsOverviewController.getChanges().add ( ListChangeAdapter.removeRoute( Collections.singletonList( selectedRoute ) ) );
-
-//                DataInputStream inClient =
-//                       new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-//
-//                // get Data
-//                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-//                changes.forEach( listChangeAdapter -> {
-//                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-//                               if ( listChangeAdapter.equals(listChangeAdapter1) ) {
-//                                    if ( data.hasNotException() ) {
-//
-//                                        Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-//                                        alert1.setTitle( " Delete a route" );
-//                                        alert1.setHeaderText( " Deleting a route was successful! " );
-//                                        alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                        changes.remove( listChangeAdapter );
-//                                    } else{
-//                                        Alert alert1 = new Alert( Alert.AlertType.ERROR );
-//                                        alert1.setTitle( " Delete a route" );
-//                                        alert1.setHeaderText( " Error while deleting a route on a server! " );
-//                                        alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                    }
-//                               }
-//                            }
-//                        }
-//                );
-
-                Controller.getInstance().getUserInformation().setChanges( null );
-                Data data = FaRExchanger.exchange();
-                processUpdates(data);
-            }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
-            }
+                    outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    RoutesFlightsOverviewController.getChanges()
+                                                   .add( ListChangeAdapter.removeRoute( Collections.singletonList(
+                                                           selectedRoute ) ) );
+                    Controller.getInstance().getUserInformation().setChanges( null );
+                }catch( IOException e ){
+                    System.out.println( "Connection problem" );
+                    System.out.println( e.getMessage() );
+                }
+            } );
         } );
-        }
+
         /*
           TODO: set message to delete route to server
         */
@@ -196,7 +169,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
     private void handleAddFlightAction(){
         try{
             FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-            Stage popUp = new Stage();
+            Stage                               popUp      = new Stage();
             AddAndEditFlightsOverviewController controller = new AddAndEditFlightsOverviewController( null , popUp );
             loader.setController( controller );
 
@@ -210,9 +183,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
-            if (!changes.isEmpty()) {
+            if( !changes.isEmpty() ){
                 Data data = FaRExchanger.exchange();
-                processUpdates(data);
+                processUpdates( data );
             }
         }catch( IOException e ){
             e.printStackTrace();
@@ -226,8 +199,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
             try{
                 FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/AddFlightsOverview.fxml" ) );
-                Stage popUp = new Stage();
-                AddAndEditFlightsOverviewController controller =
+                Stage      popUp  = new Stage();
+                AddAndEditFlightsOverviewController
+                        controller =
                         new AddAndEditFlightsOverviewController( selectedFlight , popUp );
                 loader.setController( controller );
 
@@ -241,9 +215,9 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 thisStage.setOpacity( 0.9 );
                 popUp.showAndWait();
                 thisStage.setOpacity( 1 );
-                if (!changes.isEmpty()) {
+                if( !changes.isEmpty() ){
                     Data data = FaRExchanger.exchange();
-                    processUpdates(data);
+                    processUpdates( data );
                 }
             }catch( IOException e ){
                 e.printStackTrace();
@@ -258,43 +232,42 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
         alert.setHeaderText( " Are you sure that you want to delete this flight? " );
         alert.setContentText( flightTable.getSelectionModel().getSelectedItem().toString() );
 
-        Optional<ButtonType> option = alert.showAndWait();
+        alert.showAndWait().ifPresent( option -> {
+            Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
+                try{
+                    DataOutputStream
+                            outClient =
+                            new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+                    ObjectMapper mapper = new ObjectMapper();
 
-        if ( option.get() == ButtonType.OK ){
-        Optional.ofNullable( flightTable.getSelectionModel().getSelectedItem() ).ifPresent( selectedFlight -> {
-            try{
-                DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper mapper = new ObjectMapper();
+                    Controller.getInstance()
+                              .getUserInformation()
+                              .setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( Collections.singletonList(
+                                      selectedFlight ) ) ) );
 
-                Controller.getInstance()
-                          .getUserInformation()
-                          .setChanges( Collections.singletonList( ListChangeAdapter.removeFlight( Collections.singletonList(
-                                  selectedFlight ) ) ) );
+                    outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+                    RoutesFlightsOverviewController.getChanges()
+                                                   .add( ListChangeAdapter.removeFlight( Collections.singletonList(
+                                                           selectedFlight ) ) );
 
-                RoutesFlightsOverviewController.getChanges().add ( ListChangeAdapter.removeFlight( Collections.singletonList( selectedFlight ) ) );
-
-                Data data = FaRExchanger.exchange();
-                processUpdates(data);
-                Controller.getInstance().getUserInformation().setChanges( null );
-            }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
-            }
-        } );}
-        /*
-          TODO: add message to server to delete flight
-         */
+                    Data data = FaRExchanger.exchange();
+                    processUpdates( data );
+                    Controller.getInstance().getUserInformation().setChanges( null );
+                }catch( IOException e ){
+                    System.out.println( "Connection problem" );
+                    System.out.println( e.getMessage() );
+                }
+            } );
+        } );
     }
 
     static void processUpdates( Data data ){
 
         if( data.hasNotException() ){
-        changes.forEach( listChangeAdapter -> {
-            for( ListChangeAdapter listChangeAdapter1 : data.getChanges() ){
-                if( listChangeAdapter.equalsEntities( listChangeAdapter1 ) ){
+            changes.forEach( listChangeAdapter -> {
+                for( ListChangeAdapter listChangeAdapter1 : data.getChanges() ){
+                    if( listChangeAdapter.equalsEntities( listChangeAdapter1 ) ){
                         Alert alert = new Alert( Alert.AlertType.INFORMATION );
                         alert.setTitle( " Confirmation " );
                         alert.setHeaderText( " Changes on server " );
@@ -305,12 +278,12 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                 }
             } );
         }else{
-            Alert alert = new Alert( Alert.AlertType.ERROR);
+            Alert alert = new Alert( Alert.AlertType.ERROR );
             alert.setTitle( "Error" );
             alert.setHeaderText( data.getException().getMessage() );
-            alert.setContentText( changes.get(0).getUpdate() );
+            alert.setContentText( changes.get( 0 ).getUpdate() );
             alert.showAndWait();
-            changes.remove( changes.get(0) );
+            changes.remove( changes.get( 0 ) );
         }
     }
 

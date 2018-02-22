@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--suppress ALL -->
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="238.0" prefWidth="321.0"
-            xmlns="http://javafx.com/javafx/8.0.121">
+<AnchorPane prefHeight="238.0" prefWidth="321.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
     <Label layoutX="25.0" layoutY="35.0" text="IP"/>
     <Label layoutX="25.0" layoutY="75.0" text="Port"/>
     <TextField fx:id="ipTextField" layoutX="125.0" layoutY="31.0" prefHeight="25.0" prefWidth="134.0"/>
@@ -14,8 +14,8 @@
     <TextField fx:id="loginTextField" layoutX="125.0" layoutY="111.0" prefHeight="25.0" prefWidth="134.0"/>
     <PasswordField fx:id="passwordField" layoutX="125.0" layoutY="151.0" prefHeight="25.0" prefWidth="134.0"/>
     <Button fx:id="logInButton" layoutX="25.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleLogInAction"
-            prefHeight="25.0" prefWidth="52.0" text="Log in"/>
-    <Button fx:id="cancelButton" layoutX="244.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleCancelAction"
+            prefHeight="27.0" prefWidth="74.0" text="Log in"/>
+    <Button fx:id="cancelButton" layoutX="130.0" layoutY="199.0" mnemonicParsing="false" onAction="#handleCancelAction"
             text="Cancel"/>
-
+    <Button layoutX="217.0" layoutY="199.0" mnemonicParsing="false" onAction="#openFile" text="Open file..."/>
 </AnchorPane>

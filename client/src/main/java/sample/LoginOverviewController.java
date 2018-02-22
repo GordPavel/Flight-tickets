@@ -1,20 +1,30 @@
 package sample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.FlightAndRouteException;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import model.DataModel;
+import model.DataModelInstanceSaver;
 import transport.Data;
 import transport.UserInformation;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,8 +57,6 @@ class LoginOverviewController{
         loginTextField.setOnKeyPressed( enterHandler );
         portTextField.setOnKeyPressed( enterHandler );
         passwordField.setOnKeyPressed( enterHandler );
-
-
     }
 
     EventHandler<KeyEvent> enterHandler = event -> {
@@ -74,7 +82,7 @@ class LoginOverviewController{
         if( Controller.getInstance().getClientSocket() != null &&
             Controller.getInstance().getClientSocket().isConnected() ){
 
-            Pattern pattern = Pattern.compile( "^[.\\w\\d\\-_]+$" );
+            Pattern pattern      = Pattern.compile( "^[.\\w\\d\\-_]+$" );
             Boolean userCanWrite = false;
 
             if( !( pattern.matcher( loginTextField.getText() ).matches() &&
@@ -94,12 +102,12 @@ class LoginOverviewController{
                 ObjectMapper mapper = new ObjectMapper();
 
                 try{
-                    DataOutputStream dataOutputStream = new DataOutputStream( Controller.getInstance()
-                            .getClientSocket()
-                            .getOutputStream() ) ;
-                    DataInputStream inputStream = new DataInputStream( Controller.getInstance()
-                            .getClientSocket()
-                            .getInputStream() ) ;
+                    DataOutputStream
+                            dataOutputStream =
+                            new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+                    DataInputStream
+                            inputStream =
+                            new DataInputStream( Controller.getInstance().getClientSocket().getInputStream() );
                     System.out.println( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
                     System.out.println( "Connected: " + Controller.getInstance().getClientSocket().isConnected() );
                     dataOutputStream.writeUTF( mapper.writeValueAsString( Controller.getInstance()
@@ -113,9 +121,11 @@ class LoginOverviewController{
 
                 data.withoutExceptionOrWith( data1 -> {
                     try{
-                        Stage primaryStage = new Stage();
-                        FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
-                        ChoiceOverviewController controller = new ChoiceOverviewController( primaryStage , data1 );
+                        Stage                    primaryStage = new Stage();
+                        FXMLLoader
+                                                 loader       =
+                                new FXMLLoader( getClass().getResource( "/fxml/ChoiceOverview.fxml" ) );
+                        ChoiceOverviewController controller   = new ChoiceOverviewController( primaryStage , data1 );
                         loader.setController( controller );
                         primaryStage.setTitle( "Select DB" );
                         Scene scene = new Scene( loader.load() );
@@ -133,37 +143,18 @@ class LoginOverviewController{
             }
         }else{
             ClientMain.showWarning( "Error" , "Network error" , "Can`t connect to server" );
-//            try {
-//                Map<String,String> map = new HashMap();
-////                      map.put("1","2");
-////                      map.put("2","3");
-//                Controller.getInstance().setClientSocket(new Socket());
-//                Data data1 = new Data();
-//                data1.setBases(map);
-//                Stage primaryStage = new Stage();
-//                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChoiceOverview.fxml"));
-//                ChoiceOverviewController controller = new ChoiceOverviewController(primaryStage, data1);
-//                loader.setController(controller);
-//                primaryStage.setTitle("Select DB");
-//                Scene scene = new Scene(loader.load());
-//                primaryStage.setScene(scene);
-//                primaryStage.setResizable(false);
-//                primaryStage.show();
-//                closeWindow();
-//            } catch (IOException e) {
-//                System.out.println("load problem");
-//                System.out.println(e.getMessage());
-//            }
         }
     }
 
     private void fieldCheck(){
-        Pattern ipPattern = Pattern.compile( "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                                             "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
+        Pattern
+                ipPattern =
+                Pattern.compile( "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                                 "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$" );
         Pattern portPattern = Pattern.compile( "[0-9]{1,5}" );
 
         Pattern textPattern = Pattern.compile( "[.\\w\\d\\-_]*" );
-        Matcher matcher = textPattern.matcher( loginTextField.getText() );
+        Matcher matcher     = textPattern.matcher( loginTextField.getText() );
         if( !matcher.matches() ){
             loginTextField.setStyle( "-fx-text-inner-color: red;" );
             loginTextField.setTooltip( new Tooltip( "Acceptable symbols: 0-9, a-z, -, _" ) );
@@ -188,9 +179,45 @@ class LoginOverviewController{
         }
 
         if( ipPattern.matcher( ipTextField.getText() ).matches() &&
-            portPattern.matcher( portTextField.getText() ).matches() && matcher.matches() ){
+            portPattern.matcher( portTextField.getText() ).matches() &&
+            matcher.matches() ){
             logInButton.setDisable( false );
         }
+    }
+
+    @FXML
+    void openFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Flights and routes" , "*.far" ) );
+        Optional.ofNullable( fileChooser.showOpenDialog( new Stage() ) ).ifPresent( file -> {
+            try( InputStream inputStream = Files.newInputStream( file.toPath() ) ){
+                final DataModel dataModel = DataModelInstanceSaver.getInstance();
+                dataModel.clear();
+                dataModel.importFrom( inputStream );
+                Controller.savingFile = file;
+                Controller.changed = false;
+                try{
+                    Stage primaryStage = new Stage();
+                    FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
+                    RoutesFlightsOverviewController
+                            controller =
+                            new RoutesFlightsLocalFileOverviewController( primaryStage );
+                    loader.setController( controller );
+                    primaryStage.setTitle( file.getName() );
+                    Scene scene = new Scene( loader.load() );
+                    primaryStage.setScene( scene );
+                    primaryStage.setResizable( false );
+                    primaryStage.show();
+                    closeWindow();
+                }catch( IOException e ){
+//                todo : Если око не открылось
+                }
+            }catch( FlightAndRouteException e ){
+//                todo : Показать ошибку в базе
+            }catch( IOException e ){
+//                todo : Если файл не открылся
+            }
+        } );
     }
 
     private void closeWindow(){

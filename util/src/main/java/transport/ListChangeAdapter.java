@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.FlightAndRouteException;
 import javafx.collections.ListChangeListener;
 import model.DataModel;
 import model.Flight;
@@ -157,6 +158,7 @@ public class ListChangeAdapter{
                 case "changed to":
                     switch( entity ){
                         case "flight":
+
                             Flux.zip( Flux.fromStream( ( ( List<Flight> ) mapper.readerFor( mapper.getTypeFactory()
                                                                                                   .constructCollectionType(
                                                                                                           List.class ,
@@ -184,9 +186,15 @@ public class ListChangeAdapter{
                                                                                                          List.class ,
                                                                                                          Route.class ) )
                                                                                .readValue( newList ) ).stream() ) )
-                                .subscribe( tuple2 -> dataModel.editRoute( tuple2.getT1() ,
-                                                                           tuple2.getT2().getFrom() ,
-                                                                           tuple2.getT2().getTo() ) );
+                                .subscribe( tuple2 -> {
+                                    try{
+                                        dataModel.editRoute( tuple2.getT1() ,
+                                                             tuple2.getT2().getFrom() ,
+                                                             tuple2.getT2().getTo() );
+                                    }catch( FlightAndRouteException e ){
+                                        throw e;
+                                    }
+                                } );
                             break;
                     }
                     break;

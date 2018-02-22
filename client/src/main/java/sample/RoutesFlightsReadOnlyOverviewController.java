@@ -1,16 +1,9 @@
 package sample;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import model.DataModelInstanceSaver;
-import transport.Data;
-import transport.PredicateParser;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,15 +15,15 @@ import java.util.TimerTask;
  */
 class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewController{
 
-    final Timer timer = new Timer();
-    TimerTask task = new TimerTask(){
+    private final Timer     timer = new Timer();
+    private       TimerTask task  = new TimerTask(){
         @Override
         public void run(){
             System.out.println( "test" );
         }
     };
 
-    public RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
+    RoutesFlightsReadOnlyOverviewController( Stage thisStage ){
         super( thisStage );
     }
 
@@ -67,7 +60,7 @@ class RoutesFlightsReadOnlyOverviewController extends RoutesFlightsOverviewContr
         destination.textProperty().addListener( observable -> restartTask() );
     }
 
-    public void restartTask(){
+    private void restartTask(){
         restartTask( new TimerTask(){
             @Override
             public void run(){

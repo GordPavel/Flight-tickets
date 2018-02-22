@@ -1,6 +1,7 @@
 package sample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.FlightAndRouteException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,11 +16,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import model.DataModel;
 import model.DataModelInstanceSaver;
 import transport.Data;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,8 +71,6 @@ class ChoiceOverviewController{
     private void handleSelectAction(){
 
         /*
-          TODO: Select database
-
           Send your login and password to server. true? go below : retry message
           Add view with table of available DB...
           Load db to dataModel and execute code below
@@ -83,19 +85,9 @@ class ChoiceOverviewController{
                     ( ( Map.Entry<String, String> ) selectedBase ).getValue().toUpperCase().equals( "READWRITE" ) ?
                     new RoutesFlightsWriteOverviewController( primaryStage ) :
                     new RoutesFlightsReadOnlyOverviewController( primaryStage );
-//            if( ( ( Map.Entry<String, String> ) selectedBase ).getValue().toUpperCase().equals( "READWRITE" ) ){
-//                controller = new RoutesFlightsWriteOverviewController( primaryStage );
-//            }
-//            if( Controller.getInstance().getClientSocket().isClosed() ){
-//            try {
-//                Controller.getInstance().getClientSocket().close();
-//            } catch (IOException ex)
-//            {
-//
-//            }
-
-            Controller.getInstance().reconnect();
-//            }
+            if( Controller.getInstance().getClientSocket().isClosed() ){
+                Controller.getInstance().reconnect();
+            }
             ObjectMapper mapper = new ObjectMapper();
 
             try{
@@ -111,23 +103,22 @@ class ChoiceOverviewController{
                 System.out.println( testString );
                 data = mapper.readerFor( Data.class ).readValue( testString );
             }catch( IOException e ){
-                System.out.println( "load problem" );
-                System.out.println( e.getMessage() );
+                throw new IllegalStateException( "load problem " + e.getMessage() , e );
             }
             data.withoutExceptionOrWith( data1 -> {
                 try{
                     if( ( controller instanceof RoutesFlightsReadOnlyOverviewController ) &&
                         ( data1.getRoutes() == null ) &&
-                        ( new File( Controller.getInstance().getUserInformation().getDataBase() + ".far" ) ).exists() ){
+                        ( new File( Controller.getInstance().getUserInformation().getDataBase() + ".dm" ) ).exists() ){
                         DataModelInstanceSaver.getInstance()
                                               .importFrom( new FileInputStream( Controller.getInstance()
                                                                                           .getUserInformation()
-                                                                                          .getDataBase() + ".far" ) );
+                                                                                          .getDataBase() + ".dm" ) );
                         data1.getChanges()
                              .forEach( update -> update.apply( DataModelInstanceSaver.getInstance() , false ) );
                     }else{
                         System.out.println( ( new File( Controller.getInstance().getUserInformation().getDataBase() +
-                                                        ".far" ) ).exists() );
+                                                        ".dm" ) ).exists() );
                         data1.getRoutes()
                              .forEach( route -> DataModelInstanceSaver.getInstance().addRoute( route , false ) );
                         data1.getFlights().forEach( DataModelInstanceSaver.getInstance()::addFlight );
@@ -148,28 +139,6 @@ class ChoiceOverviewController{
                 }
             } , ClientMain::showWarningByError );
         } );
-
-
-//        // if write
-//        try{
-//
-//            Controller.getInstance().setUserInformation(new UserInformation());
-//            Stage primaryStage = new Stage();
-//            FXMLLoader loader = new FXMLLoader( getClass().getResource( "/fxml/RoutesFlightsOverview.fxml" ) );
-//            RoutesFlightsOverviewController controller = new RoutesFlightsReadOnlyOverviewController( primaryStage );
-//            loader.setController( controller );
-//            primaryStage.setTitle( "Information system about flights and routes" );
-//            Scene scene = new Scene( loader.load() , 700 , 500 );
-//            primaryStage.setScene( scene );
-//            primaryStage.setResizable( false );
-//            primaryStage.show();
-//            closeWindow();
-//        }catch( IOException e ){
-//            System.out.println( "load problem" );
-//            System.out.println( e.getMessage() );
-//        }
-
-
     }
 
     private void handleCancelAction(){

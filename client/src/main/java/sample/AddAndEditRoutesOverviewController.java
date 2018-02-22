@@ -7,21 +7,17 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.Route;
-import transport.Data;
 import transport.ListChangeAdapter;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
@@ -46,21 +42,18 @@ class AddAndEditRoutesOverviewController{
     @FXML JFXButton         clearButton;
     @FXML JFXButton         cancelButton;
 
-    private Route editingRoute;
+    Route editingRoute;
 
     private Stage thisStage;
     private Pattern                   pattern = Pattern.compile( "^([\\w/]+)/(\\w+)$" );
     //    Collect all zones to map by country
-    private Map<String, List<ZoneId>> zones   = ZoneId.getAvailableZoneIds()
-                                                      .stream()
-                                                      .sorted()
-                                                      .filter( Pattern.compile( "(Etc|SystemV)/.+" )
-                                                                      .asPredicate()
-                                                                      .negate()
-                                                                      .and( pattern.asPredicate() ) )
-                                                      .collect( Collector.of( HashMap::new ,
-                                                                              this::putNewZoneToMap ,
-                                                                              this::mergeTwoMaps ) );
+    private Map<String, List<ZoneId>>
+                                      zones   =
+            ZoneId.getAvailableZoneIds()
+                  .stream()
+                  .sorted()
+                  .filter( Pattern.compile( "(Etc|SystemV)/.+" ).asPredicate().negate().and( pattern.asPredicate() ) )
+                  .collect( Collector.of( HashMap::new , this::putNewZoneToMap , this::mergeTwoMaps ) );
 
     private Map<String, List<ZoneId>> mergeTwoMaps( Map<String, List<ZoneId>> map1 , Map<String, List<ZoneId>> map2 ){
         map1.forEach( ( key1 , value1 ) -> map2.merge( key1 , value1 , ( key2 , value2 ) -> key2 ).addAll( value1 ) );
@@ -71,7 +64,7 @@ class AddAndEditRoutesOverviewController{
         Matcher matcher = pattern.matcher( zone );
         //noinspection ResultOfMethodCallIgnored
         matcher.find();
-        String key = matcher.group( 1 );
+        String       key    = matcher.group( 1 );
         final ZoneId zoneId = ZoneId.of( zone );
         if( map.containsKey( key ) ){
             map.get( key ).add( zoneId );
@@ -92,7 +85,7 @@ class AddAndEditRoutesOverviewController{
      */
     @SuppressWarnings( "ResultOfMethodCallIgnored" )
     @FXML
-    private void initialize(){
+    void initialize(){
         departureCountryChoice.setItems( zones.keySet()
                                               .stream()
                                               .collect( Collectors.collectingAndThen( toList() ,
@@ -125,9 +118,12 @@ class AddAndEditRoutesOverviewController{
                                 .addListener( ( observable , oldValue , newValue ) -> countrySelected( newValue ,
                                                                                                        destinationCityChoice ) );
 
-        BooleanProperty addAvailable = new SimpleBooleanProperty(
-                Optional.ofNullable( departureCityChoice.getSelectionModel().getSelectedItem() ).isPresent() &&
-                Optional.ofNullable( destinationCityChoice.getSelectionModel().getSelectedItem() ).isPresent() );
+        BooleanProperty
+                addAvailable =
+                new SimpleBooleanProperty( Optional.ofNullable( departureCityChoice.getSelectionModel()
+                                                                                   .getSelectedItem() ).isPresent() &&
+                                           Optional.ofNullable( destinationCityChoice.getSelectionModel()
+                                                                                     .getSelectedItem() ).isPresent() );
         addAvailable.bind( departureCityChoice.getSelectionModel()
                                               .selectedItemProperty()
                                               .isNotNull()
@@ -156,114 +152,50 @@ class AddAndEditRoutesOverviewController{
         cancelButton.setOnAction( event -> closeWindow() );
     }
 
-    private void addOrEdit( Boolean isAdd ){
+    void addOrEdit( Boolean isAdd ){
         try{
-//            if( isAdd ){
-//                DataModelInstanceSaver.getInstance()
-//                                      .addRoute( new Route( Optional.ofNullable( departureCityChoice.getSelectionModel()
-//                                                                                                    .getSelectedItem() )
-//                                                                    .orElseThrow( IllegalStateException::new ) ,
-//                                                            Optional.ofNullable( destinationCityChoice.getSelectionModel()
-//                                                                                                      .getSelectedItem() )
-//                                                                    .orElseThrow( IllegalStateException::new ) ) );
-//            }else{
-//                DataModelInstanceSaver.getInstance()
-//                                      .editRoute( editingRoute ,
-//                                                  Optional.ofNullable( departureCityChoice.getSelectionModel()
-//                                                                                          .getSelectedItem() )
-//                                                          .orElseThrow( IllegalStateException::new ) ,
-//                                                  Optional.ofNullable( destinationCityChoice.getSelectionModel()
-//                                                                                            .getSelectedItem() )
-//                                                          .orElseThrow( IllegalStateException::new ) );
-//            }
-//            TODO: put here request to server to add route
-            try{
-                DataOutputStream outClient =
-                        new DataOutputStream ( Controller.getInstance().getClientSocket().getOutputStream() );
-                ObjectMapper mapper = new ObjectMapper();
-                ArrayList<ListChangeAdapter> changes = new ArrayList<>();
+            DataOutputStream
+                    outClient =
+                    new DataOutputStream( Controller.getInstance().getClientSocket().getOutputStream() );
+            ObjectMapper                 mapper  = new ObjectMapper();
+            ArrayList<ListChangeAdapter> changes = new ArrayList<>();
 
-                if( isAdd ){
-                    changes.add( ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                      .getSelectedItem() ,
-                                                                                                   destinationCityChoice
-                                                                                                           .getSelectionModel()
-                                                                                                           .getSelectedItem() ) ) ) );
-                    RoutesFlightsOverviewController.getChanges().add( ListChangeAdapter.addRoute(Collections.singletonList(new Route(
-                                                                                                       departureCityChoice.getSelectionModel()
-                                                                                                                          .getSelectedItem() ,
-                                                                                                       destinationCityChoice
-                                                                                                                          .getSelectionModel()
-                                                                                                                          .getSelectedItem() ) ) ) );
-                }else{
-                    changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                              Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                       .getSelectedItem() ,
-                                                                                                    destinationCityChoice
-                                                                                                                       .getSelectionModel()
-                                                                                                                       .getSelectedItem() ) ) ) );
-                    RoutesFlightsOverviewController.getChanges().add (ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                                       Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
-                                                                                                                                .getSelectedItem() ,
-                                                                                                             destinationCityChoice
-                                                                                                                                .getSelectionModel()
-                                                                                                                                .getSelectedItem() ) ) ) );
-                }
-
-                Controller.getInstance().getUserInformation().setChanges( changes );
-                outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
-
-//                DataInputStream inClient =
-//                        new DataInputStream ( Controller.getInstance().getClientSocket().getInputStream() );
-//
-//                // get Data
-//                Data data = mapper.readerFor( Data.class ).readValue( inClient.readUTF() );
-//                changesAdapt.forEach( listChangeAdapter -> {
-//                            for ( ListChangeAdapter listChangeAdapter1 : data.getChanges() ) {
-//                                if ( listChangeAdapter.equals( listChangeAdapter1 ) ) {
-//                                    if ( data.hasNotException() ) {
-//                                        if( isAdd ) {
-//                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-//                                            alert1.setTitle(" Add a route");
-//                                            alert1.setHeaderText(" Adding a route was successful! ");
-//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                            changesAdapt.remove( listChangeAdapter );
-//                                        }else {
-//                                            Alert alert1 = new Alert( Alert.AlertType.INFORMATION );
-//                                            alert1.setTitle(" Edit a route");
-//                                            alert1.setHeaderText(" Editing a route was successful! ");
-//                                            alert1.setContentText(listChangeAdapter.getUpdate());
-//                                            changesAdapt.remove( listChangeAdapter );
-//                                        }
-//                                    } else{
-//                                        if (isAdd) {
-//                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
-//                                            alert1.setTitle(" Adding route error ");
-//                                            alert1.setHeaderText(" Error while adding a route on a server! ");
-//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                            changesAdapt.remove( listChangeAdapter );
-//                                        } else {
-//                                            Alert alert1 = new Alert( Alert.AlertType.ERROR );
-//                                            alert1.setTitle(" Editing route error");
-//                                            alert1.setHeaderText(" Error while editing a route on a server! ");
-//                                            alert1.setContentText( listChangeAdapter.getUpdate() );
-//                                            changesAdapt.remove( listChangeAdapter );
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                );
-
-                Controller.getInstance().getUserInformation().setChanges( null );
-            }catch( IOException e ){
-                System.out.println( "Connection problem" );
-                System.out.println( e.getMessage() );
+            if( isAdd ){
+                changes.add( ListChangeAdapter.addRoute( Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                                                                                  .getSelectedItem() ,
+                                                                                               destinationCityChoice.getSelectionModel()
+                                                                                                                    .getSelectedItem() ) ) ) );
+                RoutesFlightsOverviewController.getChanges()
+                                               .add( ListChangeAdapter.addRoute( Collections.singletonList( new Route(
+                                                       departureCityChoice.getSelectionModel().getSelectedItem() ,
+                                                       destinationCityChoice.getSelectionModel()
+                                                                            .getSelectedItem() ) ) ) );
+            }else{
+                changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
+                                                          Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                                                                                   .getSelectedItem() ,
+                                                                                                destinationCityChoice.getSelectionModel()
+                                                                                                                     .getSelectedItem() ) ) ) );
+                RoutesFlightsOverviewController.getChanges()
+                                               .add( ListChangeAdapter.editRoute( Collections.singletonList(
+                                                       editingRoute ) ,
+                                                                                  Collections.singletonList( new Route(
+                                                                                          departureCityChoice.getSelectionModel()
+                                                                                                             .getSelectedItem() ,
+                                                                                          destinationCityChoice.getSelectionModel()
+                                                                                                               .getSelectedItem() ) ) ) );
             }
-            Controller.changed = true;
-            closeWindow();
+
+            Controller.getInstance().getUserInformation().setChanges( changes );
+            outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
+
+            Controller.getInstance().getUserInformation().setChanges( null );
         }catch( FlightAndRouteException e ){
             RoutesFlightsOverviewController.showModelAlert( e );
+        }catch( IOException e ){
+            System.out.println( "Connection problem" );
+            System.out.println( e.getMessage() );
+            closeWindow();
         }
     }
 
@@ -289,7 +221,7 @@ class AddAndEditRoutesOverviewController{
         destinationCityChoice.getSelectionModel().clearSelection();
     }
 
-    private void closeWindow(){
+    void closeWindow(){
         thisStage.close();
     }
 }
