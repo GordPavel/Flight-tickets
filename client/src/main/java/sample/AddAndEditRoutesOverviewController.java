@@ -208,9 +208,6 @@ class AddAndEditRoutesOverviewController{
                 }
             }
 
-
-//Controller.getInstance().getUserInformation().setChanges( null );
-// closeWindow();
         }catch( FlightAndRouteException e ){
             RoutesFlightsOverviewController.showModelAlert( e );
         }catch( IOException e ){

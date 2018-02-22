@@ -9,7 +9,9 @@ import model.Flight;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-
+/**
+ * class for local changes (adding and editing) of flights
+ */
 class AddAndEditFlightsLocalOverviewController extends AddAndEditFlightsOverviewController{
     AddAndEditFlightsLocalOverviewController( Flight editingFlight , Stage thisStage ){
         super( editingFlight , thisStage );

@@ -301,7 +301,10 @@ class RoutesFlightsLocalFileOverviewController extends RoutesFlightsOverviewCont
                     try( OutputStream save = Files.newOutputStream( Controller.savingFile.toPath() ) ){
                         DataModelInstanceSaver.getInstance().saveTo( save );
                     }catch( IOException e ){
-//                          todo : Не удалось открыть файл
+                        Alert alert = new Alert (Alert.AlertType.ERROR);
+                        alert.setHeaderText("ERROR");
+                        alert.setHeaderText(" Error occured ");
+                        alert.showAndWait();
                     }
                 }else if( buttonType.get() == ButtonType.CANCEL ){
                     return;
