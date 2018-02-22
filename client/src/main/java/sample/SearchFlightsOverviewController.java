@@ -361,9 +361,9 @@ class SearchFlightsOverviewController{
                         flightTimeTo.getEditor().getText().equals("")? null : flightTimeTo.getEditor().getText() ,
                         searchFromTextField.getText().equals("")? null : searchFromTextField.getText() ,
                         searchToTextField.getText().equals("")? null : searchToTextField.getText() ) );
-//        if (mainController instanceof RoutesFlightsWriteOverviewController) {
-//            DataModelInstanceSaver.getInstance().clear();
-//        }
+        if (mainController instanceof RoutesFlightsWriteOverviewController) {
+            DataModelInstanceSaver.getInstance().clear();
+        }
         mainController.requestUpdate();
 
 
