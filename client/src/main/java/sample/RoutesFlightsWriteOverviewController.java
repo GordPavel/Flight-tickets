@@ -79,6 +79,7 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
             popUp.setResizable( false );
 
             thisStage.setOpacity( 0.9 );
+            thisStage.setOpacity( 0.9 );
             popUp.showAndWait();
             thisStage.setOpacity( 1 );
             if( !changes.isEmpty() ){
@@ -151,6 +152,8 @@ class RoutesFlightsWriteOverviewController extends RoutesFlightsOverviewControll
                                                    .add( ListChangeAdapter.removeRoute( Collections.singletonList(
                                                            selectedRoute ) ) );
                     Controller.getInstance().getUserInformation().setChanges( null );
+                    Data data = FaRExchanger.exchange();
+                    processUpdates( data );
                 }catch( IOException e ){
                     System.out.println( "Connection problem" );
                     System.out.println( e.getMessage() );

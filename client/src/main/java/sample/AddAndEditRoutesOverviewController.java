@@ -172,14 +172,14 @@ class AddAndEditRoutesOverviewController{
                                                                             .getSelectedItem() ) ) ) );
             }else{
                 changes.add( ListChangeAdapter.editRoute( Collections.singletonList( editingRoute ) ,
-                                                          Collections.singletonList( new Route( departureCityChoice.getSelectionModel()
+                                                          Collections.singletonList( new Route( editingRoute.getId(),departureCityChoice.getSelectionModel()
                                                                                                                    .getSelectedItem() ,
                                                                                                 destinationCityChoice.getSelectionModel()
                                                                                                                      .getSelectedItem() ) ) ) );
                 RoutesFlightsOverviewController.getChanges()
                                                .add( ListChangeAdapter.editRoute( Collections.singletonList(
                                                        editingRoute ) ,
-                                                                                  Collections.singletonList( new Route(
+                                                                                  Collections.singletonList( new Route( editingRoute.getId(),
                                                                                           departureCityChoice.getSelectionModel()
                                                                                                              .getSelectedItem() ,
                                                                                           destinationCityChoice.getSelectionModel()
@@ -190,6 +190,7 @@ class AddAndEditRoutesOverviewController{
             outClient.writeUTF( mapper.writeValueAsString( Controller.getInstance().getUserInformation() ) );
 
             Controller.getInstance().getUserInformation().setChanges( null );
+            closeWindow();
         }catch( FlightAndRouteException e ){
             RoutesFlightsOverviewController.showModelAlert( e );
         }catch( IOException e ){
